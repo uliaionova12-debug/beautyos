@@ -27,7 +27,8 @@ export default function RetentionPage() {
     Promise.all([
       fetch(`/api/clients?salon_id=${salonId}&status=at_risk&limit=100`).then(r => r.json()),
       fetch(`/api/clients?salon_id=${salonId}&status=lost&limit=100`).then(r => r.json()),
-    ]).then(([riskData, lostData]) => {
+      fetch(`/api/summary?salon_id=${salonId}`).then(r => r.json()),
+    ]).then(([riskData, lostData, summaryData]) => {
       const riskClients: Client[] = riskData.clients || []
       const lostClients: Client[] = lostData.clients || []
       setAtRisk(riskClients)
@@ -43,15 +44,15 @@ export default function RetentionPage() {
       setAnalysis({
         salon_id: salonId,
         period_days: 90,
-        total_clients: 0,
-        active_clients: 0,
+        total_clients: summaryData.total_clients || 0,
+        active_clients: summaryData.active_clients || 0,
         at_risk_clients: riskClients.length,
         lost_clients: lostClients.length,
         total_financial_impact: totalFinancialImpact,
-        retention_rate: 0,
+        retention_rate: (summaryData.retention_rate || 0) / 100,
         at_risk_list: riskClients,
         lost_list: lostClients,
-        masters: [],
+        masters: summaryData.masters || [],
         ai_insights: [],
         ai_recommendation: '',
         analyzed_at: new Date().toISOString(),
