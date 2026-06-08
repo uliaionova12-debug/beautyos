@@ -40,7 +40,6 @@ export default function RetentionPage() {
         return sum + Math.round(c.avg_check * visitsLost)
       }, 0)
 
-      const allClients = [...riskClients, ...lostClients]
       setAnalysis({
         salon_id: salonId,
         period_days: 90,
@@ -97,7 +96,7 @@ export default function RetentionPage() {
             <Users size={20} className="text-blue-400" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">AI Retention Director</h1>
+            <h1 className="text-xl font-bold">Директор по возврату</h1>
             <p className="text-sm text-zinc-500">Возвратность клиентов и финансовые потери</p>
           </div>
         </div>

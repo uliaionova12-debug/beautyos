@@ -119,7 +119,7 @@ export async function parseYClientsCSV(file: File): Promise<ParseResult> {
 
         resolve({ rows, errors, totalRows: results.data.length, skippedRows })
       },
-      error: (err) => {
+      error: (err: Error) => {
         resolve({ rows: [], errors: [err.message], totalRows: 0, skippedRows: 0 })
       },
     })
