@@ -47,7 +47,8 @@ interface Props {
 
 export function ClientRiskList({ clients, salonName, title, emptyText }: Props) {
   const [loadingId, setLoadingId] = useState<string | null>(null)
-  const [noPhoneMsg, setNoPhoneMsg] = useState<{ name: string; text: string } | null>(null)
+  const [modal, setModal] = useState<{ name: string; phone: string | null; text: string } | null>(null)
+  const [copied, setCopied] = useState(false)
 
   async function handleWrite(client: Client) {
     setLoadingId(client.id)
@@ -59,20 +60,24 @@ export function ClientRiskList({ clients, salonName, title, emptyText }: Props) 
       })
       const data = await res.json()
       const message: string = data.message || ''
-
-      if (client.phone) {
-        const phone = formatPhone(client.phone)
-        const smsUrl = `sms:${phone}?body=${encodeURIComponent(message)}`
-        window.location.href = smsUrl
-      } else {
-        // Нет телефона — показываем текст для ручной отправки
-        setNoPhoneMsg({ name: client.name, text: message })
-      }
+      setModal({ name: client.name, phone: client.phone || null, text: message })
     } catch {
       // ignore
     } finally {
       setLoadingId(null)
     }
+  }
+
+  function copyText(text: string) {
+    navigator.clipboard.writeText(text)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  function openSms() {
+    if (!modal?.phone) return
+    const phone = formatPhone(modal.phone)
+    window.location.href = `sms:${phone}?body=${encodeURIComponent(modal.text)}`
   }
 
   if (!clients.length) {
@@ -83,22 +88,43 @@ export function ClientRiskList({ clients, salonName, title, emptyText }: Props) 
     <div>
       <h3 className="text-xs font-semibold text-dusk uppercase tracking-wider mb-4">{title}</h3>
 
-      {/* Модал для клиентов без телефона */}
-      {noPhoneMsg && (
+      {/* Модал с сообщением */}
+      {modal && (
         <div className="fixed inset-0 bg-graphite/40 z-50 flex items-end sm:items-center justify-center p-4"
-          onClick={() => setNoPhoneMsg(null)}>
+          onClick={() => setModal(null)}>
           <div className="bg-cream rounded-2xl p-5 w-full max-w-sm shadow-xl" onClick={e => e.stopPropagation()}>
-            <p className="text-xs text-dusk font-semibold uppercase tracking-wider mb-1">Нет телефона</p>
-            <p className="text-sm font-medium text-graphite mb-3">{noPhoneMsg.name}</p>
+            <p className="text-sm font-semibold text-graphite mb-1">{modal.name}</p>
+
+            {/* Телефон — кнопка звонка, не нужно копировать */}
+            {modal.phone ? (
+              <a href={`tel:${formatPhone(modal.phone)}`}
+                className="flex items-center gap-2 text-sm text-rose font-medium mb-4">
+                <Phone size={14} />
+                {modal.phone}
+              </a>
+            ) : (
+              <p className="text-xs text-dusk/60 mb-4">Телефон не указан</p>
+            )}
+
+            {/* Текст сообщения */}
             <div className="bg-card border border-parchment rounded-xl p-4 mb-4">
-              <p className="text-sm text-graphite leading-relaxed">{noPhoneMsg.text}</p>
+              <p className="text-sm text-graphite leading-relaxed">{modal.text}</p>
             </div>
-            <button
-              onClick={() => { navigator.clipboard.writeText(noPhoneMsg.text); setNoPhoneMsg(null) }}
-              className="w-full bg-rose text-white py-3 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity"
-            >
-              Скопировать текст
-            </button>
+
+            {/* Кнопки */}
+            <div className="flex flex-col gap-2">
+              {modal.phone && (
+                <button onClick={openSms}
+                  className="flex items-center justify-center gap-2 bg-rose text-white py-3 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity">
+                  <MessageCircle size={15} />
+                  Открыть Сообщения
+                </button>
+              )}
+              <button onClick={() => copyText(modal.text)}
+                className="flex items-center justify-center gap-2 bg-card border border-parchment text-graphite py-3 rounded-xl text-sm font-medium hover:border-rose/30 transition-colors">
+                {copied ? '✓ Скопировано' : 'Скопировать текст'}
+              </button>
+            </div>
           </div>
         </div>
       )}
