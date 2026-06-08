@@ -1,5 +1,12 @@
 import Link from 'next/link'
-import { Bell, Heart, Calendar, Star, ChevronRight, Sparkles } from 'lucide-react'
+import { Calendar, Heart, Star } from 'lucide-react'
+
+const CARDS = [
+  '🌸 Юлия, сегодня не забудьте масло для кутикулы.',
+  '🌸 После окрашивания волосам нужна дополнительная защита.',
+  '🌸 Через 5 дней лучше обновить маникюр.',
+  '🌸 Ваш любимый мастер освободил окно в пятницу.',
+]
 
 export default function LandingPage() {
   return (
@@ -26,7 +33,7 @@ export default function LandingPage() {
           <div className="max-w-sm w-full pt-8 md:pt-0">
 
             <p className="text-[10px] font-semibold tracking-[0.22em] uppercase text-rose mb-7">
-              AI-помощник в мире красоты
+              Ваш спутник красоты
             </p>
 
             <h1 className="font-serif text-[2.7rem] md:text-[3.2rem] leading-[1.06] text-graphite mb-6 tracking-tight">
@@ -36,7 +43,7 @@ export default function LandingPage() {
             </h1>
 
             <p className="text-[15px] text-dusk leading-relaxed mb-10 max-w-[285px]">
-              Персональный помощник, который запоминает ваши предпочтения и заботится о вас между визитами.
+              Ваш спутник красоты, который заботится о Вас между визитами, помнит Ваши предпочтения и помогает сохранять результат каждый день.
             </p>
 
             <div className="flex flex-col gap-3.5">
@@ -93,60 +100,19 @@ export default function LandingPage() {
           {/* Left fade into text column on desktop */}
           <div className="absolute inset-y-0 left-0 w-28 bg-gradient-to-r from-cream to-transparent hidden md:block" />
 
-          {/* Floating UI cards — xl screens only */}
+          {/* Floating companion messages — xl screens only */}
           <div className="absolute right-5 top-0 bottom-0 hidden xl:flex flex-col justify-center gap-3 pointer-events-none">
-
-            {/* Notification */}
-            <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl shadow-graphite/10 p-4 w-52">
-              <div className="flex items-center gap-2 mb-2.5">
-                <div className="w-5 h-5 bg-rose/12 rounded-md flex items-center justify-center">
-                  <Bell size={11} className="text-rose" />
-                </div>
-                <span className="text-[9px] font-bold text-rose uppercase tracking-widest">Напоминание</span>
+            <p className="text-[9px] font-semibold tracking-[0.18em] uppercase text-rose/60 mb-1 text-right pr-1">
+              BeautyOS<sup className="text-[7px] ml-0.5">+</sup>
+            </p>
+            {CARDS.map((text, i) => (
+              <div
+                key={i}
+                className="bg-white/95 backdrop-blur-md rounded-2xl shadow-lg shadow-graphite/8 px-4 py-3.5 w-56"
+              >
+                <p className="text-[12px] text-graphite leading-snug">{text}</p>
               </div>
-              <p className="text-[11px] text-graphite leading-relaxed">Не забудьте нанести увлажняющий крем перед выходом</p>
-              <p className="text-[10px] text-dusk/60 mt-1.5">Сегодня, 09:00</p>
-            </div>
-
-            {/* Recommendation */}
-            <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl shadow-graphite/10 p-4 w-52">
-              <div className="flex items-center gap-2 mb-2.5">
-                <div className="w-5 h-5 bg-rose/12 rounded-md flex items-center justify-center">
-                  <Heart size={11} className="text-rose" />
-                </div>
-                <span className="text-[9px] font-bold text-rose uppercase tracking-widest">Рекомендация</span>
-              </div>
-              <p className="text-[11px] text-graphite leading-relaxed">После окрашивания рекомендуем питательную маску для волос</p>
-              <div className="flex items-center gap-0.5 mt-1.5">
-                <span className="text-[10px] text-rose font-semibold">Подробнее</span>
-                <ChevronRight size={9} className="text-rose" />
-              </div>
-            </div>
-
-            {/* Next appointment */}
-            <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl shadow-graphite/10 p-4 w-52">
-              <p className="text-[9px] font-semibold text-dusk/70 uppercase tracking-wider mb-1.5">Ваш следующий визит</p>
-              <p className="text-sm font-bold text-graphite">Маникюр</p>
-              <p className="text-[11px] text-dusk mt-0.5">24 мая, 14:00</p>
-              <p className="text-[10px] text-dusk/50 mt-0.5">Студия красоты Beauty Lab</p>
-              <div className="flex items-center gap-0.5 mt-1.5">
-                <span className="text-[10px] text-rose font-semibold">Посмотреть запись</span>
-                <ChevronRight size={9} className="text-rose" />
-              </div>
-            </div>
-
-            {/* Beauty Companion */}
-            <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl shadow-graphite/10 p-3.5 w-52 flex items-center gap-2.5">
-              <div className="w-8 h-8 bg-rose/10 rounded-xl flex items-center justify-center shrink-0">
-                <Sparkles size={14} className="text-rose" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-semibold text-graphite">Beauty Companion</p>
-                <p className="text-[10px] text-dusk leading-tight mt-0.5">Всегда на связи, чтобы ваша красота сияла</p>
-              </div>
-              <ChevronRight size={11} className="text-rose shrink-0" />
-            </div>
-
+            ))}
           </div>
         </div>
 
