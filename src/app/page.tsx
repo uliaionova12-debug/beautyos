@@ -84,7 +84,7 @@ export default function LandingPage() {
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="https://images.unsplash.com/photo-1661346376364-706a9eac60ab?auto=format&fit=crop&w=1200&q=85"
+            src="/hero.png"
             alt=""
             className="absolute inset-0 w-full h-full object-cover object-center"
             loading="eager"
