@@ -1,8 +1,8 @@
-import Anthropic from '@anthropic-ai/sdk'
+import OpenAI from 'openai'
 import { RetentionAnalysis } from '@/types'
 
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY!,
 })
 
 function formatMoney(n: number): string {
@@ -43,23 +43,16 @@ ${worstMasters.map(m => `- ${m.name}: возвратность ${formatPct(m.ret
   "recommendation": "одно главное действие, которое нужно сделать сегодня (2-3 предложения, конкретно)"
 }`
 
-  const message = await client.messages.create({
-    model: 'claude-sonnet-4-6',
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4o-mini',
     max_tokens: 800,
+    response_format: { type: 'json_object' },
     messages: [{ role: 'user', content: prompt }],
   })
 
-  const text = (message.content[0] as { type: string; text: string }).text
-  const jsonMatch = text.match(/\{[\s\S]*\}/)
+  const text = response.choices[0].message.content || '{}'
+  const parsed = JSON.parse(text)
 
-  if (!jsonMatch) {
-    return {
-      insights: ['AI-анализ временно недоступен'],
-      recommendation: 'Проверьте данные и попробуйте снова',
-    }
-  }
-
-  const parsed = JSON.parse(jsonMatch[0])
   return {
     insights: parsed.insights || [],
     recommendation: parsed.recommendation || '',
@@ -72,7 +65,13 @@ export async function generateReturnMessage(
   lastService: string,
   salonName: string
 ): Promise<string> {
-  const prompt = `Напиши короткое персональное сообщение для возврата клиента в салон красоты.
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4o-mini',
+    max_tokens: 200,
+    messages: [
+      {
+        role: 'user',
+        content: `Напиши короткое персональное сообщение для возврата клиента в салон красоты.
 
 Клиент: ${clientName}
 Последняя услуга: ${lastService || 'маникюр'}
@@ -84,13 +83,10 @@ export async function generateReturnMessage(
 - Тёплый, не навязчивый тон
 - Без скидок и акций (не обесценивай)
 - На русском языке
-- Только текст сообщения, без кавычек и пояснений`
-
-  const message = await client.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 200,
-    messages: [{ role: 'user', content: prompt }],
+- Только текст сообщения, без кавычек и пояснений`,
+      },
+    ],
   })
 
-  return (message.content[0] as { type: string; text: string }).text.trim()
+  return response.choices[0].message.content?.trim() || ''
 }

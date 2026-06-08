@@ -26,6 +26,7 @@ create table clients (
   avg_interval_days numeric(6,1) default 0,
   status text check (status in ('active','at_risk','lost')) default 'active',
   risk_score numeric(4,3) default 0,
+  days_since_last_visit integer default 0,
   updated_at timestamptz default now(),
   created_at timestamptz default now(),
   unique(salon_id, phone)

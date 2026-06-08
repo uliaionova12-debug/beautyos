@@ -61,11 +61,11 @@ export interface ParseResult {
 }
 
 export async function parseYClientsCSV(file: File): Promise<ParseResult> {
+  const text = await file.text()
   return new Promise((resolve) => {
-    Papa.parse(file, {
+    Papa.parse(text, {
       header: true,
       skipEmptyLines: true,
-      encoding: 'UTF-8',
       complete: (results) => {
         const errors: string[] = []
         const rows: CSVRow[] = []
