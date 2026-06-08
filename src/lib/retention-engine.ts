@@ -95,6 +95,37 @@ function calcLostRevenue(client: {
   return Math.round(client.avgCheck * visitsLost)
 }
 
+// Вероятность возврата: 0.0–1.0
+// Факторы: лояльность (кол-во визитов) + насколько просрочен
+function calcReturnScore(client: {
+  totalVisits: number
+  daysSinceLast: number
+  avgInterval: number
+}): number {
+  const interval = client.avgInterval || 30
+  const overdueRatio = client.daysSinceLast / interval
+
+  // Лояльность: растёт до 10 визитов
+  const loyaltyScore = Math.min(client.totalVisits / 10, 1.0)
+
+  // Просрочка: 1.0 при overdueRatio=1.5, падает до 0 при overdueRatio=3.5
+  const overdueScore = Math.max(0, 1 - (overdueRatio - 1.5) / 2)
+
+  const raw = loyaltyScore * 0.4 + overdueScore * 0.6
+  return parseFloat(Math.min(Math.max(raw, 0), 1).toFixed(3))
+}
+
+// Потенциал выручки: ожидаемая выручка за год × вероятность возврата
+function calcRevenueOpportunity(client: {
+  avgCheck: number
+  returnScore: number
+  avgInterval: number
+}): number {
+  const interval = client.avgInterval || 30
+  const visitsPerYear = 365 / interval
+  return Math.round(client.avgCheck * visitsPerYear * client.returnScore)
+}
+
 export interface AnalysisInput {
   salonId: string
   rows: CSVRow[]
@@ -127,6 +158,16 @@ export function runRetentionAnalysis(input: AnalysisInput): AnalysisOutput {
     const avgCheck = totalRevenue / rc.visits.length
 
     const { status, riskScore } = calcStatus(daysSinceLast, avgInterval)
+    const returnScore = calcReturnScore({
+      totalVisits: rc.visits.length,
+      daysSinceLast,
+      avgInterval,
+    })
+    const revenueOpportunity = calcRevenueOpportunity({
+      avgCheck: Math.round(avgCheck),
+      returnScore,
+      avgInterval,
+    })
 
     clients.push({
       salon_id: salonId,
@@ -140,6 +181,8 @@ export function runRetentionAnalysis(input: AnalysisInput): AnalysisOutput {
       avg_interval_days: avgInterval,
       status,
       risk_score: riskScore,
+      return_score: returnScore,
+      revenue_opportunity: revenueOpportunity,
       days_since_last_visit: daysSinceLast,
     })
 

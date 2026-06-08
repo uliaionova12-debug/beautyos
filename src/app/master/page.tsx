@@ -3,8 +3,31 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Scissors, TrendingUp, UserX, Users, MessageCircle } from 'lucide-react'
+import { ArrowLeft, Scissors, TrendingUp, Trophy, Star } from 'lucide-react'
 import { Master } from '@/types'
+
+interface MasterLevel {
+  name: string
+  minRate: number
+  maxRate: number
+  color: string
+  bg: string
+  border: string
+}
+
+const LEVELS: MasterLevel[] = [
+  { name: 'Новичок',    minRate: 0,    maxRate: 0.40, color: 'text-zinc-400',    bg: 'bg-zinc-800',        border: 'border-zinc-700' },
+  { name: 'Развивается', minRate: 0.40, maxRate: 0.55, color: 'text-blue-400',    bg: 'bg-blue-950/40',     border: 'border-blue-800/40' },
+  { name: 'Про',        minRate: 0.55, maxRate: 0.70, color: 'text-violet-400',   bg: 'bg-violet-950/40',   border: 'border-violet-800/40' },
+  { name: 'Эксперт',   minRate: 0.70, maxRate: 0.85, color: 'text-amber-400',    bg: 'bg-amber-950/40',    border: 'border-amber-800/40' },
+  { name: 'Мастер',    minRate: 0.85, maxRate: 1.01, color: 'text-emerald-400',  bg: 'bg-emerald-950/40',  border: 'border-emerald-800/40' },
+]
+
+function getLevel(rate: number): MasterLevel & { index: number } {
+  const idx = LEVELS.findIndex(l => rate >= l.minRate && rate < l.maxRate)
+  const level = LEVELS[Math.max(0, idx)]
+  return { ...level, index: Math.max(0, idx) }
+}
 
 function formatMoney(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + ' млн ₽'
@@ -137,6 +160,74 @@ export default function MasterPage() {
                 <p className="text-xs text-zinc-500 mt-1">Потеряно</p>
               </div>
             </div>
+
+            {/* Геймификация */}
+            {(() => {
+              const level = getLevel(selected.retention_rate)
+              const nextLevel = LEVELS[level.index + 1]
+              const worseCount = masters.filter(m => m.id !== selected.id && m.retention_rate < selected.retention_rate).length
+              const rankPct = masters.length > 1 ? Math.round((worseCount / (masters.length - 1)) * 100) : 100
+              const progressPct = nextLevel
+                ? Math.round(((selected.retention_rate - level.minRate) / (nextLevel.minRate - level.minRate)) * 100)
+                : 100
+              const neededPct = nextLevel ? Math.round((nextLevel.minRate - selected.retention_rate) * 100) : 0
+
+              return (
+                <div className={`rounded-2xl p-5 mb-4 border ${level.bg} ${level.border}`}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <Trophy size={16} className={level.color} />
+                      <span className={`text-sm font-bold ${level.color}`}>{level.name}</span>
+                    </div>
+                    {masters.length > 1 && (
+                      <div className="flex items-center gap-1.5 text-xs text-zinc-400">
+                        <Star size={11} className="text-amber-400" />
+                        Лучше чем у {rankPct}% мастеров
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Progress bar */}
+                  <div className="mb-3">
+                    <div className="flex justify-between text-xs text-zinc-500 mb-1.5">
+                      <span>Возвратность {Math.round(selected.retention_rate * 100)}%</span>
+                      {nextLevel && <span>до «{nextLevel.name}» — ещё +{neededPct}%</span>}
+                    </div>
+                    <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all ${
+                          level.index === 0 ? 'bg-zinc-500' :
+                          level.index === 1 ? 'bg-blue-500' :
+                          level.index === 2 ? 'bg-violet-500' :
+                          level.index === 3 ? 'bg-amber-500' : 'bg-emerald-500'
+                        }`}
+                        style={{ width: `${progressPct}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Уровни */}
+                  <div className="flex gap-1">
+                    {LEVELS.map((l, i) => (
+                      <div
+                        key={l.name}
+                        className={`flex-1 h-1 rounded-full ${
+                          i < level.index ? 'bg-white/40' :
+                          i === level.index ? 'bg-white/80' : 'bg-zinc-800'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex justify-between mt-1">
+                    {LEVELS.map((l, i) => (
+                      <span key={l.name} className={`text-[10px] ${i === level.index ? 'text-white' : 'text-zinc-600'}`}>
+                        {l.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )
+            })()}
 
             {/* Финансы */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-4">

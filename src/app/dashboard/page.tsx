@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { AgentCard } from '@/components/dashboard/AgentCard'
-import { Users, BarChart3, TrendingDown, Zap, ArrowRight, TrendingUp } from 'lucide-react'
+import { Users, BarChart3, TrendingDown, Zap, ArrowRight, Phone, Star, Target, Megaphone } from 'lucide-react'
 import Link from 'next/link'
+import { DailyAction } from '@/types'
 
 interface Summary {
   at_risk_count: number
@@ -23,25 +24,25 @@ const AGENTS = [
     status: 'active' as const,
   },
   {
-    title: 'Директор по загрузке',
-    description: 'Простои мастеров и незаполненные слоты',
-    icon: BarChart3,
-    href: '#',
-    status: 'soon' as const,
+    title: 'Директор по репутации',
+    description: 'Рейтинг, неотвеченные отзывы и AI-ответы',
+    icon: Star,
+    href: '/reputation',
+    status: 'active' as const,
   },
   {
-    title: 'Директор по прибыли',
-    description: 'Маржинальность услуг и доходность по мастерам',
-    icon: TrendingDown,
-    href: '#',
-    status: 'soon' as const,
+    title: 'Директор по конкурентам',
+    description: 'Анализ рынка, чек и акции конкурентов',
+    icon: Target,
+    href: '/competitors',
+    status: 'active' as const,
   },
   {
-    title: 'AI-ассистент клиента',
-    description: 'Персональный бот для клиентов в Telegram',
-    icon: Zap,
-    href: '#',
-    status: 'soon' as const,
+    title: 'Директор по маркетингу',
+    description: 'Контент-план, акции и идеи для роста',
+    icon: Megaphone,
+    href: '/marketing',
+    status: 'active' as const,
   },
 ]
 
@@ -56,6 +57,7 @@ export default function DashboardPage() {
   const router = useRouter()
   const salonId = searchParams.get('salon_id') || ''
   const [summary, setSummary] = useState<Summary | null>(null)
+  const [dailyAction, setDailyAction] = useState<DailyAction | null>(null)
   const [loading, setLoading] = useState(true)
 
   const now = new Date()
@@ -64,9 +66,15 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!salonId) { setLoading(false); return }
-    fetch(`/api/summary?salon_id=${salonId}`)
-      .then(r => r.json())
-      .then(d => { setSummary(d); setLoading(false) })
+    Promise.all([
+      fetch(`/api/summary?salon_id=${salonId}`).then(r => r.json()),
+      fetch(`/api/daily-action?salon_id=${salonId}`).then(r => r.json()),
+    ])
+      .then(([summaryData, actionData]) => {
+        setSummary(summaryData)
+        setDailyAction(actionData.action ?? null)
+        setLoading(false)
+      })
       .catch(() => setLoading(false))
   }, [salonId])
 
@@ -97,6 +105,34 @@ export default function DashboardPage() {
             Сменить роль
           </Link>
         </div>
+
+        {/* DAILY AI BRIEF */}
+        {!loading && dailyAction && (
+          <div className="bg-gradient-to-r from-violet-950/50 to-purple-950/40 border border-violet-700/30 rounded-2xl p-5 mb-4">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-2 h-2 rounded-full bg-violet-400 animate-pulse" />
+              <p className="text-xs text-violet-400 font-medium uppercase tracking-wider">
+                Главное действие на сегодня
+              </p>
+            </div>
+            <p className="text-white font-semibold text-base leading-snug mb-1">
+              Позвонить {dailyAction.client_count} клиентам мастера {dailyAction.master_name.split(' ')[0]}
+            </p>
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-emerald-400 font-bold">{formatMoney(dailyAction.potential_revenue)}</span>
+              <span className="text-zinc-600">·</span>
+              <span className="text-zinc-400 text-sm">{Math.round(dailyAction.probability * 100)}% вероятность</span>
+            </div>
+            <button
+              onClick={() => router.push(`/retention?salon_id=${salonId}&tab=at_risk`)}
+              className="flex items-center gap-2 text-sm font-semibold text-violet-300 hover:text-violet-200 transition-colors"
+            >
+              <Phone size={14} />
+              Открыть список
+              <ArrowRight size={14} />
+            </button>
+          </div>
+        )}
 
         {/* ГЛАВНЫЙ БЛОК — ACTION FIRST */}
         {loading ? (

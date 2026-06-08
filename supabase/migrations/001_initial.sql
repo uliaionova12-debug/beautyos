@@ -26,6 +26,8 @@ create table clients (
   avg_interval_days numeric(6,1) default 0,
   status text check (status in ('active','at_risk','lost')) default 'active',
   risk_score numeric(4,3) default 0,
+  return_score numeric(4,3) default 0,
+  revenue_opportunity integer default 0,
   days_since_last_visit integer default 0,
   updated_at timestamptz default now(),
   created_at timestamptz default now(),
@@ -88,9 +90,26 @@ alter table visits enable row level security;
 alter table masters enable row level security;
 alter table insights enable row level security;
 
+-- Отзывы клиентов (внутренние + факт публикации на площадках)
+create table reviews (
+  id uuid primary key default uuid_generate_v4(),
+  salon_id uuid references salons(id) on delete cascade not null,
+  client_name text,
+  master_name text,
+  rating integer not null check (rating between 1 and 5),
+  text text,
+  is_public boolean default false,   -- true = клиент перешёл публиковать на площадку
+  platform text,                     -- 'yandex'|'google'|'2gis'|'vk'|'internal'
+  created_at timestamptz default now()
+);
+
+create index idx_reviews_salon on reviews(salon_id, created_at desc);
+alter table reviews enable row level security;
+
 -- Для демо: политики разрешают всё (в продакшне — через auth.uid())
 create policy "allow_all_salons" on salons for all using (true) with check (true);
 create policy "allow_all_clients" on clients for all using (true) with check (true);
 create policy "allow_all_visits" on visits for all using (true) with check (true);
 create policy "allow_all_masters" on masters for all using (true) with check (true);
 create policy "allow_all_insights" on insights for all using (true) with check (true);
+create policy "allow_all_reviews" on reviews for all using (true) with check (true);

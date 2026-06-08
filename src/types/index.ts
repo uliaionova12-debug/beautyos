@@ -14,6 +14,8 @@ export interface Client {
   avg_interval_days: number
   status: ClientStatus
   risk_score: number
+  return_score: number
+  revenue_opportunity: number
   days_since_last_visit: number
   created_at?: string
   updated_at?: string
@@ -43,10 +45,18 @@ export interface Master {
   lost_clients_count: number
 }
 
+export interface DailyAction {
+  master_name: string
+  client_count: number
+  potential_revenue: number
+  probability: number
+  client_ids: string[]
+}
+
 export interface Insight {
   id: string
   salon_id: string
-  agent_type: 'retention' | 'profit' | 'load' | 'marketing' | 'quality'
+  agent_type: 'retention' | 'profit' | 'load' | 'marketing' | 'quality' | 'reputation' | 'competitor'
   title: string
   body: string
   financial_impact: number

@@ -1,24 +1,130 @@
 'use client'
 
+import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Calendar, Clock, Star, Gift, Heart } from 'lucide-react'
+import {
+  ArrowLeft, Star, CheckCircle2, ExternalLink, Heart,
+  Calendar, Clock, Scissors, ChevronRight, Gift, Copy
+} from 'lucide-react'
+
+// В продакшне эти ссылки берутся из настроек салона (таблица salons)
+// Формат Яндекс: https://yandex.ru/maps/org/SLUG/ORG_ID/reviews/
+// Формат Google: https://search.google.com/local/writereview?placeid=PLACE_ID
+// Формат 2GIS:   https://2gis.ru/CITY/firm/FIRM_ID/tab/reviews
+const SALON_PLATFORMS = [
+  {
+    id: 'yandex',
+    name: 'Яндекс Карты',
+    emoji: '🗺️',
+    color: 'bg-red-950/40 border-red-800/30 text-red-300',
+    hint: 'Нажмите «Написать отзыв»',
+    // DEMO: замените на реальную ссылку профиля салона в Яндекс.Бизнес
+    url: 'https://yandex.ru/maps/org/beauty_salon/reviews/',
+  },
+  {
+    id: 'google',
+    name: 'Google Maps',
+    emoji: '🌐',
+    color: 'bg-blue-950/40 border-blue-800/30 text-blue-300',
+    hint: 'Нажмите звёзды и вставьте текст',
+    // DEMO: замените на placeid своего салона
+    url: 'https://search.google.com/local/writereview?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4',
+  },
+  {
+    id: '2gis',
+    name: '2GIS',
+    emoji: '📍',
+    color: 'bg-emerald-950/40 border-emerald-800/30 text-emerald-300',
+    hint: 'Перейдите во вкладку «Отзывы»',
+    // DEMO: замените на ссылку профиля салона в 2GIS
+    url: 'https://2gis.ru/moscow/firm/70000001082270604/tab/reviews',
+  },
+  {
+    id: 'vk',
+    name: 'ВКонтакте',
+    emoji: '💙',
+    color: 'bg-indigo-950/40 border-indigo-800/30 text-indigo-300',
+    hint: 'Перейдите в «Отзывы» сообщества',
+    // DEMO: замените на ссылку группы салона ВК
+    url: 'https://vk.com/topic-000000_000000',
+  },
+]
 
 const NEXT_SLOTS = [
-  { date: '12 июня', time: '17:00', master: 'Наташа' },
-  { date: '13 июня', time: '19:00', master: 'Наташа' },
+  { date: '12 июня', time: '17:00', master: 'Наталья' },
+  { date: '13 июня', time: '19:00', master: 'Наталья' },
   { date: '14 июня', time: '11:00', master: 'Ольга' },
 ]
 
-const HISTORY = [
-  { date: '10 мая 2026', service: 'Маникюр + гель', master: 'Наташа', amount: '2 800 ₽' },
-  { date: '12 апреля 2026', service: 'Маникюр + педикюр', master: 'Наташа', amount: '3 800 ₽' },
-  { date: '15 марта 2026', service: 'Маникюр + гель', master: 'Наташа', amount: '2 800 ₽' },
+const MOCK_HISTORY = [
+  { date: '15 мая 2026', service: 'Окрашивание + укладка', master: 'Наталья', amount: 4200 },
+  { date: '22 марта 2026', service: 'Стрижка + уход', master: 'Наталья', amount: 2800 },
+  { date: '10 января 2026', service: 'Ламинирование волос', master: 'Ирина', amount: 3500 },
 ]
+
+type Step = 'idle' | 'rating' | 'text' | 'gating_positive' | 'gating_negative' | 'done'
 
 export default function ClientPage() {
   const searchParams = useSearchParams()
   const salonId = searchParams.get('salon_id') || ''
+
+  const [step, setStep] = useState<Step>('idle')
+  const [rating, setRating] = useState(0)
+  const [hovered, setHovered] = useState(0)
+  const [reviewText, setReviewText] = useState('')
+  const [clientName, setClientName] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [publishedTo, setPublishedTo] = useState<string[]>([])
+  const [copied, setCopied] = useState(false)
+
+  const lastVisit = MOCK_HISTORY[0]
+
+  async function submitReview(platform?: string) {
+    setSubmitting(true)
+    try {
+      await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          salon_id: salonId,
+          client_name: clientName || 'Анонимный клиент',
+          master_name: lastVisit.master,
+          rating,
+          text: reviewText,
+          platform: platform || 'internal',
+        }),
+      })
+    } catch {
+      // не блокируем UX при сетевой ошибке
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  async function handleTextSubmit() {
+    if (rating >= 4) {
+      await submitReview('internal')
+      setStep('gating_positive')
+    } else {
+      await submitReview('internal')
+      setStep('gating_negative')
+    }
+  }
+
+  function copyReviewText() {
+    navigator.clipboard.writeText(reviewText)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2500)
+  }
+
+  async function handlePublish(platform: typeof SALON_PLATFORMS[number]) {
+    if (!publishedTo.includes(platform.id)) {
+      await submitReview(platform.id)
+      setPublishedTo(prev => [...prev, platform.id])
+    }
+    window.open(platform.url, '_blank', 'noopener')
+  }
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -33,21 +139,21 @@ export default function ClientPage() {
         </Link>
 
         {/* Приветствие */}
-        <div className="mb-8">
+        <div className="mb-6">
           <p className="text-zinc-500 text-sm mb-1">Добрый день</p>
           <h1 className="text-2xl font-bold">Юлия</h1>
         </div>
 
-        {/* Следующий визит */}
+        {/* Следующая запись */}
         <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/20 border border-purple-700/30 rounded-2xl p-5 mb-4">
           <p className="text-xs text-purple-400 font-medium uppercase tracking-wider mb-2">
             Рекомендуем записаться
           </p>
           <p className="text-white font-semibold mb-1">
-            Ваш следующий визит через <span className="text-purple-300">8 дней</span>
+            Следующий визит через <span className="text-purple-300">8 дней</span>
           </p>
           <p className="text-zinc-400 text-sm mb-4">
-            Наташа ждёт вас — маникюр выглядит лучше всего каждые 4 недели
+            Наталья ждёт вас — лучший результат раз в 4 недели
           </p>
           <div className="space-y-2">
             {NEXT_SLOTS.map((slot, i) => (
@@ -82,41 +188,257 @@ export default function ClientPage() {
           ))}
         </div>
 
-        {/* История */}
-        <div>
-          <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider mb-3">
-            История визитов
-          </p>
-          <div className="space-y-2">
-            {HISTORY.map((h, i) => (
-              <div
-                key={i}
-                className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 flex items-center justify-between"
-              >
-                <div>
-                  <p className="text-sm text-white font-medium">{h.service}</p>
-                  <p className="text-xs text-zinc-500 mt-0.5">{h.date} · {h.master}</p>
+        {/* ---- БЛОК ОТЗЫВА ---- */}
+
+        {/* Последний визит + CTA */}
+        {step === 'idle' && (
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-4">
+            <p className="text-xs text-zinc-500 uppercase tracking-wider mb-3">Последний визит</p>
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <p className="text-white font-semibold">{lastVisit.service}</p>
+                <div className="flex items-center gap-2 mt-1 text-xs text-zinc-500">
+                  <Scissors size={11} />
+                  <span>{lastVisit.master}</span>
+                  <span>·</span>
+                  <Calendar size={11} />
+                  <span>{lastVisit.date}</span>
                 </div>
-                <span className="text-sm text-zinc-400">{h.amount}</span>
+              </div>
+              <p className="text-white font-bold">{lastVisit.amount.toLocaleString('ru-RU')} ₽</p>
+            </div>
+            <button
+              onClick={() => setStep('rating')}
+              className="w-full bg-white text-black font-semibold py-3 rounded-xl text-sm hover:bg-zinc-100 transition-colors flex items-center justify-center gap-2"
+            >
+              <Star size={15} />
+              Оставить отзыв о визите
+            </button>
+          </div>
+        )}
+
+        {/* ШАГ 1: Звёзды */}
+        {step === 'rating' && (
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-4">
+            <p className="text-sm font-semibold text-white mb-1">Как прошёл визит?</p>
+            <p className="text-xs text-zinc-500 mb-5">Оцените от 1 до 5 звёзд</p>
+            <div className="flex gap-3 justify-center mb-4">
+              {[1, 2, 3, 4, 5].map(n => (
+                <button
+                  key={n}
+                  onMouseEnter={() => setHovered(n)}
+                  onMouseLeave={() => setHovered(0)}
+                  onClick={() => { setRating(n); setStep('text') }}
+                  className="transition-transform hover:scale-110 active:scale-95"
+                >
+                  <Star
+                    size={38}
+                    className={`transition-colors ${
+                      n <= (hovered || rating)
+                        ? 'text-amber-400 fill-amber-400'
+                        : 'text-zinc-700'
+                    }`}
+                  />
+                </button>
+              ))}
+            </div>
+            <p className="text-center text-xs text-zinc-600 h-4">
+              {hovered === 1 && 'Очень плохо'}
+              {hovered === 2 && 'Плохо'}
+              {hovered === 3 && 'Нормально'}
+              {hovered === 4 && 'Хорошо'}
+              {hovered === 5 && 'Отлично!'}
+            </p>
+          </div>
+        )}
+
+        {/* ШАГ 2: Текст */}
+        {step === 'text' && (
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-4">
+            <div className="flex gap-1 mb-3">
+              {[1,2,3,4,5].map(n => (
+                <Star key={n} size={16}
+                  className={n <= rating ? 'text-amber-400 fill-amber-400' : 'text-zinc-700'} />
+              ))}
+            </div>
+            <p className="text-sm font-semibold text-white mb-4">
+              {rating >= 4 ? 'Расскажите, что понравилось' : 'Что можно улучшить?'}
+            </p>
+            <input
+              type="text"
+              placeholder="Ваше имя (необязательно)"
+              value={clientName}
+              onChange={e => setClientName(e.target.value)}
+              className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 mb-3 outline-none focus:border-zinc-500 transition-colors"
+            />
+            <textarea
+              placeholder={
+                rating >= 4
+                  ? 'Мастер Наталья — настоящий профессионал! Цвет получился именно таким...'
+                  : 'Расскажите, что не понравилось — мы обязательно исправим...'
+              }
+              value={reviewText}
+              onChange={e => setReviewText(e.target.value)}
+              rows={4}
+              className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 outline-none focus:border-zinc-500 resize-none mb-4 transition-colors"
+            />
+            <button
+              onClick={handleTextSubmit}
+              disabled={submitting}
+              className="w-full bg-white text-black font-semibold py-3 rounded-xl text-sm hover:bg-zinc-100 transition-colors disabled:opacity-50"
+            >
+              {submitting ? 'Отправляю...' : 'Отправить отзыв'}
+            </button>
+          </div>
+        )}
+
+        {/* ШАГ 3а: Позитивный — копировать + кнопки на площадки */}
+        {step === 'gating_positive' && (
+          <div className="space-y-3 mb-4">
+            {/* Заголовок */}
+            <div className="bg-gradient-to-br from-amber-950/40 to-yellow-950/30 border border-amber-700/30 rounded-2xl p-5">
+              <p className="text-3xl mb-2 text-center">🎉</p>
+              <p className="text-white font-bold text-center mb-1">Спасибо за тёплые слова!</p>
+              <p className="text-zinc-400 text-sm text-center">
+                Помогите другим найти нас — 3 простых шага
+              </p>
+            </div>
+
+            {/* Шаги */}
+            <div className="grid grid-cols-3 gap-2">
+              {['1. Скопируйте текст', '2. Нажмите площадку', '3. Вставьте и отправьте'].map((s, i) => (
+                <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-center">
+                  <p className="text-xs text-zinc-400 leading-snug">{s}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Блок с текстом отзыва */}
+            {reviewText && (
+              <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs text-zinc-500 uppercase tracking-wider">Ваш отзыв</p>
+                  <button
+                    onClick={copyReviewText}
+                    className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all ${
+                      copied
+                        ? 'bg-emerald-900/50 text-emerald-400 border border-emerald-700/50'
+                        : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700'
+                    }`}
+                  >
+                    {copied ? <CheckCircle2 size={12} /> : <Copy size={12} />}
+                    {copied ? 'Скопировано!' : 'Копировать'}
+                  </button>
+                </div>
+                <p className="text-sm text-zinc-200 leading-relaxed">{reviewText}</p>
+              </div>
+            )}
+
+            {/* Площадки */}
+            <div className="space-y-2">
+              {SALON_PLATFORMS.map(platform => {
+                const published = publishedTo.includes(platform.id)
+                return (
+                  <button
+                    key={platform.id}
+                    onClick={() => handlePublish(platform)}
+                    className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl border text-sm font-medium transition-all active:scale-[0.98] ${
+                      published
+                        ? 'bg-emerald-950/40 border-emerald-800/30 text-emerald-400'
+                        : platform.color
+                    }`}
+                  >
+                    <span className="flex flex-col items-start gap-0.5">
+                      <span className="flex items-center gap-2">
+                        <span>{platform.emoji}</span>
+                        {platform.name}
+                      </span>
+                      {!published && (
+                        <span className="text-[11px] opacity-50 font-normal pl-6">{platform.hint}</span>
+                      )}
+                    </span>
+                    {published
+                      ? <CheckCircle2 size={15} />
+                      : <ExternalLink size={14} className="opacity-60 shrink-0" />
+                    }
+                  </button>
+                )
+              })}
+            </div>
+
+            <button
+              onClick={() => setStep('done')}
+              className="w-full text-sm text-zinc-600 hover:text-zinc-400 transition-colors py-2"
+            >
+              Готово, закрыть
+            </button>
+          </div>
+        )}
+
+        {/* ШАГ 3б: Негативный — внутреннее сохранение */}
+        {step === 'gating_negative' && (
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-4 text-center">
+            <p className="text-4xl mb-3">🙏</p>
+            <p className="text-white font-bold mb-2">Спасибо за честность</p>
+            <p className="text-zinc-400 text-sm leading-relaxed mb-5">
+              Ваш отзыв получен. Владелец салона лично прочитает его
+              и свяжется с вами. Мы обязательно исправим.
+            </p>
+            <button
+              onClick={() => setStep('done')}
+              className="bg-white text-black font-semibold px-6 py-3 rounded-xl text-sm hover:bg-zinc-100 transition-colors"
+            >
+              Хорошо, спасибо
+            </button>
+          </div>
+        )}
+
+        {/* Финал */}
+        {step === 'done' && (
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-4 text-center">
+            <CheckCircle2 size={32} className="text-emerald-400 mx-auto mb-3" />
+            <p className="text-white font-bold mb-1">Всё готово!</p>
+            <p className="text-zinc-500 text-sm">
+              {publishedTo.length > 0
+                ? `Опубликовано на ${publishedTo.length} площадке${publishedTo.length > 1 ? 'х' : ''}`
+                : 'Отзыв сохранён'}
+            </p>
+          </div>
+        )}
+
+        {/* ---- / БЛОК ОТЗЫВА ---- */}
+
+        {/* История визитов */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-4">
+          <p className="text-xs text-zinc-500 uppercase tracking-wider mb-3">История визитов</p>
+          <div className="space-y-3">
+            {MOCK_HISTORY.map((visit, i) => (
+              <div key={i} className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-white">{visit.service}</p>
+                  <p className="text-xs text-zinc-600 mt-0.5">{visit.master} · {visit.date}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm text-zinc-400">{visit.amount.toLocaleString('ru-RU')} ₽</p>
+                  <ChevronRight size={14} className="text-zinc-700" />
+                </div>
               </div>
             ))}
           </div>
         </div>
 
         {/* Beauty AI Assistant */}
-        <div className="mt-6 bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-2">
             <Heart size={14} className="text-pink-400" />
             <p className="text-xs text-zinc-400 font-medium uppercase tracking-wider">Beauty AI</p>
           </div>
           <p className="text-sm text-zinc-300 leading-relaxed">
-            Наташа специализируется на укреплении натуральных ногтей. После 3 месяцев регулярного ухода ваши ногти стали заметно крепче — продолжайте в том же темпе!
+            Наталья специализируется на сложном окрашивании. После 3 визитов ваши волосы
+            заметно здоровее — продолжайте регулярный уход!
           </p>
         </div>
 
-        <p className="text-xs text-zinc-700 text-center mt-8">
-          Интерфейс клиента · BeautyOS
-        </p>
       </div>
     </div>
   )
