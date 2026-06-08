@@ -4,14 +4,19 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Upload, CheckCircle, AlertCircle, Loader2, ArrowLeft } from 'lucide-react'
+import {
+  Upload, CheckCircle, AlertCircle, Loader2, ArrowLeft,
+  PlugZap, FileSpreadsheet, PenLine,
+} from 'lucide-react'
 import Link from 'next/link'
 
 type Stage = 'idle' | 'uploading' | 'analyzing' | 'done' | 'error'
+type View = 'select' | 'csv'
 
 export default function JoinSalonPage() {
   const router = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
+  const [view, setView] = useState<View>('select')
   const [stage, setStage] = useState<Stage>('idle')
   const [fileName, setFileName] = useState('')
   const [salonName, setSalonName] = useState('')
@@ -24,57 +29,148 @@ export default function JoinSalonPage() {
       setStage('error')
       return
     }
-
     setFileName(file.name)
     setStage('uploading')
     setProgress('Читаю файл...')
-
     const form = new FormData()
     form.append('file', file)
     form.append('salon_name', salonName || 'Мой салон')
-
     try {
       setStage('analyzing')
       setProgress('Анализирую клиентскую базу...')
-
       const res = await fetch('/api/upload', { method: 'POST', body: form })
       const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.error || 'Ошибка загрузки')
-        setStage('error')
-        return
-      }
-
+      if (!res.ok) { setError(data.error || 'Ошибка загрузки'); setStage('error'); return }
       setStage('done')
-      setTimeout(() => {
-        router.push(`/dashboard?salon_id=${data.salon_id}`)
-      }, 1200)
+      setTimeout(() => router.push(`/dashboard?salon_id=${data.salon_id}`), 1200)
     } catch {
       setError('Не удалось загрузить файл. Проверьте подключение.')
       setStage('error')
     }
   }
 
+  // ── Source selection screen ──
+  if (view === 'select') {
+    return (
+      <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 py-12">
+        <div className="w-full max-w-lg">
+
+          <div className="mb-8">
+            <Link href="/role" className="inline-flex items-center gap-1.5 text-sm text-dusk hover:text-sage transition-colors">
+              <ArrowLeft size={14} />
+              Назад
+            </Link>
+          </div>
+
+          <div className="mb-10">
+            <p className="text-base font-semibold text-graphite">BeautyOS</p>
+            <h1 className="text-xl font-semibold text-graphite mt-2">Как начнём?</h1>
+            <p className="text-sm text-dusk mt-1">Выберите способ, который подходит вам сейчас.</p>
+          </div>
+
+          <div className="space-y-3">
+
+            {/* Manual — highlighted, new */}
+            <button
+              onClick={() => router.push('/join/manual')}
+              className="w-full text-left bg-card border-2 border-rose/30 rounded-2xl p-5 hover:border-rose/60 hover:shadow-sm transition-all group"
+            >
+              <div className="flex items-start gap-4">
+                <div className="w-11 h-11 bg-rose/10 rounded-xl flex items-center justify-center shrink-0">
+                  <PenLine size={18} className="text-rose" />
+                </div>
+                <div className="flex-1 pt-0.5">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold text-graphite">Начать вручную</p>
+                    <span className="text-[10px] font-bold tracking-wider text-rose uppercase bg-rose/10 px-2 py-0.5 rounded-full">Рекомендуем</span>
+                  </div>
+                  <p className="text-xs text-dusk mt-1 leading-snug">
+                    Для мастеров без CRM — добавьте несколько клиентов и получите первый анализ за 3 минуты.
+                  </p>
+                </div>
+              </div>
+            </button>
+
+            {/* CSV */}
+            <button
+              onClick={() => setView('csv')}
+              className="w-full text-left bg-card border border-parchment rounded-2xl p-5 hover:border-sage/50 hover:shadow-sm transition-all group"
+            >
+              <div className="flex items-start gap-4">
+                <div className="w-11 h-11 bg-cream border border-parchment rounded-xl flex items-center justify-center shrink-0 group-hover:border-sage/30 transition-colors">
+                  <FileSpreadsheet size={18} className="text-sage" />
+                </div>
+                <div className="pt-0.5">
+                  <p className="text-sm font-semibold text-graphite">Загрузить файл</p>
+                  <p className="text-xs text-dusk mt-1 leading-snug">
+                    Для тех, кто может выгрузить данные — CSV из YClients, Dikidi или любой таблицы.
+                  </p>
+                </div>
+              </div>
+            </button>
+
+            {/* CRM — coming soon */}
+            <div className="w-full text-left bg-card/60 border border-parchment/60 rounded-2xl p-5 opacity-60 cursor-not-allowed">
+              <div className="flex items-start gap-4">
+                <div className="w-11 h-11 bg-cream border border-parchment rounded-xl flex items-center justify-center shrink-0">
+                  <PlugZap size={18} className="text-dusk/40" />
+                </div>
+                <div className="pt-0.5">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold text-dusk/70">Подключить CRM</p>
+                    <span className="text-[10px] font-bold tracking-wider text-dusk/50 uppercase bg-parchment px-2 py-0.5 rounded-full">Скоро</span>
+                  </div>
+                  <p className="text-xs text-dusk/50 mt-1 leading-snug">
+                    Прямое подключение Dikidi, YClients и других систем — без выгрузки файлов.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <p className="text-xs text-dusk/50 text-center mt-10">
+            Хотите посмотреть демо?{' '}
+            <button
+              onClick={async () => {
+                setView('csv')
+                const res = await fetch('/sample_salon.csv')
+                const blob = await res.blob()
+                const file = new File([blob], 'sample_salon.csv', { type: 'text/csv' })
+                setSalonName('Демо-салон Лотос')
+                setTimeout(() => handleFile(file), 100)
+              }}
+              className="text-sage hover:opacity-80 transition-opacity font-semibold"
+            >
+              Запустить на демо-данных →
+            </button>
+          </p>
+
+        </div>
+      </div>
+    )
+  }
+
+  // ── CSV upload screen ──
   return (
     <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6">
       <div className="w-full max-w-md">
 
         <div className="mb-8">
-          <Link
-            href="/role"
+          <button
+            onClick={() => { setView('select'); setStage('idle'); setError('') }}
             className="inline-flex items-center gap-1.5 text-sm text-dusk hover:text-sage transition-colors"
           >
             <ArrowLeft size={14} />
             Назад
-          </Link>
+          </button>
         </div>
 
         <div className="text-center mb-10">
           <p className="text-base font-semibold text-graphite">BeautyOS</p>
-          <h1 className="text-xl font-semibold text-graphite mt-3 mb-2">Начнём с данных</h1>
+          <h1 className="text-xl font-semibold text-graphite mt-3 mb-2">Загрузите файл</h1>
           <p className="text-sm text-dusk leading-relaxed max-w-xs mx-auto">
-            Загрузите выгрузку из YClients или Dikidi — покажем финансовый ущерб от ухода клиентов за 60 секунд.
+            Выгрузка из YClients или Dikidi — покажем финансовый ущерб от ухода клиентов за 60 секунд.
           </p>
         </div>
 
@@ -83,9 +179,7 @@ export default function JoinSalonPage() {
           {stage === 'idle' && (
             <>
               <div className="mb-5">
-                <label className="block text-xs font-semibold text-dusk mb-2 tracking-wide">
-                  Название салона
-                </label>
+                <label className="block text-xs font-semibold text-dusk mb-2 tracking-wide">Название салона</label>
                 <input
                   type="text"
                   value={salonName}
@@ -95,45 +189,17 @@ export default function JoinSalonPage() {
                 />
               </div>
 
-              <input
-                ref={inputRef}
-                type="file"
-                accept=".csv"
-                className="hidden"
-                onChange={e => {
-                  const f = e.target.files?.[0]
-                  if (f) handleFile(f)
-                }}
-              />
+              <input ref={inputRef} type="file" accept=".csv" className="hidden"
+                onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f) }} />
 
               <button
                 onClick={() => inputRef.current?.click()}
                 className="w-full border-2 border-dashed border-parchment hover:border-sage/40 rounded-xl py-8 flex flex-col items-center gap-2 transition-colors group"
               >
                 <Upload size={22} className="text-dusk/40 group-hover:text-sage transition-colors" />
-                <span className="text-sm text-dusk group-hover:text-graphite transition-colors font-medium">
-                  Нажмите, чтобы выбрать CSV
-                </span>
-                <span className="text-xs text-dusk/40">
-                  YClients · Dikidi · любой CSV с визитами
-                </span>
+                <span className="text-sm text-dusk group-hover:text-graphite transition-colors font-medium">Нажмите, чтобы выбрать CSV</span>
+                <span className="text-xs text-dusk/40">YClients · Dikidi · любой CSV с визитами</span>
               </button>
-
-              <p className="text-xs text-dusk/50 text-center mt-5">
-                Нет файла?{' '}
-                <button
-                  onClick={async () => {
-                    const res = await fetch('/sample_salon.csv')
-                    const blob = await res.blob()
-                    const file = new File([blob], 'sample_salon.csv', { type: 'text/csv' })
-                    setSalonName('Демо-салон Лотос')
-                    handleFile(file)
-                  }}
-                  className="text-sage hover:opacity-80 transition-opacity font-semibold"
-                >
-                  Запустить на демо-данных
-                </button>
-              </p>
             </>
           )}
 
@@ -164,10 +230,8 @@ export default function JoinSalonPage() {
                 <p className="text-graphite font-medium">Ошибка</p>
                 <p className="text-dusk text-sm mt-1">{error}</p>
               </div>
-              <button
-                onClick={() => { setStage('idle'); setError('') }}
-                className="text-sm text-sage hover:opacity-80 transition-opacity font-medium"
-              >
+              <button onClick={() => { setStage('idle'); setError('') }}
+                className="text-sm text-sage hover:opacity-80 transition-opacity font-medium">
                 Попробовать снова
               </button>
             </div>
