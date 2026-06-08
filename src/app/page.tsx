@@ -17,12 +17,17 @@ export default function LandingPage() {
         <span className="text-base font-semibold tracking-tight text-graphite select-none">
           BeautyOS<sup className="text-rose text-[10px] font-bold ml-0.5 relative -top-1">+</sup>
         </span>
-        <Link
-          href="/role"
-          className="text-sm font-medium text-dusk hover:text-rose transition-colors"
-        >
-          Войти
-        </Link>
+        <div className="flex items-center gap-5">
+          <Link href="/pricing" className="hidden sm:block text-sm text-dusk hover:text-rose transition-colors">
+            Тарифы
+          </Link>
+          <Link
+            href="/role"
+            className="text-sm font-medium text-dusk hover:text-rose transition-colors"
+          >
+            Войти
+          </Link>
+        </div>
       </header>
 
       {/* Two-column layout */}
