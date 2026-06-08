@@ -65,13 +65,18 @@ export async function POST(req: NextRequest) {
       salonId = newSalon.id
     }
 
-    // Регистрируем загрузку в журнале
-    const { data: uploadRecord } = await supabaseAdmin
-      .from('data_uploads')
-      .insert({ salon_id: salonId, filename: file.name, period_from: periodFrom, period_to: periodTo, row_count: rows.length })
-      .select('id')
-      .single()
-    const uploadId: string | undefined = uploadRecord?.id
+    // Регистрируем загрузку в журнале (Salon Memory — необязательно)
+    let uploadId: string | undefined
+    try {
+      const { data: uploadRecord } = await supabaseAdmin
+        .from('data_uploads')
+        .insert({ salon_id: salonId, filename: file.name, period_from: periodFrom, period_to: periodTo, row_count: rows.length })
+        .select('id')
+        .single()
+      uploadId = uploadRecord?.id
+    } catch {
+      // Таблица data_uploads ещё не создана — продолжаем без журнала
+    }
 
     // Запускаем анализ
     const { clients, masters, summary } = runRetentionAnalysis({ salonId, rows })
@@ -89,18 +94,22 @@ export async function POST(req: NextRequest) {
     }
 
     // Сохраняем визиты (батчами по 500)
-    const visits = rows.map(row => ({
-      salon_id: salonId,
-      client_id: null, // TODO: связать с clients.id после дедупликации
-      upload_id: uploadId,
-      master_name: row.master_name,
-      service_name: row.service_name,
-      visit_date: row.visit_date,
-      amount: parseFloat(row.amount.replace(/[^\d.]/g, '')) || 0,
-    }))
+    const visits = rows.map(row => {
+      const v: Record<string, unknown> = {
+        salon_id: salonId,
+        client_id: null,
+        master_name: row.master_name,
+        service_name: row.service_name,
+        visit_date: row.visit_date,
+        amount: parseFloat(String(row.amount).replace(/[^\d.]/g, '')) || 0,
+      }
+      if (uploadId) v.upload_id = uploadId
+      return v
+    })
 
     for (let i = 0; i < visits.length; i += 500) {
-      await supabaseAdmin.from('visits').insert(visits.slice(i, i + 500))
+      const { error } = await supabaseAdmin.from('visits').insert(visits.slice(i, i + 500))
+      if (error) throw error
     }
 
     // Получаем AI-инсайты
@@ -114,21 +123,25 @@ export async function POST(req: NextRequest) {
     summary.ai_insights = aiResult.insights
     summary.ai_recommendation = aiResult.recommendation
 
-    // Сохраняем снапшот метрик для анализа динамики
-    const totalRevenue = clients.reduce((s, c) => s + (c.total_revenue ?? 0), 0)
-    const avgCheck = clients.length > 0 ? Math.round(totalRevenue / clients.length) : 0
-    await supabaseAdmin.from('analysis_snapshots').insert({
-      salon_id: salonId,
-      upload_id: uploadId,
-      total_clients: summary.total_clients,
-      active_clients: summary.active_clients,
-      at_risk_clients: summary.at_risk_clients,
-      lost_clients: summary.lost_clients,
-      total_revenue: totalRevenue,
-      avg_check: avgCheck,
-      retention_rate: summary.retention_rate,
-      total_financial_impact: summary.total_financial_impact,
-    })
+    // Сохраняем снапшот метрик (Salon Memory — необязательно)
+    try {
+      const totalRevenue = clients.reduce((s, c) => s + (c.total_revenue ?? 0), 0)
+      const avgCheck = clients.length > 0 ? Math.round(totalRevenue / clients.length) : 0
+      await supabaseAdmin.from('analysis_snapshots').insert({
+        salon_id: salonId,
+        upload_id: uploadId,
+        total_clients: summary.total_clients,
+        active_clients: summary.active_clients,
+        at_risk_clients: summary.at_risk_clients,
+        lost_clients: summary.lost_clients,
+        total_revenue: totalRevenue,
+        avg_check: avgCheck,
+        retention_rate: summary.retention_rate,
+        total_financial_impact: summary.total_financial_impact,
+      })
+    } catch {
+      // Таблица analysis_snapshots ещё не создана — продолжаем
+    }
 
     // Сохраняем главный инсайт
     await supabaseAdmin.from('insights').insert({
