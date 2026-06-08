@@ -25,9 +25,10 @@ function groupByClient(rows: CSVRow[]): RawClient[] {
   const map = new Map<string, RawClient>()
 
   for (const row of rows) {
-    const key = row.phone || row.client_name.toLowerCase().trim()
+    const cleanPhone = row.phone?.replace(/[^\d+]/g, '') || ''
+    const key = cleanPhone || row.client_name.toLowerCase().trim()
     if (!map.has(key)) {
-      map.set(key, { name: row.client_name, phone: row.phone, visits: [] })
+      map.set(key, { name: row.client_name, phone: cleanPhone, visits: [] })
     }
     const amount = parseFloat(row.amount.replace(/[^\d.]/g, '')) || 0
     map.get(key)!.visits.push({
@@ -172,7 +173,7 @@ export function runRetentionAnalysis(input: AnalysisInput): AnalysisOutput {
     clients.push({
       salon_id: salonId,
       name: rc.name,
-      phone: rc.phone,
+      phone: rc.phone || undefined,
       first_visit_date: firstVisitDate,
       last_visit_date: lastVisitDate,
       total_visits: rc.visits.length,
