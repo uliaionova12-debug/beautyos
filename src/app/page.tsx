@@ -1,190 +1,79 @@
-'use client'
+import Link from 'next/link'
 
-export const dynamic = 'force-dynamic'
-
-import { useState, useRef } from 'react'
-import { useRouter } from 'next/navigation'
-import { Upload, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
-
-type Stage = 'idle' | 'uploading' | 'analyzing' | 'done' | 'error'
-
-export default function HomePage() {
-  const router = useRouter()
-  const inputRef = useRef<HTMLInputElement>(null)
-  const [stage, setStage] = useState<Stage>('idle')
-  const [fileName, setFileName] = useState('')
-  const [salonName, setSalonName] = useState('')
-  const [error, setError] = useState('')
-  const [progress, setProgress] = useState('')
-
-  async function handleFile(file: File) {
-    if (!file.name.endsWith('.csv')) {
-      setError('Нужен файл в формате CSV')
-      setStage('error')
-      return
-    }
-
-    setFileName(file.name)
-    setStage('uploading')
-    setProgress('Читаю файл...')
-
-    const form = new FormData()
-    form.append('file', file)
-    form.append('salon_name', salonName || 'Мой салон')
-
-    try {
-      setStage('analyzing')
-      setProgress('Анализирую клиентскую базу...')
-
-      const res = await fetch('/api/upload', { method: 'POST', body: form })
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.error || 'Ошибка загрузки')
-        setStage('error')
-        return
-      }
-
-      setStage('done')
-      setTimeout(() => {
-        router.push(`/role?salon_id=${data.salon_id}`)
-      }, 1200)
-    } catch {
-      setError('Не удалось загрузить файл. Проверьте подключение.')
-      setStage('error')
-    }
-  }
-
+export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-cream overflow-hidden">
 
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold tracking-tight mb-2">BeautyOS</h1>
-          <p className="text-zinc-500 text-sm">
-            AI Operating System для салонов красоты
-          </p>
-        </div>
+      {/* Floating header */}
+      <header className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-7 md:px-12 py-6">
+        <span className="text-base font-semibold tracking-tight text-graphite select-none">
+          BeautyOS
+        </span>
+        <Link
+          href="/role"
+          className="text-sm font-medium text-dusk hover:text-sage transition-colors"
+        >
+          Войти
+        </Link>
+      </header>
 
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
+      {/* Two-column layout */}
+      <div className="flex flex-col md:flex-row min-h-screen">
 
-          {stage === 'idle' && (
-            <>
-              <div className="mb-6">
-                <p className="text-white font-semibold text-lg mb-1">
-                  Узнайте, сколько денег теряет ваш салон
-                </p>
-                <p className="text-zinc-500 text-sm leading-relaxed">
-                  Загрузите выгрузку из YClients или Dikidi — мы покажем финансовый ущерб от ухода клиентов за 60 секунд.
-                </p>
-              </div>
+        {/* Text column — below image on mobile, left on desktop */}
+        <div className="order-2 md:order-1 md:w-[42%] flex items-center px-7 py-10 md:px-16 md:py-0 bg-cream">
+          <div className="max-w-sm w-full pt-6 md:pt-0">
 
-              <div className="mb-4">
-                <label className="block text-xs text-zinc-400 font-medium mb-1.5">
-                  Название салона
-                </label>
-                <input
-                  type="text"
-                  value={salonName}
-                  onChange={e => setSalonName(e.target.value)}
-                  placeholder="Например: Лотос"
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
-                />
-              </div>
+            <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-terracotta mb-7">
+              AI-помощник в мире красоты
+            </p>
 
-              <input
-                ref={inputRef}
-                type="file"
-                accept=".csv"
-                className="hidden"
-                onChange={e => {
-                  const f = e.target.files?.[0]
-                  if (f) handleFile(f)
-                }}
-              />
+            <h1 className="text-[2.5rem] md:text-[3rem] font-light leading-[1.1] text-graphite mb-6 tracking-tight">
+              Красота,<br />
+              которая помнит<br />
+              <em className="not-italic font-semibold">о Вас.</em>
+            </h1>
 
-              <button
-                onClick={() => inputRef.current?.click()}
-                className="w-full border-2 border-dashed border-zinc-700 hover:border-zinc-500 rounded-xl py-8 flex flex-col items-center gap-2 transition-colors group"
+            <p className="text-[15px] text-dusk leading-relaxed mb-10 max-w-[280px]">
+              Персональный помощник, который запоминает ваши предпочтения и напоминает о визитах.
+            </p>
+
+            <div className="flex flex-col gap-4">
+              <Link
+                href="/client"
+                className="inline-flex items-center gap-2.5 bg-sage text-white px-8 py-4 rounded-full text-sm font-semibold hover:opacity-90 transition-opacity w-fit"
               >
-                <Upload size={24} className="text-zinc-600 group-hover:text-zinc-400 transition-colors" />
-                <span className="text-sm text-zinc-500 group-hover:text-zinc-400 transition-colors">
-                  Нажмите, чтобы выбрать CSV
-                </span>
-                <span className="text-xs text-zinc-700">
-                  YClients · Dikidi · любой CSV с визитами
-                </span>
-              </button>
+                🌸 Забочусь о себе
+              </Link>
 
-              <p className="text-xs text-zinc-700 text-center mt-4">
-                Нет файла?{' '}
-                <button
-                  onClick={async () => {
-                    const res = await fetch('/sample_salon.csv')
-                    const blob = await res.blob()
-                    const file = new File([blob], 'sample_salon.csv', { type: 'text/csv' })
-                    setSalonName('Демо-салон Лотос')
-                    handleFile(file)
-                  }}
-                  className="text-blue-500 hover:text-blue-400 transition-colors"
-                >
-                  Запустить на демо-данных
-                </button>
-              </p>
-            </>
-          )}
-
-          {(stage === 'uploading' || stage === 'analyzing') && (
-            <div className="flex flex-col items-center py-8 gap-4">
-              <Loader2 size={32} className="text-blue-400 animate-spin" />
-              <div className="text-center">
-                <p className="text-white font-medium">{progress}</p>
-                <p className="text-zinc-500 text-sm mt-1">{fileName}</p>
-              </div>
-            </div>
-          )}
-
-          {stage === 'done' && (
-            <div className="flex flex-col items-center py-8 gap-4">
-              <CheckCircle size={32} className="text-emerald-400" />
-              <div className="text-center">
-                <p className="text-white font-medium">Анализ завершён</p>
-                <p className="text-zinc-500 text-sm mt-1">Открываю дашборд...</p>
-              </div>
-            </div>
-          )}
-
-          {stage === 'error' && (
-            <div className="flex flex-col items-center py-6 gap-4">
-              <AlertCircle size={32} className="text-red-400" />
-              <div className="text-center">
-                <p className="text-white font-medium">Ошибка</p>
-                <p className="text-zinc-500 text-sm mt-1">{error}</p>
-              </div>
-              <button
-                onClick={() => { setStage('idle'); setError('') }}
-                className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+              <Link
+                href="/role"
+                className="text-sm font-medium text-dusk hover:text-terracotta transition-colors"
               >
-                Попробовать снова
-              </button>
+                Beauty Pro →
+              </Link>
             </div>
-          )}
-        </div>
 
-        {stage === 'idle' && (
-          <div className="mt-6 grid grid-cols-3 gap-4 text-center">
-            {[
-              { value: '60 сек', label: 'до первого инсайта' },
-              { value: '35–45%', label: 'отток клиентов в год' },
-              { value: '7+ млн ₽', label: 'теряет салон незаметно' },
-            ].map(stat => (
-              <div key={stat.label}>
-                <p className="text-white font-bold text-lg">{stat.value}</p>
-                <p className="text-zinc-600 text-xs leading-tight">{stat.label}</p>
-              </div>
-            ))}
           </div>
-        )}
+        </div>
+
+        {/* Image column — top on mobile, right on desktop */}
+        <div
+          className="order-1 md:order-2 md:w-[58%] h-[52vh] md:h-screen relative overflow-hidden"
+          style={{ background: 'linear-gradient(150deg, #DCCAB8 0%, #E9D9CC 30%, #EFE2D8 60%, #F5EDE8 100%)' }}
+        >
+          {/* Photo — gradient shows as fallback */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1200&q=80"
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover"
+            loading="eager"
+          />
+          {/* Left-side fade on desktop to blend into text column */}
+          <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-cream to-transparent hidden md:block" />
+        </div>
+
       </div>
     </div>
   )
