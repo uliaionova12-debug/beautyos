@@ -80,11 +80,11 @@ export default function LandingPage() {
         {/* Image column */}
         <div
           className="order-1 md:order-2 md:w-[56%] h-[55vh] md:h-screen relative overflow-hidden"
-          style={{ background: 'linear-gradient(150deg, #E8C3CA 0%, #EFD4D9 30%, #F5E4E7 60%, #FAF0F2 100%)' }}
+          style={{ background: 'linear-gradient(150deg, #D5C9BC 0%, #E2D8CC 30%, #EDE5DA 60%, #F5F0E8 100%)' }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="https://images.pexels.com/photos/12088508/pexels-photo-12088508.jpeg?auto=compress&cs=tinysrgb&w=1260&h=840&fit=crop"
+            src="https://images.unsplash.com/photo-1545386673-7723f55e5490?auto=format&fit=crop&w=1200&q=85"
             alt=""
             className="absolute inset-0 w-full h-full object-cover object-center"
             loading="eager"
