@@ -10,45 +10,37 @@ import {
   Calendar, Clock, Scissors, ChevronRight, Gift, Copy
 } from 'lucide-react'
 
-// В продакшне эти ссылки берутся из настроек салона (таблица salons)
-// Формат Яндекс: https://yandex.ru/maps/org/SLUG/ORG_ID/reviews/
-// Формат Google: https://search.google.com/local/writereview?placeid=PLACE_ID
-// Формат 2GIS:   https://2gis.ru/CITY/firm/FIRM_ID/tab/reviews
 const SALON_PLATFORMS = [
   {
     id: 'yandex',
     name: 'Яндекс Карты',
     emoji: '🗺️',
-    color: 'bg-red-950/40 border-red-800/30 text-red-300',
+    color: 'bg-red-50 border-red-200 text-red-700',
     hint: 'Нажмите «Написать отзыв»',
-    // DEMO: замените на реальную ссылку профиля салона в Яндекс.Бизнес
     url: 'https://yandex.ru/maps/org/beauty_salon/reviews/',
   },
   {
     id: 'google',
     name: 'Google Maps',
     emoji: '🌐',
-    color: 'bg-blue-950/40 border-blue-800/30 text-blue-300',
+    color: 'bg-blue-50 border-blue-200 text-blue-700',
     hint: 'Нажмите звёзды и вставьте текст',
-    // DEMO: замените на placeid своего салона
     url: 'https://search.google.com/local/writereview?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4',
   },
   {
     id: '2gis',
     name: '2GIS',
     emoji: '📍',
-    color: 'bg-emerald-950/40 border-emerald-800/30 text-emerald-300',
+    color: 'bg-emerald-50 border-emerald-200 text-emerald-700',
     hint: 'Перейдите во вкладку «Отзывы»',
-    // DEMO: замените на ссылку профиля салона в 2GIS
     url: 'https://2gis.ru/moscow/firm/70000001082270604/tab/reviews',
   },
   {
     id: 'vk',
     name: 'ВКонтакте',
     emoji: '💙',
-    color: 'bg-indigo-950/40 border-indigo-800/30 text-indigo-300',
+    color: 'bg-indigo-50 border-indigo-200 text-indigo-700',
     hint: 'Перейдите в «Отзывы» сообщества',
-    // DEMO: замените на ссылку группы салона ВК
     url: 'https://vk.com/topic-000000_000000',
   },
 ]
@@ -129,12 +121,12 @@ export default function ClientPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-cream">
       <div className="max-w-md mx-auto px-4 py-8">
 
         <Link
           href={`/role?salon_id=${salonId}`}
-          className="flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-300 transition-colors mb-6"
+          className="flex items-center gap-1.5 text-sm text-dusk hover:text-sage transition-colors mb-6"
         >
           <ArrowLeft size={14} />
           Сменить роль
@@ -142,32 +134,32 @@ export default function ClientPage() {
 
         {/* Приветствие */}
         <div className="mb-6">
-          <p className="text-zinc-500 text-sm mb-1">Добрый день</p>
-          <h1 className="text-2xl font-bold">Юлия</h1>
+          <p className="text-dusk text-sm mb-1">Добрый день</p>
+          <h1 className="text-2xl font-bold text-graphite">Юлия</h1>
         </div>
 
         {/* Следующая запись */}
-        <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/20 border border-purple-700/30 rounded-2xl p-5 mb-4">
-          <p className="text-xs text-purple-400 font-medium uppercase tracking-wider mb-2">
+        <div className="bg-sage/10 border border-sage/20 rounded-2xl p-5 mb-4">
+          <p className="text-xs text-sage font-semibold uppercase tracking-wider mb-2">
             Рекомендуем записаться
           </p>
-          <p className="text-white font-semibold mb-1">
-            Следующий визит через <span className="text-purple-300">8 дней</span>
+          <p className="text-graphite font-semibold mb-1">
+            Следующий визит через <span className="text-sage">8 дней</span>
           </p>
-          <p className="text-zinc-400 text-sm mb-4">
+          <p className="text-dusk text-sm mb-4">
             Наталья ждёт вас — лучший результат раз в 4 недели
           </p>
           <div className="space-y-2">
             {NEXT_SLOTS.map((slot, i) => (
               <button
                 key={i}
-                className="w-full flex items-center justify-between bg-black/30 hover:bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 transition-colors"
+                className="w-full flex items-center justify-between bg-white/70 hover:bg-white border border-parchment rounded-xl px-4 py-2.5 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <Clock size={14} className="text-purple-400" />
-                  <span className="text-sm text-white">{slot.date}, {slot.time}</span>
+                  <Clock size={14} className="text-sage" />
+                  <span className="text-sm text-graphite">{slot.date}, {slot.time}</span>
                 </div>
-                <span className="text-xs text-zinc-400">{slot.master}</span>
+                <span className="text-xs text-dusk">{slot.master}</span>
               </button>
             ))}
           </div>
@@ -182,24 +174,23 @@ export default function ClientPage() {
           ].map(({ icon: Icon, label }) => (
             <button
               key={label}
-              className="bg-zinc-900 border border-zinc-800 rounded-xl py-4 flex flex-col items-center gap-2 hover:border-zinc-600 transition-colors"
+              className="bg-card border border-parchment rounded-xl py-4 flex flex-col items-center gap-2 hover:border-sage/40 transition-colors"
             >
-              <Icon size={18} className="text-zinc-400" />
-              <span className="text-xs text-zinc-500">{label}</span>
+              <Icon size={18} className="text-dusk" />
+              <span className="text-xs text-dusk">{label}</span>
             </button>
           ))}
         </div>
 
         {/* ---- БЛОК ОТЗЫВА ---- */}
 
-        {/* Последний визит + CTA */}
         {step === 'idle' && (
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-4">
-            <p className="text-xs text-zinc-500 uppercase tracking-wider mb-3">Последний визит</p>
+          <div className="bg-card border border-parchment rounded-2xl p-5 mb-4">
+            <p className="text-xs text-dusk font-semibold uppercase tracking-wider mb-3">Последний визит</p>
             <div className="flex items-start justify-between mb-4">
               <div>
-                <p className="text-white font-semibold">{lastVisit.service}</p>
-                <div className="flex items-center gap-2 mt-1 text-xs text-zinc-500">
+                <p className="text-graphite font-semibold">{lastVisit.service}</p>
+                <div className="flex items-center gap-2 mt-1 text-xs text-dusk">
                   <Scissors size={11} />
                   <span>{lastVisit.master}</span>
                   <span>·</span>
@@ -207,11 +198,11 @@ export default function ClientPage() {
                   <span>{lastVisit.date}</span>
                 </div>
               </div>
-              <p className="text-white font-bold">{lastVisit.amount.toLocaleString('ru-RU')} ₽</p>
+              <p className="text-graphite font-bold">{lastVisit.amount.toLocaleString('ru-RU')} ₽</p>
             </div>
             <button
               onClick={() => setStep('rating')}
-              className="w-full bg-white text-black font-semibold py-3 rounded-xl text-sm hover:bg-zinc-100 transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-sage text-white font-semibold py-3 rounded-xl text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
             >
               <Star size={15} />
               Оставить отзыв о визите
@@ -219,11 +210,10 @@ export default function ClientPage() {
           </div>
         )}
 
-        {/* ШАГ 1: Звёзды */}
         {step === 'rating' && (
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-4">
-            <p className="text-sm font-semibold text-white mb-1">Как прошёл визит?</p>
-            <p className="text-xs text-zinc-500 mb-5">Оцените от 1 до 5 звёзд</p>
+          <div className="bg-card border border-parchment rounded-2xl p-5 mb-4">
+            <p className="text-sm font-semibold text-graphite mb-1">Как прошёл визит?</p>
+            <p className="text-xs text-dusk mb-5">Оцените от 1 до 5 звёзд</p>
             <div className="flex gap-3 justify-center mb-4">
               {[1, 2, 3, 4, 5].map(n => (
                 <button
@@ -238,13 +228,13 @@ export default function ClientPage() {
                     className={`transition-colors ${
                       n <= (hovered || rating)
                         ? 'text-amber-400 fill-amber-400'
-                        : 'text-zinc-700'
+                        : 'text-parchment fill-parchment'
                     }`}
                   />
                 </button>
               ))}
             </div>
-            <p className="text-center text-xs text-zinc-600 h-4">
+            <p className="text-center text-xs text-dusk/60 h-4">
               {hovered === 1 && 'Очень плохо'}
               {hovered === 2 && 'Плохо'}
               {hovered === 3 && 'Нормально'}
@@ -254,16 +244,15 @@ export default function ClientPage() {
           </div>
         )}
 
-        {/* ШАГ 2: Текст */}
         {step === 'text' && (
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-4">
+          <div className="bg-card border border-parchment rounded-2xl p-5 mb-4">
             <div className="flex gap-1 mb-3">
               {[1,2,3,4,5].map(n => (
                 <Star key={n} size={16}
-                  className={n <= rating ? 'text-amber-400 fill-amber-400' : 'text-zinc-700'} />
+                  className={n <= rating ? 'text-amber-400 fill-amber-400' : 'text-parchment fill-parchment'} />
               ))}
             </div>
-            <p className="text-sm font-semibold text-white mb-4">
+            <p className="text-sm font-semibold text-graphite mb-4">
               {rating >= 4 ? 'Расскажите, что понравилось' : 'Что можно улучшить?'}
             </p>
             <input
@@ -271,7 +260,7 @@ export default function ClientPage() {
               placeholder="Ваше имя (необязательно)"
               value={clientName}
               onChange={e => setClientName(e.target.value)}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 mb-3 outline-none focus:border-zinc-500 transition-colors"
+              className="w-full bg-cream border border-parchment rounded-xl px-4 py-3 text-sm text-graphite placeholder-dusk/40 mb-3 outline-none focus:border-sage/60 transition-colors"
             />
             <textarea
               placeholder={
@@ -282,61 +271,56 @@ export default function ClientPage() {
               value={reviewText}
               onChange={e => setReviewText(e.target.value)}
               rows={4}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 outline-none focus:border-zinc-500 resize-none mb-4 transition-colors"
+              className="w-full bg-cream border border-parchment rounded-xl px-4 py-3 text-sm text-graphite placeholder-dusk/40 outline-none focus:border-sage/60 resize-none mb-4 transition-colors"
             />
             <button
               onClick={handleTextSubmit}
               disabled={submitting}
-              className="w-full bg-white text-black font-semibold py-3 rounded-xl text-sm hover:bg-zinc-100 transition-colors disabled:opacity-50"
+              className="w-full bg-sage text-white font-semibold py-3 rounded-xl text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
             >
               {submitting ? 'Отправляю...' : 'Отправить отзыв'}
             </button>
           </div>
         )}
 
-        {/* ШАГ 3а: Позитивный — копировать + кнопки на площадки */}
         {step === 'gating_positive' && (
           <div className="space-y-3 mb-4">
-            {/* Заголовок */}
-            <div className="bg-gradient-to-br from-amber-950/40 to-yellow-950/30 border border-amber-700/30 rounded-2xl p-5">
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5">
               <p className="text-3xl mb-2 text-center">🎉</p>
-              <p className="text-white font-bold text-center mb-1">Спасибо за тёплые слова!</p>
-              <p className="text-zinc-400 text-sm text-center">
+              <p className="text-graphite font-bold text-center mb-1">Спасибо за тёплые слова!</p>
+              <p className="text-dusk text-sm text-center">
                 Помогите другим найти нас — 3 простых шага
               </p>
             </div>
 
-            {/* Шаги */}
             <div className="grid grid-cols-3 gap-2">
               {['1. Скопируйте текст', '2. Нажмите площадку', '3. Вставьте и отправьте'].map((s, i) => (
-                <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-center">
-                  <p className="text-xs text-zinc-400 leading-snug">{s}</p>
+                <div key={i} className="bg-card border border-parchment rounded-xl p-3 text-center">
+                  <p className="text-xs text-dusk leading-snug">{s}</p>
                 </div>
               ))}
             </div>
 
-            {/* Блок с текстом отзыва */}
             {reviewText && (
-              <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-4">
+              <div className="bg-card border border-parchment rounded-2xl p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs text-zinc-500 uppercase tracking-wider">Ваш отзыв</p>
+                  <p className="text-xs text-dusk font-semibold uppercase tracking-wider">Ваш отзыв</p>
                   <button
                     onClick={copyReviewText}
-                    className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all ${
+                    className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all border ${
                       copied
-                        ? 'bg-emerald-900/50 text-emerald-400 border border-emerald-700/50'
-                        : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700'
+                        ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                        : 'bg-cream text-dusk hover:bg-blush border-parchment'
                     }`}
                   >
                     {copied ? <CheckCircle2 size={12} /> : <Copy size={12} />}
                     {copied ? 'Скопировано!' : 'Копировать'}
                   </button>
                 </div>
-                <p className="text-sm text-zinc-200 leading-relaxed">{reviewText}</p>
+                <p className="text-sm text-graphite leading-relaxed">{reviewText}</p>
               </div>
             )}
 
-            {/* Площадки */}
             <div className="space-y-2">
               {SALON_PLATFORMS.map(platform => {
                 const published = publishedTo.includes(platform.id)
@@ -346,7 +330,7 @@ export default function ClientPage() {
                     onClick={() => handlePublish(platform)}
                     className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl border text-sm font-medium transition-all active:scale-[0.98] ${
                       published
-                        ? 'bg-emerald-950/40 border-emerald-800/30 text-emerald-400'
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-600'
                         : platform.color
                     }`}
                   >
@@ -370,37 +354,35 @@ export default function ClientPage() {
 
             <button
               onClick={() => setStep('done')}
-              className="w-full text-sm text-zinc-600 hover:text-zinc-400 transition-colors py-2"
+              className="w-full text-sm text-dusk/60 hover:text-dusk transition-colors py-2"
             >
               Готово, закрыть
             </button>
           </div>
         )}
 
-        {/* ШАГ 3б: Негативный — внутреннее сохранение */}
         {step === 'gating_negative' && (
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-4 text-center">
+          <div className="bg-card border border-parchment rounded-2xl p-5 mb-4 text-center">
             <p className="text-4xl mb-3">🙏</p>
-            <p className="text-white font-bold mb-2">Спасибо за честность</p>
-            <p className="text-zinc-400 text-sm leading-relaxed mb-5">
+            <p className="text-graphite font-bold mb-2">Спасибо за честность</p>
+            <p className="text-dusk text-sm leading-relaxed mb-5">
               Ваш отзыв получен. Владелец салона лично прочитает его
               и свяжется с вами. Мы обязательно исправим.
             </p>
             <button
               onClick={() => setStep('done')}
-              className="bg-white text-black font-semibold px-6 py-3 rounded-xl text-sm hover:bg-zinc-100 transition-colors"
+              className="bg-sage text-white font-semibold px-6 py-3 rounded-xl text-sm hover:opacity-90 transition-opacity"
             >
               Хорошо, спасибо
             </button>
           </div>
         )}
 
-        {/* Финал */}
         {step === 'done' && (
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-4 text-center">
-            <CheckCircle2 size={32} className="text-emerald-400 mx-auto mb-3" />
-            <p className="text-white font-bold mb-1">Всё готово!</p>
-            <p className="text-zinc-500 text-sm">
+          <div className="bg-card border border-parchment rounded-2xl p-5 mb-4 text-center">
+            <CheckCircle2 size={32} className="text-sage mx-auto mb-3" />
+            <p className="text-graphite font-bold mb-1">Всё готово!</p>
+            <p className="text-dusk text-sm">
               {publishedTo.length > 0
                 ? `Опубликовано на ${publishedTo.length} площадке${publishedTo.length > 1 ? 'х' : ''}`
                 : 'Отзыв сохранён'}
@@ -411,31 +393,31 @@ export default function ClientPage() {
         {/* ---- / БЛОК ОТЗЫВА ---- */}
 
         {/* История визитов */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-4">
-          <p className="text-xs text-zinc-500 uppercase tracking-wider mb-3">История визитов</p>
+        <div className="bg-card border border-parchment rounded-2xl p-5 mb-4">
+          <p className="text-xs text-dusk font-semibold uppercase tracking-wider mb-3">История визитов</p>
           <div className="space-y-3">
             {MOCK_HISTORY.map((visit, i) => (
               <div key={i} className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-white">{visit.service}</p>
-                  <p className="text-xs text-zinc-600 mt-0.5">{visit.master} · {visit.date}</p>
+                  <p className="text-sm text-graphite">{visit.service}</p>
+                  <p className="text-xs text-dusk/60 mt-0.5">{visit.master} · {visit.date}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <p className="text-sm text-zinc-400">{visit.amount.toLocaleString('ru-RU')} ₽</p>
-                  <ChevronRight size={14} className="text-zinc-700" />
+                  <p className="text-sm text-dusk">{visit.amount.toLocaleString('ru-RU')} ₽</p>
+                  <ChevronRight size={14} className="text-parchment" />
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Beauty AI Assistant */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+        {/* Beauty AI */}
+        <div className="bg-card border border-parchment rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-2">
-            <Heart size={14} className="text-pink-400" />
-            <p className="text-xs text-zinc-400 font-medium uppercase tracking-wider">Beauty AI</p>
+            <Heart size={14} className="text-terracotta" />
+            <p className="text-xs text-dusk font-semibold uppercase tracking-wider">Beauty AI</p>
           </div>
-          <p className="text-sm text-zinc-300 leading-relaxed">
+          <p className="text-sm text-graphite leading-relaxed">
             Наталья специализируется на сложном окрашивании. После 3 визитов ваши волосы
             заметно здоровее — продолжайте регулярный уход!
           </p>

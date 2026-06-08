@@ -6,8 +6,8 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { FinancialImpact } from '@/components/retention/FinancialImpact'
 import { ClientRiskList } from '@/components/retention/ClientRiskList'
-import { Client, RetentionAnalysis, Master } from '@/types'
-import { ArrowLeft, Users, TrendingDown } from 'lucide-react'
+import { Client, RetentionAnalysis } from '@/types'
+import { ArrowLeft, Users } from 'lucide-react'
 import Link from 'next/link'
 
 type Tab = 'at_risk' | 'lost' | 'masters'
@@ -19,7 +19,6 @@ export default function RetentionPage() {
   const [atRisk, setAtRisk] = useState<Client[]>([])
   const [lost, setLost] = useState<Client[]>([])
   const [analysis, setAnalysis] = useState<RetentionAnalysis | null>(null)
-  const [masters, setMasters] = useState<Master[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -34,7 +33,6 @@ export default function RetentionPage() {
       setAtRisk(riskClients)
       setLost(lostClients)
 
-      // Считаем сводку на клиенте
       const totalFinancialImpact = lostClients.reduce((sum, c) => {
         const interval = c.avg_interval_days || 30
         const monthsLost = Math.max(0, c.days_since_last_visit - interval) / 30
@@ -65,10 +63,10 @@ export default function RetentionPage() {
 
   if (!salonId) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="min-h-screen bg-cream flex items-center justify-center">
         <div className="text-center">
-          <p className="text-zinc-400 mb-4">Данные не загружены</p>
-          <Link href="/" className="text-blue-400 hover:text-blue-300">← Вернуться на главную</Link>
+          <p className="text-dusk mb-4">Данные не загружены</p>
+          <Link href="/join/salon" className="text-sage hover:opacity-80 transition-opacity">← Загрузить данные</Link>
         </div>
       </div>
     )
@@ -77,38 +75,37 @@ export default function RetentionPage() {
   const TABS: { key: Tab; label: string; count: number }[] = [
     { key: 'at_risk', label: 'Группа риска', count: atRisk.length },
     { key: 'lost', label: 'Потеряны', count: lost.length },
-    { key: 'masters', label: 'Мастера', count: masters.length },
+    { key: 'masters', label: 'Мастера', count: 0 },
   ]
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-cream">
       <div className="max-w-4xl mx-auto px-4 py-8">
 
-        {/* Назад */}
         <Link
           href={`/dashboard?salon_id=${salonId}`}
-          className="flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-300 transition-colors mb-6"
+          className="flex items-center gap-1.5 text-sm text-dusk hover:text-sage transition-colors mb-6"
         >
           <ArrowLeft size={14} />
           Дашборд
         </Link>
 
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 bg-blue-500/10 rounded-xl">
-            <Users size={20} className="text-blue-400" />
+          <div className="p-2 bg-sage/10 rounded-xl">
+            <Users size={20} className="text-sage" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">Директор по возврату</h1>
-            <p className="text-sm text-zinc-500">Возвратность клиентов и финансовые потери</p>
+            <h1 className="text-xl font-semibold text-graphite">Директор по возврату</h1>
+            <p className="text-sm text-dusk">Возвратность клиентов и финансовые потери</p>
           </div>
         </div>
 
         {loading ? (
           <div className="space-y-4">
             {[1, 2, 3].map(i => (
-              <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 animate-pulse">
-                <div className="h-8 bg-zinc-800 rounded w-1/3 mb-3" />
-                <div className="h-4 bg-zinc-800 rounded w-2/3" />
+              <div key={i} className="bg-card border border-parchment rounded-2xl p-6 animate-pulse">
+                <div className="h-8 bg-parchment rounded w-1/3 mb-3" />
+                <div className="h-4 bg-parchment rounded w-2/3" />
               </div>
             ))}
           </div>
@@ -117,21 +114,21 @@ export default function RetentionPage() {
             {analysis && <div className="mb-8"><FinancialImpact analysis={analysis} /></div>}
 
             {/* Табы */}
-            <div className="flex gap-1 bg-zinc-900 border border-zinc-800 p-1 rounded-xl mb-6">
+            <div className="flex gap-1 bg-cream border border-parchment p-1 rounded-xl mb-6">
               {TABS.map(t => (
                 <button
                   key={t.key}
                   onClick={() => setTab(t.key)}
                   className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                     tab === t.key
-                      ? 'bg-white text-black'
-                      : 'text-zinc-400 hover:text-white'
+                      ? 'bg-graphite text-white'
+                      : 'text-dusk hover:text-graphite'
                   }`}
                 >
                   {t.label}
                   {t.count > 0 && (
                     <span className={`text-xs px-1.5 py-0.5 rounded-full ${
-                      tab === t.key ? 'bg-black/10' : 'bg-zinc-800'
+                      tab === t.key ? 'bg-white/20' : 'bg-parchment'
                     }`}>
                       {t.count}
                     </span>
@@ -157,7 +154,7 @@ export default function RetentionPage() {
               />
             )}
             {tab === 'masters' && (
-              <div className="text-zinc-500 text-sm text-center py-12">
+              <div className="text-dusk text-sm text-center py-12">
                 Загрузите данные для анализа мастеров
               </div>
             )}

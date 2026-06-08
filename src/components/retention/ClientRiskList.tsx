@@ -11,15 +11,15 @@ function formatMoney(n: number): string {
 }
 
 function returnScoreLabel(score: number): { label: string; color: string; bg: string } {
-  if (score >= 0.7) return { label: `${Math.round(score * 100)}% вернётся`, color: 'text-emerald-400', bg: 'bg-emerald-900/30' }
-  if (score >= 0.4) return { label: `${Math.round(score * 100)}% вернётся`, color: 'text-amber-400', bg: 'bg-amber-900/30' }
-  return { label: `${Math.round(score * 100)}% вернётся`, color: 'text-red-400', bg: 'bg-red-900/20' }
+  if (score >= 0.7) return { label: `${Math.round(score * 100)}% вернётся`, color: 'text-emerald-700', bg: 'bg-emerald-100' }
+  if (score >= 0.4) return { label: `${Math.round(score * 100)}% вернётся`, color: 'text-amber-700', bg: 'bg-amber-100' }
+  return { label: `${Math.round(score * 100)}% вернётся`, color: 'text-red-700', bg: 'bg-red-100' }
 }
 
 function riskLabel(score: number): { label: string; color: string } {
-  if (score >= 0.8) return { label: 'Высокий риск', color: 'text-red-400' }
-  if (score >= 0.5) return { label: 'Средний риск', color: 'text-amber-400' }
-  return { label: 'Под наблюдением', color: 'text-yellow-400' }
+  if (score >= 0.8) return { label: 'Высокий риск', color: 'text-red-600' }
+  if (score >= 0.5) return { label: 'Средний риск', color: 'text-amber-600' }
+  return { label: 'Под наблюдением', color: 'text-yellow-700' }
 }
 
 interface Props {
@@ -58,7 +58,7 @@ export function ClientRiskList({ clients, salonName, title, emptyText }: Props) 
 
   if (!clients.length) {
     return (
-      <div className="text-center py-12 text-zinc-600">
+      <div className="text-center py-12 text-dusk">
         <p>{emptyText}</p>
       </div>
     )
@@ -66,7 +66,7 @@ export function ClientRiskList({ clients, salonName, title, emptyText }: Props) 
 
   return (
     <div>
-      <h3 className="text-sm font-medium text-zinc-400 uppercase tracking-wider mb-4">{title}</h3>
+      <h3 className="text-xs font-semibold text-dusk uppercase tracking-wider mb-4">{title}</h3>
       <div className="space-y-2">
         {clients.map(client => {
           const { label: rLabel, color: rColor } = riskLabel(client.risk_score)
@@ -74,18 +74,17 @@ export function ClientRiskList({ clients, salonName, title, emptyText }: Props) 
           const isExpanded = expanded === client.id
 
           return (
-            <div key={client.id} className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+            <div key={client.id} className="bg-card border border-parchment rounded-xl overflow-hidden">
               <div className="p-4">
-                {/* Строка 1: имя + метки */}
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-white font-medium text-sm">{client.name}</span>
+                    <span className="text-graphite font-medium text-sm">{client.name}</span>
                     <span className={`text-xs font-medium ${rColor}`}>{rLabel}</span>
                   </div>
                   <button
                     onClick={() => generateMessage(client)}
                     disabled={loading === client.id}
-                    className="flex items-center gap-1.5 text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors disabled:opacity-50 shrink-0"
+                    className="flex items-center gap-1.5 text-xs font-medium text-sage hover:opacity-80 transition-opacity disabled:opacity-50 shrink-0"
                   >
                     <MessageCircle size={13} />
                     {loading === client.id ? 'Генерирую...' : 'Написать'}
@@ -93,30 +92,27 @@ export function ClientRiskList({ clients, salonName, title, emptyText }: Props) 
                   </button>
                 </div>
 
-                {/* Строка 2: метрики */}
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs text-zinc-500 flex items-center gap-1">
+                  <span className="text-xs text-dusk flex items-center gap-1">
                     <Clock size={11} />
                     {client.days_since_last_visit} дней
                   </span>
-                  <span className="text-xs text-zinc-500">·</span>
-                  <span className="text-xs text-zinc-500">чек {formatMoney(client.avg_check)}</span>
+                  <span className="text-xs text-dusk/40">·</span>
+                  <span className="text-xs text-dusk">чек {formatMoney(client.avg_check)}</span>
 
-                  {/* Return Score */}
                   {(client.return_score ?? 0) > 0 && (
                     <>
-                      <span className="text-xs text-zinc-500">·</span>
+                      <span className="text-xs text-dusk/40">·</span>
                       <span className={`text-xs font-medium px-1.5 py-0.5 rounded-md ${rsColor} ${rsBg}`}>
                         {rsLabel}
                       </span>
                     </>
                   )}
 
-                  {/* Revenue Opportunity */}
                   {(client.revenue_opportunity ?? 0) > 0 && (
                     <>
-                      <span className="text-xs text-zinc-500">·</span>
-                      <span className="text-xs text-emerald-400 flex items-center gap-1 font-medium">
+                      <span className="text-xs text-dusk/40">·</span>
+                      <span className="text-xs text-emerald-600 flex items-center gap-1 font-medium">
                         <TrendingUp size={11} />
                         {formatMoney(client.revenue_opportunity)}
                       </span>
@@ -125,8 +121,8 @@ export function ClientRiskList({ clients, salonName, title, emptyText }: Props) 
 
                   {client.phone && (
                     <>
-                      <span className="text-xs text-zinc-500">·</span>
-                      <span className="text-xs text-zinc-500">{client.phone}</span>
+                      <span className="text-xs text-dusk/40">·</span>
+                      <span className="text-xs text-dusk">{client.phone}</span>
                     </>
                   )}
                 </div>
@@ -134,14 +130,14 @@ export function ClientRiskList({ clients, salonName, title, emptyText }: Props) 
 
               {isExpanded && messages[client.id] && (
                 <div className="px-4 pb-4">
-                  <div className="bg-zinc-800/60 rounded-xl p-4 border border-zinc-700/50">
-                    <p className="text-xs text-zinc-400 mb-2 font-medium uppercase tracking-wide">
+                  <div className="bg-blush rounded-xl p-4 border border-parchment">
+                    <p className="text-xs text-dusk mb-2 font-semibold uppercase tracking-wide">
                       Текст для отправки
                     </p>
-                    <p className="text-sm text-zinc-200 leading-relaxed">{messages[client.id]}</p>
+                    <p className="text-sm text-graphite leading-relaxed">{messages[client.id]}</p>
                     <button
                       onClick={() => navigator.clipboard.writeText(messages[client.id])}
-                      className="mt-3 text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+                      className="mt-3 text-xs text-sage hover:opacity-80 transition-opacity font-medium"
                     >
                       Скопировать
                     </button>
