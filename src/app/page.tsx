@@ -45,7 +45,7 @@ export default function HomePage() {
 
       setStage('done')
       setTimeout(() => {
-        router.push(`/dashboard?salon_id=${data.salon_id}`)
+        router.push(`/role?salon_id=${data.salon_id}`)
       }, 1200)
     } catch {
       setError('Не удалось загрузить файл. Проверьте подключение.')
