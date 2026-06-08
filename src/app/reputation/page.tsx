@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 // Внешние отзывы (Яндекс/Google/2GIS) — MOCK, реальный источник: API площадок (V3)
 // Внутренние отзывы — РЕАЛЬНЫЕ данные из Supabase reviews
 

@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 // MOCK — данные статические, реальный источник: 2GIS API + Яндекс.Бизнес (V3)
 
 import { useSearchParams } from 'next/navigation'

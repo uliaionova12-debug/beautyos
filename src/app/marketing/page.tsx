@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 // MOCK — данные статические, реальный источник: OpenAI + контент-история (V2)
 
 import { useSearchParams } from 'next/navigation'
