@@ -5,7 +5,7 @@ export interface Client {
   salon_id: string
   external_id?: string
   name: string
-  phone?: string
+  phone?: string | null
   first_visit_date: string
   last_visit_date: string
   total_visits: number

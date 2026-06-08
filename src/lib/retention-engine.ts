@@ -173,7 +173,7 @@ export function runRetentionAnalysis(input: AnalysisInput): AnalysisOutput {
     clients.push({
       salon_id: salonId,
       name: rc.name,
-      phone: rc.phone || undefined,
+      phone: rc.phone || null,
       first_visit_date: firstVisitDate,
       last_visit_date: lastVisitDate,
       total_visits: rc.visits.length,
