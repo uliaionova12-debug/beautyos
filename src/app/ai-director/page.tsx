@@ -9,12 +9,19 @@ import { ArrowLeft, Sparkles, Send, TrendingDown, Users, AlertCircle } from 'luc
 
 interface Message { role: 'user' | 'assistant'; content: string }
 interface Summary {
+  salon_name?: string
+  total_clients: number
+  active_clients: number
   at_risk_count: number
   at_risk_revenue: number
   lost_count: number
   lost_impact: number
-  total_clients: number
-  salon_name?: string
+  retention_rate: number
+  avg_check: number
+  total_revenue: number
+  at_risk_top: { name: string; phone: string | null; days_since: number; avg_interval: number; avg_check: number; visits: number }[]
+  lost_top: { name: string; phone: string | null; days_since: number; avg_check: number; revenue_opportunity: number }[]
+  masters: { name: string; retention_rate: number; avg_check: number; total_revenue: number; active_clients_count: number; at_risk_clients_count: number }[]
 }
 
 const SUGGESTED = [
@@ -104,15 +111,21 @@ export default function AiDirectorPage() {
 
         {/* Context card */}
         {!contextLoading && summary && (
-          <div className="mt-4 bg-card border border-parchment rounded-2xl p-4 grid grid-cols-3 gap-3">
+          <div className="mt-4 bg-card border border-parchment rounded-2xl p-4 grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
             <div>
               <p className="text-xs text-dusk mb-0.5">Клиентов</p>
               <p className="text-lg font-bold text-graphite">{summary.total_clients}</p>
             </div>
             <div>
+              <p className="text-xs text-dusk mb-0.5">Возвратность</p>
+              <p className={`text-lg font-bold ${summary.retention_rate >= 60 ? 'text-emerald-600' : 'text-amber-600'}`}>
+                {summary.retention_rate}%
+              </p>
+            </div>
+            <div>
               <div className="flex items-center gap-1 mb-0.5">
                 <AlertCircle size={11} className="text-amber-500" />
-                <p className="text-xs text-dusk">Риск</p>
+                <p className="text-xs text-dusk">В риске</p>
               </div>
               <p className="text-lg font-bold text-amber-600">{summary.at_risk_count}</p>
             </div>
