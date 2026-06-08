@@ -96,3 +96,58 @@ export interface Salon {
   name: string
   owner_id: string
 }
+
+// --- Salon Memory ---
+
+export interface DataUpload {
+  id: string
+  salon_id: string
+  filename?: string
+  period_from?: string
+  period_to?: string
+  row_count: number
+  created_at?: string
+}
+
+export interface AnalysisSnapshot {
+  id: string
+  salon_id: string
+  upload_id?: string
+  snapshot_date: string
+  total_clients: number
+  active_clients: number
+  at_risk_clients: number
+  lost_clients: number
+  total_revenue: number
+  avg_check: number
+  retention_rate: number
+  total_financial_impact: number
+  created_at?: string
+}
+
+export type ActionType = 'call' | 'sms' | 'offer' | 'review_request'
+export type ActionStatus = 'pending' | 'done' | 'skipped'
+
+export interface Action {
+  id: string
+  salon_id: string
+  action_type: ActionType
+  title: string
+  description?: string
+  target_client_ids?: string[]
+  financial_impact: number
+  probability: number
+  status: ActionStatus
+  created_at?: string
+  completed_at?: string
+}
+
+export interface ActionResult {
+  id: string
+  action_id: string
+  salon_id: string
+  clients_contacted: number
+  clients_returned: number
+  revenue_recovered: number
+  measured_at?: string
+}

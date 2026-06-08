@@ -1,5 +1,5 @@
 # BeautyOS — Architecture v1
-> Дата: 2026-06-08 | Статус: FROZEN
+> Дата: 2026-06-08 | Обновлён: 2026-06-08 (Salon Memory)
 
 ---
 
@@ -85,14 +85,31 @@ Salon
 │   ├── title, body, financial_impact
 │   └── priority: critical|warning|info
 │
-└── DailyActions[]          ← ДОБАВИТЬ
-    ├── salon_id
-    ├── action_type: call|sms|offer|review_request
-    ├── title, description
-    ├── financial_impact
-    ├── probability
-    ├── target_clients: uuid[]
-    └── created_date
+├── DataUploads[]            ← ДОБАВЛЕНО (Salon Memory)
+│   ├── id, salon_id
+│   ├── filename, period_from, period_to
+│   └── row_count, created_at
+│
+├── AnalysisSnapshots[]      ← ДОБАВЛЕНО (Salon Memory)
+│   ├── id, salon_id, upload_id
+│   ├── snapshot_date
+│   ├── total/active/at_risk/lost clients
+│   ├── total_revenue, avg_check
+│   └── retention_rate, total_financial_impact
+│
+├── Actions[]                ← ДОБАВЛЕНО (Salon Memory)
+│   ├── id, salon_id
+│   ├── action_type: call|sms|offer|review_request
+│   ├── title, description
+│   ├── target_client_ids: uuid[]
+│   ├── financial_impact, probability
+│   ├── status: pending|done|skipped
+│   └── created_at, completed_at
+│
+└── ActionResults[]          ← ДОБАВЛЕНО (Salon Memory)
+    ├── id, action_id, salon_id
+    ├── clients_contacted, clients_returned
+    └── revenue_recovered, measured_at
 ```
 
 ---
@@ -161,6 +178,47 @@ Dashboard → [Вернуть клиентов]
 → [Действие] → готовый текст → скопировать
 → Видит прогресс: "До уровня Про — 3 возврата"
 ```
+
+---
+
+## 4.5 SALON MEMORY — КОНЦЕПЦИЯ
+
+BeautyOS накапливает историю салона и анализирует динамику во времени.
+
+### Пайплайн данных
+
+```
+Salon
+└── DataUploads[]          "что и когда загружалось"
+    └── Visits[]           "факты — никогда не удаляются"
+        └── Clients[]      "агрегаты — пересчитываются из всех визитов"
+            └── AnalysisSnapshots[]  "срез метрик на дату загрузки"
+                └── Actions[]        "что AI рекомендовал сделать"
+                    └── ActionResults[]  "что реально произошло"
+```
+
+### Что будет доступно по мере накопления данных
+
+| Возможность | Источник данных | Доступно с |
+|---|---|---|
+| Анализ по месяцам / кварталам | `analysis_snapshots` | 2 загрузки |
+| Динамика возвратности | `analysis_snapshots.retention_rate` | 2 загрузки |
+| Динамика выручки | `analysis_snapshots.total_revenue` | 2 загрузки |
+| История визитов клиента | `visits` (range-safe) | сразу |
+| Эффективность мастеров в динамике | `masters` + `snapshots` | 2 загрузки |
+| История AI-инсайтов | `insights.created_at` | сразу |
+| ROI удержания: "BeautyOS вернул X ₽" | `action_results` | после V1 |
+
+### Критическое изменение в upload route
+
+До Salon Memory: каждый upload удалял ВСЕ визиты.  
+После: удаляются только визиты в диапазоне дат нового файла.  
+Старая история сохраняется.
+
+### Известное ограничение MVP
+
+Клиентские агрегаты (`clients`, `masters`) пересчитываются только из текущего CSV.  
+В V1: пересчитывать из ВСЕХ накопленных `visits` после каждой загрузки.
 
 ---
 
