@@ -161,7 +161,8 @@ export async function POST(req: NextRequest) {
       summary,
     })
   } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
     console.error('Upload error:', err)
-    return NextResponse.json({ error: 'Внутренняя ошибка сервера' }, { status: 500 })
+    return NextResponse.json({ error: 'Внутренняя ошибка сервера', detail: msg }, { status: 500 })
   }
 }
