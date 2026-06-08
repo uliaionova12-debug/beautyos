@@ -126,7 +126,7 @@ export default function ClientPage() {
 
         <Link
           href={`/role?salon_id=${salonId}`}
-          className="flex items-center gap-1.5 text-sm text-dusk hover:text-sage transition-colors mb-6"
+          className="flex items-center gap-1.5 text-sm text-dusk hover:text-rose transition-colors mb-6"
         >
           <ArrowLeft size={14} />
           Сменить роль
@@ -139,12 +139,12 @@ export default function ClientPage() {
         </div>
 
         {/* Следующая запись */}
-        <div className="bg-sage/10 border border-sage/20 rounded-2xl p-5 mb-4">
-          <p className="text-xs text-sage font-semibold uppercase tracking-wider mb-2">
+        <div className="bg-rose/8 border border-rose/15 rounded-2xl p-5 mb-4">
+          <p className="text-xs text-rose font-semibold uppercase tracking-wider mb-2">
             Рекомендуем записаться
           </p>
           <p className="text-graphite font-semibold mb-1">
-            Следующий визит через <span className="text-sage">8 дней</span>
+            Следующий визит через <span className="text-rose">8 дней</span>
           </p>
           <p className="text-dusk text-sm mb-4">
             Наталья ждёт вас — лучший результат раз в 4 недели
@@ -156,7 +156,7 @@ export default function ClientPage() {
                 className="w-full flex items-center justify-between bg-white/70 hover:bg-white border border-parchment rounded-xl px-4 py-2.5 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <Clock size={14} className="text-sage" />
+                  <Clock size={14} className="text-rose" />
                   <span className="text-sm text-graphite">{slot.date}, {slot.time}</span>
                 </div>
                 <span className="text-xs text-dusk">{slot.master}</span>
@@ -174,7 +174,7 @@ export default function ClientPage() {
           ].map(({ icon: Icon, label }) => (
             <button
               key={label}
-              className="bg-card border border-parchment rounded-xl py-4 flex flex-col items-center gap-2 hover:border-sage/40 transition-colors"
+              className="bg-card border border-parchment rounded-xl py-4 flex flex-col items-center gap-2 hover:border-rose/30 transition-colors"
             >
               <Icon size={18} className="text-dusk" />
               <span className="text-xs text-dusk">{label}</span>
@@ -202,7 +202,7 @@ export default function ClientPage() {
             </div>
             <button
               onClick={() => setStep('rating')}
-              className="w-full bg-sage text-white font-semibold py-3 rounded-xl text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+              className="w-full bg-rose text-white font-semibold py-3 rounded-xl text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
             >
               <Star size={15} />
               Оставить отзыв о визите
@@ -260,7 +260,7 @@ export default function ClientPage() {
               placeholder="Ваше имя (необязательно)"
               value={clientName}
               onChange={e => setClientName(e.target.value)}
-              className="w-full bg-cream border border-parchment rounded-xl px-4 py-3 text-sm text-graphite placeholder-dusk/40 mb-3 outline-none focus:border-sage/60 transition-colors"
+              className="w-full bg-cream border border-parchment rounded-xl px-4 py-3 text-sm text-graphite placeholder-dusk/40 mb-3 outline-none focus:border-rose/40 transition-colors"
             />
             <textarea
               placeholder={
@@ -271,12 +271,12 @@ export default function ClientPage() {
               value={reviewText}
               onChange={e => setReviewText(e.target.value)}
               rows={4}
-              className="w-full bg-cream border border-parchment rounded-xl px-4 py-3 text-sm text-graphite placeholder-dusk/40 outline-none focus:border-sage/60 resize-none mb-4 transition-colors"
+              className="w-full bg-cream border border-parchment rounded-xl px-4 py-3 text-sm text-graphite placeholder-dusk/40 outline-none focus:border-rose/40 resize-none mb-4 transition-colors"
             />
             <button
               onClick={handleTextSubmit}
               disabled={submitting}
-              className="w-full bg-sage text-white font-semibold py-3 rounded-xl text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+              className="w-full bg-rose text-white font-semibold py-3 rounded-xl text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
             >
               {submitting ? 'Отправляю...' : 'Отправить отзыв'}
             </button>
@@ -285,7 +285,7 @@ export default function ClientPage() {
 
         {step === 'gating_positive' && (
           <div className="space-y-3 mb-4">
-            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5">
+            <div className="bg-rose/8 border border-rose/15 rounded-2xl p-5">
               <p className="text-3xl mb-2 text-center">🎉</p>
               <p className="text-graphite font-bold text-center mb-1">Спасибо за тёплые слова!</p>
               <p className="text-dusk text-sm text-center">
@@ -310,7 +310,7 @@ export default function ClientPage() {
                     className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all border ${
                       copied
                         ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
-                        : 'bg-cream text-dusk hover:bg-blush border-parchment'
+                        : 'bg-cream text-dusk hover:bg-rose/8 border-parchment'
                     }`}
                   >
                     {copied ? <CheckCircle2 size={12} /> : <Copy size={12} />}
@@ -371,7 +371,7 @@ export default function ClientPage() {
             </p>
             <button
               onClick={() => setStep('done')}
-              className="bg-sage text-white font-semibold px-6 py-3 rounded-xl text-sm hover:opacity-90 transition-opacity"
+              className="bg-rose text-white font-semibold px-6 py-3 rounded-xl text-sm hover:opacity-90 transition-opacity"
             >
               Хорошо, спасибо
             </button>
@@ -380,7 +380,7 @@ export default function ClientPage() {
 
         {step === 'done' && (
           <div className="bg-card border border-parchment rounded-2xl p-5 mb-4 text-center">
-            <CheckCircle2 size={32} className="text-sage mx-auto mb-3" />
+            <CheckCircle2 size={32} className="text-rose mx-auto mb-3" />
             <p className="text-graphite font-bold mb-1">Всё готово!</p>
             <p className="text-dusk text-sm">
               {publishedTo.length > 0
@@ -389,8 +389,6 @@ export default function ClientPage() {
             </p>
           </div>
         )}
-
-        {/* ---- / БЛОК ОТЗЫВА ---- */}
 
         {/* История визитов */}
         <div className="bg-card border border-parchment rounded-2xl p-5 mb-4">
@@ -414,19 +412,19 @@ export default function ClientPage() {
         {/* Beauty Companion */}
         <Link
           href="/beauty-companion"
-          className="block bg-blush border border-terracotta/20 rounded-2xl p-5 hover:border-terracotta/40 transition-colors"
+          className="block bg-rose/8 border border-rose/20 rounded-2xl p-5 hover:border-rose/40 transition-colors"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-white/70 border border-terracotta/20 rounded-full flex items-center justify-center shrink-0">
-                <Heart size={16} className="text-terracotta" />
+              <div className="w-9 h-9 bg-white/80 border border-rose/20 rounded-full flex items-center justify-center shrink-0">
+                <Heart size={16} className="text-rose" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-graphite">Beauty Companion</p>
                 <p className="text-xs text-dusk mt-0.5">Персональный советник по уходу</p>
               </div>
             </div>
-            <span className="text-terracotta text-sm font-medium">→</span>
+            <span className="text-rose text-sm font-medium">→</span>
           </div>
           <p className="text-xs text-dusk mt-3 leading-relaxed">
             После окрашивания у Натальи — советы по сохранению цвета и домашнему уходу этим летом

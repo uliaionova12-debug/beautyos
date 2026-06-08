@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { Manrope } from "next/font/google";
+import { Manrope, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -9,8 +9,14 @@ const manrope = Manrope({
   variable: "--font-manrope",
 });
 
+const playfairDisplay = Playfair_Display({
+  subsets: ["latin", "cyrillic"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-playfair",
+});
+
 export const metadata: Metadata = {
-  title: "BeautyOS — AI Operating System для салонов красоты",
+  title: "BeautyOS — AI Beauty Companion",
   description: "Персональный AI-помощник в мире красоты",
 };
 
@@ -22,7 +28,7 @@ export default function RootLayout({
   return (
     <html
       lang="ru"
-      className={`${manrope.variable} h-full antialiased`}
+      className={`${manrope.variable} ${playfairDisplay.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <Suspense fallback={null}>{children}</Suspense>

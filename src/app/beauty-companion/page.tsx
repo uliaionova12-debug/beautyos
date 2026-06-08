@@ -116,12 +116,12 @@ export default function BeautyCompanionPage() {
 
         {/* Identity */}
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 bg-blush border border-terracotta/20 rounded-full flex items-center justify-center">
-            <Heart size={18} className="text-terracotta" />
+          <div className="w-10 h-10 bg-rose/10 border border-rose/20 rounded-full flex items-center justify-center">
+            <Heart size={18} className="text-rose" />
           </div>
           <div>
             <p className="text-base font-semibold text-graphite">Beauty Companion</p>
-            <p className="text-xs text-dusk">Персональный советник · {CLIENT_CONTEXT.client_name}</p>
+            <p className="text-xs text-dusk">Персональный советник по уходу · {CLIENT_CONTEXT.client_name}</p>
           </div>
         </div>
 
@@ -141,8 +141,8 @@ export default function BeautyCompanionPage() {
               disabled={loading}
               className={`flex items-center gap-1.5 text-xs px-3 py-2 rounded-full border transition-all disabled:opacity-40 ${
                 activeScenario === s.id
-                  ? 'bg-terracotta text-white border-terracotta'
-                  : 'bg-card border-parchment text-dusk hover:border-terracotta/50 hover:text-terracotta'
+                  ? 'bg-rose text-white border-rose'
+                  : 'bg-card border-parchment text-dusk hover:border-rose/50 hover:text-rose'
               }`}
             >
               <span>{s.emoji}</span>
@@ -161,10 +161,10 @@ export default function BeautyCompanionPage() {
                 // Beauty Companion response — editorial card style
                 <div className="max-w-[90%]">
                   <div className="flex items-center gap-1.5 mb-1.5">
-                    <Heart size={11} className="text-terracotta" />
-                    <p className="text-[10px] text-terracotta font-semibold uppercase tracking-wider">Beauty Companion</p>
+                    <Heart size={11} className="text-rose" />
+                    <p className="text-[10px] text-rose font-semibold uppercase tracking-wider">Beauty Companion</p>
                   </div>
-                  <div className="bg-blush border border-terracotta/15 rounded-2xl rounded-tl-sm px-5 py-4">
+                  <div className="bg-blush border border-rose/15 rounded-2xl rounded-tl-sm px-5 py-4">
                     <p className="text-sm text-graphite leading-relaxed">{msg.content}</p>
                   </div>
                 </div>
@@ -179,13 +179,13 @@ export default function BeautyCompanionPage() {
 
           {loading && (
             <div className="flex justify-start">
-              <div className="bg-blush border border-terracotta/15 rounded-2xl rounded-tl-sm px-5 py-4">
+              <div className="bg-blush border border-rose/15 rounded-2xl rounded-tl-sm px-5 py-4">
                 <div className="flex gap-1.5 items-center">
-                  <Sparkles size={12} className="text-terracotta/50" />
+                  <Sparkles size={12} className="text-rose/50" />
                   <div className="flex gap-1">
-                    <div className="w-1.5 h-1.5 rounded-full bg-terracotta/40 animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <div className="w-1.5 h-1.5 rounded-full bg-terracotta/40 animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <div className="w-1.5 h-1.5 rounded-full bg-terracotta/40 animate-bounce" style={{ animationDelay: '300ms' }} />
+                    <div className="w-1.5 h-1.5 rounded-full bg-rose/40 animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <div className="w-1.5 h-1.5 rounded-full bg-rose/40 animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <div className="w-1.5 h-1.5 rounded-full bg-rose/40 animate-bounce" style={{ animationDelay: '300ms' }} />
                   </div>
                 </div>
               </div>
@@ -206,12 +206,12 @@ export default function BeautyCompanionPage() {
               onKeyDown={e => e.key === 'Enter' && handleSend()}
               placeholder="Спросить что-то ещё..."
               disabled={loading}
-              className="flex-1 bg-card border border-parchment rounded-full px-4 py-2.5 text-sm text-graphite placeholder-dusk/40 focus:outline-none focus:border-terracotta/40 transition-colors disabled:opacity-50"
+              className="flex-1 bg-card border border-parchment rounded-full px-4 py-2.5 text-sm text-graphite placeholder-dusk/40 focus:outline-none focus:border-rose/40 transition-colors disabled:opacity-50"
             />
             <button
               onClick={handleSend}
               disabled={!input.trim() || loading}
-              className="w-10 h-10 bg-terracotta text-white rounded-full flex items-center justify-center hover:opacity-90 transition-opacity disabled:opacity-30"
+              className="w-10 h-10 bg-rose text-white rounded-full flex items-center justify-center hover:opacity-90 transition-opacity disabled:opacity-30"
             >
               <Send size={14} />
             </button>
