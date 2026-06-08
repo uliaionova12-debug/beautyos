@@ -256,7 +256,7 @@ export default function MasterPage() {
                   <div className="p-1.5 bg-sage/10 rounded-lg">
                     <TrendingUp size={14} className="text-sage" />
                   </div>
-                  <p className="text-sm font-semibold text-graphite">AI-коуч мастера</p>
+                  <p className="text-sm font-semibold text-graphite">AI Коуч</p>
                 </div>
                 {!messages[selected.id] && (
                   <button
@@ -264,23 +264,26 @@ export default function MasterPage() {
                     disabled={msgLoading === selected.id}
                     className="text-xs text-sage hover:opacity-80 transition-opacity disabled:opacity-50 font-medium"
                   >
-                    {msgLoading === selected.id ? 'Анализирую...' : 'Получить совет'}
+                    {msgLoading === selected.id ? 'Анализирую...' : 'Быстрый совет'}
                   </button>
                 )}
               </div>
 
               {messages[selected.id] ? (
-                <p className="text-sm text-graphite leading-relaxed">{messages[selected.id]}</p>
+                <p className="text-sm text-graphite leading-relaxed mb-4">{messages[selected.id]}</p>
               ) : (
-                <div className="space-y-2 text-sm text-dusk">
-                  <p>Нажмите «Получить совет» — AI-коуч проанализирует вашу практику и подскажет:</p>
-                  <ul className="space-y-1 pl-3">
-                    <li>· кому написать для повторной записи</li>
-                    <li>· кому предложить дополнительную услугу</li>
-                    <li>· кто в зоне риска ухода</li>
-                  </ul>
+                <div className="space-y-2 text-sm text-dusk mb-4">
+                  <p>Нажмите «Быстрый совет» или откройте полный AI Коуч — задавайте вопросы о клиентах, доходе и развитии практики.</p>
                 </div>
               )}
+
+              <Link
+                href={`/ai-coach?salon_id=${salonId}`}
+                className="flex items-center justify-between w-full bg-sage/10 border border-sage/20 rounded-xl px-4 py-3 hover:bg-sage/15 transition-colors"
+              >
+                <span className="text-sm font-medium text-sage">Открыть AI Коуч</span>
+                <span className="text-sage text-sm">→</span>
+              </Link>
             </div>
           </>
         )}

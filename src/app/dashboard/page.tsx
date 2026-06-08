@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { AgentCard } from '@/components/dashboard/AgentCard'
-import { Users, ArrowRight, Phone, Star, Target, Megaphone } from 'lucide-react'
+import { Users, ArrowRight, Phone, Star, Target, Megaphone, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { DailyAction } from '@/types'
 
@@ -190,6 +190,21 @@ export default function DashboardPage() {
             </div>
           </div>
         )}
+
+        {/* AI Director CTA */}
+        <Link
+          href={`/ai-director?salon_id=${salonId}`}
+          className="flex items-center justify-between bg-sage text-white rounded-2xl p-5 mb-6 hover:opacity-95 transition-opacity"
+        >
+          <div className="flex items-center gap-3">
+            <Sparkles size={18} className="opacity-80 shrink-0" />
+            <div>
+              <p className="text-sm font-semibold">AI Директор</p>
+              <p className="text-xs opacity-70">Задайте любой вопрос о бизнесе</p>
+            </div>
+          </div>
+          <span className="text-sm font-medium opacity-80">→</span>
+        </Link>
 
         {/* AI Директора */}
         <div>

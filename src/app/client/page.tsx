@@ -411,17 +411,27 @@ export default function ClientPage() {
           </div>
         </div>
 
-        {/* Beauty AI */}
-        <div className="bg-card border border-parchment rounded-2xl p-5">
-          <div className="flex items-center gap-2 mb-2">
-            <Heart size={14} className="text-terracotta" />
-            <p className="text-xs text-dusk font-semibold uppercase tracking-wider">Beauty AI</p>
+        {/* Beauty Companion */}
+        <Link
+          href="/beauty-companion"
+          className="block bg-blush border border-terracotta/20 rounded-2xl p-5 hover:border-terracotta/40 transition-colors"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 bg-white/70 border border-terracotta/20 rounded-full flex items-center justify-center shrink-0">
+                <Heart size={16} className="text-terracotta" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-graphite">Beauty Companion</p>
+                <p className="text-xs text-dusk mt-0.5">Персональный советник по уходу</p>
+              </div>
+            </div>
+            <span className="text-terracotta text-sm font-medium">→</span>
           </div>
-          <p className="text-sm text-graphite leading-relaxed">
-            Наталья специализируется на сложном окрашивании. После 3 визитов ваши волосы
-            заметно здоровее — продолжайте регулярный уход!
+          <p className="text-xs text-dusk mt-3 leading-relaxed">
+            После окрашивания у Натальи — советы по сохранению цвета и домашнему уходу этим летом
           </p>
-        </div>
+        </Link>
 
       </div>
     </div>
