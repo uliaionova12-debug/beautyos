@@ -3,9 +3,12 @@
 export const dynamic = 'force-dynamic'
 
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Scissors, TrendingUp, Trophy, Star } from 'lucide-react'
+import {
+  ArrowLeft, Scissors, TrendingUp, Trophy, Star,
+  CalendarDays, Users, Plus, Sparkles,
+} from 'lucide-react'
 import { Master } from '@/types'
 
 interface MasterLevel {
@@ -19,11 +22,11 @@ interface MasterLevel {
 }
 
 const LEVELS: MasterLevel[] = [
-  { name: 'Новичок',     minRate: 0,    maxRate: 0.40, color: 'text-dusk',        bg: 'bg-cream',        border: 'border-parchment', bar: 'bg-dusk/40' },
-  { name: 'Развивается', minRate: 0.40, maxRate: 0.55, color: 'text-blue-600',    bg: 'bg-blue-50',      border: 'border-blue-200',  bar: 'bg-blue-500' },
-  { name: 'Про',         minRate: 0.55, maxRate: 0.70, color: 'text-violet-600',  bg: 'bg-violet-50',    border: 'border-violet-200', bar: 'bg-violet-500' },
-  { name: 'Эксперт',    minRate: 0.70, maxRate: 0.85, color: 'text-amber-600',   bg: 'bg-amber-50',     border: 'border-amber-200', bar: 'bg-amber-500' },
-  { name: 'Мастер',     minRate: 0.85, maxRate: 1.01, color: 'text-emerald-600', bg: 'bg-emerald-50',   border: 'border-emerald-200', bar: 'bg-emerald-500' },
+  { name: 'Новичок',     minRate: 0,    maxRate: 0.40, color: 'text-dusk',        bg: 'bg-cream',       border: 'border-parchment',  bar: 'bg-dusk/40'     },
+  { name: 'Развивается', minRate: 0.40, maxRate: 0.55, color: 'text-blue-600',    bg: 'bg-blue-50',     border: 'border-blue-200',   bar: 'bg-blue-500'    },
+  { name: 'Про',         minRate: 0.55, maxRate: 0.70, color: 'text-violet-600',  bg: 'bg-violet-50',   border: 'border-violet-200', bar: 'bg-violet-500'  },
+  { name: 'Эксперт',    minRate: 0.70, maxRate: 0.85, color: 'text-amber-600',   bg: 'bg-amber-50',    border: 'border-amber-200',  bar: 'bg-amber-500'   },
+  { name: 'Мастер',     minRate: 0.85, maxRate: 1.01, color: 'text-emerald-600', bg: 'bg-emerald-50',  border: 'border-emerald-200', bar: 'bg-emerald-500' },
 ]
 
 function getLevel(rate: number): MasterLevel & { index: number } {
@@ -42,6 +45,109 @@ function formatPct(n: number): string {
   return Math.round(n * 100) + '%'
 }
 
+// ── Onboarding empty state for masters ──────────────────────────────────────
+function MasterOnboarding() {
+  const router = useRouter()
+  const [loadingDemo, setLoadingDemo] = useState(false)
+
+  async function startDemo() {
+    setLoadingDemo(true)
+    try {
+      const res = await fetch('/sample_salon.csv')
+      const blob = await res.blob()
+      const file = new File([blob], 'sample_salon.csv', { type: 'text/csv' })
+      const form = new FormData()
+      form.append('file', file)
+      form.append('salon_name', 'Демо-студия')
+      const data = await (await fetch('/api/upload', { method: 'POST', body: form })).json()
+      if (data.salon_id) router.push(`/master?salon_id=${data.salon_id}`)
+    } catch {
+      setLoadingDemo(false)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-cream flex flex-col">
+      <div className="max-w-md mx-auto px-6 pt-12 pb-16 w-full flex-1 flex flex-col">
+
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-12">
+          <div className="w-9 h-9 bg-rose/10 rounded-xl flex items-center justify-center">
+            <Scissors size={16} className="text-rose" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-graphite">BeautyOS</p>
+            <p className="text-xs text-dusk">Кабинет мастера</p>
+          </div>
+        </div>
+
+        {/* Visual */}
+        <div className="flex-1 flex flex-col items-center justify-center text-center py-4">
+
+          <div className="relative mb-8">
+            <div className="w-20 h-20 bg-rose/10 rounded-3xl flex items-center justify-center mx-auto">
+              <CalendarDays size={32} className="text-rose" />
+            </div>
+            <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-sage/15 rounded-xl flex items-center justify-center">
+              <Users size={13} className="text-sage" />
+            </div>
+          </div>
+
+          <h1 className="font-serif text-[1.8rem] text-graphite leading-tight mb-3 tracking-tight">
+            Кабинет готов
+          </h1>
+          <p className="text-sm text-dusk leading-relaxed mb-10 max-w-[280px]">
+            Добавьте первых клиентов, чтобы начать отслеживать возвратность и получать AI-рекомендации.
+          </p>
+
+          {/* Actions */}
+          <div className="flex flex-col gap-3 w-full mb-10">
+            <Link
+              href="/join/manual"
+              className="flex items-center justify-center gap-2 bg-rose text-white py-4 rounded-2xl text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm shadow-rose/20"
+            >
+              <Plus size={16} />
+              Добавить клиентов
+            </Link>
+
+            <button
+              onClick={startDemo}
+              disabled={loadingDemo}
+              className="flex items-center justify-center gap-2 bg-cream border border-parchment text-dusk hover:border-sage/40 hover:text-graphite py-4 rounded-2xl text-sm font-medium transition-all disabled:opacity-50"
+            >
+              <Sparkles size={15} />
+              {loadingDemo ? 'Загружаю демо...' : 'Посмотреть на демо-данных'}
+            </button>
+          </div>
+
+          {/* What will appear */}
+          <div className="w-full bg-card border border-parchment rounded-2xl p-5 text-left">
+            <p className="text-xs font-semibold text-dusk uppercase tracking-wider mb-4">
+              После добавления клиентов появится:
+            </p>
+            <ul className="space-y-3">
+              {[
+                { icon: '📊', text: 'Показатель возвратности клиентов' },
+                { icon: '⚠️', text: 'Клиенты в группе риска — кто давно не приходил' },
+                { icon: '✨', text: 'AI-Коуч с персональными рекомендациями' },
+                { icon: '📈', text: 'Динамика выручки и средний чек' },
+              ].map(item => (
+                <li key={item.text} className="flex items-start gap-3">
+                  <span className="text-base leading-none mt-0.5">{item.icon}</span>
+                  <span className="text-[13px] text-dusk leading-snug">{item.text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  )
+}
+
+// ── Main page ────────────────────────────────────────────────────────────────
 export default function MasterPage() {
   const searchParams = useSearchParams()
   const salonId = searchParams.get('salon_id') || ''
@@ -85,10 +191,18 @@ export default function MasterPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-cream flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-parchment border-t-sage rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-parchment border-t-rose rounded-full animate-spin" />
       </div>
     )
   }
+
+  // No salon_id OR no data → onboarding for masters (not "данные не найдены")
+  if (!salonId || masters.length === 0) {
+    return <MasterOnboarding />
+  }
+
+  // ── Master analytics (data exists) ──
+  const isSolo = masters.length === 1
 
   return (
     <div className="min-h-screen bg-cream">
@@ -96,26 +210,30 @@ export default function MasterPage() {
 
         <Link
           href={`/role?salon_id=${salonId}`}
-          className="flex items-center gap-1.5 text-sm text-dusk hover:text-sage transition-colors mb-6"
+          className="flex items-center gap-1.5 text-sm text-dusk hover:text-rose transition-colors mb-6"
         >
           <ArrowLeft size={14} />
           Сменить роль
         </Link>
 
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 bg-sage/10 rounded-xl">
-            <Scissors size={20} className="text-sage" />
+          <div className="p-2 bg-rose/10 rounded-xl">
+            <Scissors size={20} className="text-rose" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold text-graphite">Кабинет мастера</h1>
-            <p className="text-sm text-dusk">Ваша практика и рекомендации</p>
+            <h1 className="text-xl font-semibold text-graphite">
+              {isSolo ? 'Мои клиенты' : 'Кабинет мастера'}
+            </h1>
+            <p className="text-sm text-dusk">
+              {isSolo ? 'Возвратность и рекомендации' : 'Ваша практика и рекомендации'}
+            </p>
           </div>
         </div>
 
-        {/* Выбор мастера */}
+        {/* Выбор мастера — только если несколько */}
         {masters.length > 1 && (
           <div className="mb-6">
-            <p className="text-xs text-dusk font-semibold uppercase tracking-wider mb-2">Мастер</p>
+            <p className="text-xs text-dusk font-semibold uppercase tracking-wider mb-2">Специалист</p>
             <div className="flex gap-2 flex-wrap">
               {masters.map(m => (
                 <button
@@ -123,7 +241,7 @@ export default function MasterPage() {
                   onClick={() => setSelected(m)}
                   className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                     selected?.id === m.id
-                      ? 'bg-sage text-white'
+                      ? 'bg-rose text-white'
                       : 'bg-card border border-parchment text-dusk hover:text-graphite'
                   }`}
                 >
@@ -136,7 +254,7 @@ export default function MasterPage() {
 
         {selected && (
           <>
-            {/* Главные цифры */}
+            {/* Ключевые метрики клиентов */}
             <div className="grid grid-cols-2 gap-3 mb-4 sm:grid-cols-4">
               <div className="bg-card border border-parchment rounded-xl p-4">
                 <p className="text-2xl font-bold text-graphite">{selected.active_clients_count}</p>
@@ -164,12 +282,13 @@ export default function MasterPage() {
               </div>
             </div>
 
-            {/* Геймификация */}
+            {/* Геймификация уровня */}
             {(() => {
               const level = getLevel(selected.retention_rate)
               const nextLevel = LEVELS[level.index + 1]
+              // Сравнение с коллегами — только если несколько мастеров
               const worseCount = masters.filter(m => m.id !== selected.id && m.retention_rate < selected.retention_rate).length
-              const rankPct = masters.length > 1 ? Math.round((worseCount / (masters.length - 1)) * 100) : 100
+              const rankPct = masters.length > 1 ? Math.round((worseCount / (masters.length - 1)) * 100) : null
               const progressPct = nextLevel
                 ? Math.round(((selected.retention_rate - level.minRate) / (nextLevel.minRate - level.minRate)) * 100)
                 : 100
@@ -182,10 +301,10 @@ export default function MasterPage() {
                       <Trophy size={16} className={level.color} />
                       <span className={`text-sm font-bold ${level.color}`}>{level.name}</span>
                     </div>
-                    {masters.length > 1 && (
+                    {rankPct !== null && (
                       <div className="flex items-center gap-1.5 text-xs text-dusk">
                         <Star size={11} className="text-amber-500" />
-                        Лучше чем у {rankPct}% мастеров
+                        Лучше чем у {rankPct}% коллег
                       </div>
                     )}
                   </div>
@@ -196,22 +315,15 @@ export default function MasterPage() {
                       {nextLevel && <span>до «{nextLevel.name}» — ещё +{neededPct}%</span>}
                     </div>
                     <div className="h-2 bg-parchment rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full transition-all ${level.bar}`}
-                        style={{ width: `${progressPct}%` }}
-                      />
+                      <div className={`h-full rounded-full transition-all ${level.bar}`} style={{ width: `${progressPct}%` }} />
                     </div>
                   </div>
 
                   <div className="flex gap-1">
                     {LEVELS.map((l, i) => (
-                      <div
-                        key={l.name}
-                        className={`flex-1 h-1 rounded-full ${
-                          i < level.index ? 'bg-graphite/30' :
-                          i === level.index ? 'bg-graphite' : 'bg-parchment'
-                        }`}
-                      />
+                      <div key={l.name} className={`flex-1 h-1 rounded-full ${
+                        i < level.index ? 'bg-graphite/30' : i === level.index ? 'bg-graphite' : 'bg-parchment'
+                      }`} />
                     ))}
                   </div>
                   <div className="flex justify-between mt-1">
@@ -225,7 +337,7 @@ export default function MasterPage() {
               )
             })()}
 
-            {/* Финансы */}
+            {/* Финансы — переформулировано под мастера */}
             <div className="bg-card border border-parchment rounded-2xl p-5 mb-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -240,7 +352,7 @@ export default function MasterPage() {
               {selected.at_risk_clients_count > 0 && (
                 <div className="mt-4 pt-4 border-t border-parchment">
                   <p className="text-sm text-amber-600">
-                    Не записались повторно: <span className="font-bold">{selected.at_risk_clients_count} клиентов</span>
+                    Давно не записывались: <span className="font-bold">{selected.at_risk_clients_count} клиентов</span>
                   </p>
                   <p className="text-xs text-dusk mt-0.5">
                     Потенциальная потеря: ~{formatMoney(selected.at_risk_clients_count * selected.avg_check)}
@@ -253,8 +365,8 @@ export default function MasterPage() {
             <div className="bg-card border border-parchment rounded-2xl p-5">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-sage/10 rounded-lg">
-                    <TrendingUp size={14} className="text-sage" />
+                  <div className="p-1.5 bg-rose/10 rounded-lg">
+                    <TrendingUp size={14} className="text-rose" />
                   </div>
                   <p className="text-sm font-semibold text-graphite">AI Коуч</p>
                 </div>
@@ -262,7 +374,7 @@ export default function MasterPage() {
                   <button
                     onClick={() => generateRecommendation(selected)}
                     disabled={msgLoading === selected.id}
-                    className="text-xs text-sage hover:opacity-80 transition-opacity disabled:opacity-50 font-medium"
+                    className="text-xs text-rose hover:opacity-80 transition-opacity disabled:opacity-50 font-medium"
                   >
                     {msgLoading === selected.id ? 'Анализирую...' : 'Быстрый совет'}
                   </button>
@@ -272,30 +384,23 @@ export default function MasterPage() {
               {messages[selected.id] ? (
                 <p className="text-sm text-graphite leading-relaxed mb-4">{messages[selected.id]}</p>
               ) : (
-                <div className="space-y-2 text-sm text-dusk mb-4">
-                  <p>Нажмите «Быстрый совет» или откройте полный AI Коуч — задавайте вопросы о клиентах, доходе и развитии практики.</p>
-                </div>
+                <p className="text-sm text-dusk mb-4 leading-relaxed">
+                  Нажмите «Быстрый совет» или откройте полный AI Коуч — задавайте вопросы о клиентах и развитии практики.
+                </p>
               )}
 
               <Link
                 href={`/ai-coach?salon_id=${salonId}`}
-                className="flex items-center justify-between w-full bg-sage/10 border border-sage/20 rounded-xl px-4 py-3 hover:bg-sage/15 transition-colors"
+                className="flex items-center justify-between w-full bg-rose/8 border border-rose/20 rounded-xl px-4 py-3 hover:bg-rose/12 transition-colors"
               >
-                <span className="text-sm font-medium text-sage">Открыть AI Коуч</span>
-                <span className="text-sage text-sm">→</span>
+                <span className="text-sm font-medium text-rose">Открыть AI Коуч</span>
+                <span className="text-rose text-sm">→</span>
               </Link>
             </div>
+
           </>
         )}
 
-        {masters.length === 0 && (
-          <div className="text-center py-12 text-dusk">
-            <p>Данные мастеров не найдены</p>
-            <Link href="/join/salon" className="text-sage hover:opacity-80 transition-opacity text-sm mt-2 inline-block">
-              Загрузить данные
-            </Link>
-          </div>
-        )}
       </div>
     </div>
   )
