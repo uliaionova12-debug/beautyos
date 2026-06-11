@@ -20,6 +20,16 @@ export async function POST(req: NextRequest) {
       plan: plan || null,
     })
 
+    // SMS notification via SMS.ru
+    const smsApiKey = process.env.SMSRU_API_KEY
+    const smsRecipient = process.env.SMSRU_RECIPIENT
+    if (smsApiKey && smsRecipient) {
+      const contact = telegram?.trim() || phone?.trim() || '—'
+      const smsText = `BeautyOS заявка: ${name.trim()}, ${contact}${business_type ? `, ${business_type.slice(0, 50)}` : ''}`
+      const smsUrl = `https://sms.ru/sms/send?api_id=${smsApiKey}&to=${smsRecipient}&msg=${encodeURIComponent(smsText)}&json=1`
+      fetch(smsUrl).catch(() => {})
+    }
+
     // Telegram notification — works if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID are set
     const botToken = process.env.TELEGRAM_BOT_TOKEN
     const chatId = process.env.TELEGRAM_CHAT_ID
@@ -30,7 +40,7 @@ export async function POST(req: NextRequest) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' }),
-      }).catch(() => {}) // не блокируем ответ если TG недоступен
+      }).catch(() => {})
     }
 
     return NextResponse.json({ success: true })
