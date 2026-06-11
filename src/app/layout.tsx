@@ -16,8 +16,8 @@ const playfairDisplay = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "BeautyOS — Ваш спутник красоты",
-  description: "Персональный AI-помощник в мире красоты: напоминает о визитах, помнит предпочтения и помогает сохранять результат.",
+  title: "BeautyOS — AI-платформа для возврата клиентов салона красоты",
+  description: "BeautyOS анализирует клиентскую базу салона и каждый день говорит: кому позвонить, что сказать и сколько денег вернёте. Загрузите CSV из DIKIDI или YClients — первые инсайты за 2 минуты.",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,

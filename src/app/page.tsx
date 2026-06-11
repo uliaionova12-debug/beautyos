@@ -3,6 +3,7 @@ import { ArrowRight, Users, Star, Target, Megaphone, Sparkles, CheckCircle, Phon
 import { RoiCalculator } from '@/components/landing/RoiCalculator'
 import { FaqSection } from '@/components/landing/FaqSection'
 import { AppScreenshots } from '@/components/landing/AppScreenshots'
+import { NeuroConsultant, ConsultantTeaser } from '@/components/landing/NeuroConsultant'
 
 /* eslint-disable @next/next/no-img-element */
 
@@ -391,6 +392,7 @@ export default function LandingPage() {
       <section className="py-20 px-6 bg-cream">
         <div className="max-w-6xl mx-auto">
           <FaqSection />
+          <ConsultantTeaser />
         </div>
       </section>
 
@@ -427,6 +429,9 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ─── НЕЙРОКОНСУЛЬТАНТ (плавающая кнопка + чат) ─── */}
+      <NeuroConsultant />
 
       {/* ─── FOOTER ─── */}
       <footer className="py-10 px-6 border-t border-parchment bg-cream">
