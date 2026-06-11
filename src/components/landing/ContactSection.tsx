@@ -40,7 +40,7 @@ export function ContactSection() {
 
         <div className="text-center mb-10">
           <p className="text-xs text-terracotta font-semibold uppercase tracking-wider mb-3">Остался вопрос?</p>
-          <h2 className="text-3xl md:text-4xl font-bold text-graphite">Разберём вместе</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-graphite">Покажем, сколько клиентов вы теряете прямо сейчас</h2>
         </div>
 
         <div className="rounded-3xl overflow-hidden shadow-xl grid grid-cols-1 md:grid-cols-2">
