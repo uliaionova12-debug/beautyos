@@ -170,6 +170,15 @@ export function runRetentionAnalysis(input: AnalysisInput): AnalysisOutput {
       avgInterval,
     })
 
+    // Основной мастер — тот, у кого больше всего визитов с этим клиентом
+    const masterCount = new Map<string, number>()
+    for (const v of rc.visits) {
+      if (v.master) masterCount.set(v.master, (masterCount.get(v.master) ?? 0) + 1)
+    }
+    const primaryMaster = masterCount.size > 0
+      ? [...masterCount.entries()].sort((a, b) => b[1] - a[1])[0][0]
+      : 'Не указан'
+
     clients.push({
       salon_id: salonId,
       name: rc.name,
@@ -185,11 +194,9 @@ export function runRetentionAnalysis(input: AnalysisInput): AnalysisOutput {
       return_score: returnScore,
       revenue_opportunity: revenueOpportunity,
       days_since_last_visit: daysSinceLast,
+      primary_master_name: primaryMaster !== 'Не указан' ? primaryMaster : null,
     })
 
-    // Группируем мастеров
-    const mastersByClient = [...new Set(rc.visits.map(v => v.master).filter(Boolean))]
-    const primaryMaster = mastersByClient[0] || 'Не указан'
     if (!masterMap.has(primaryMaster)) {
       masterMap.set(primaryMaster, { totalRevenue: 0, checks: [], clientStatuses: [] })
     }

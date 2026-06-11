@@ -17,6 +17,7 @@ export interface Client {
   return_score: number
   revenue_opportunity: number
   days_since_last_visit: number
+  primary_master_name?: string | null
   created_at?: string
   updated_at?: string
 }

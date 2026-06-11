@@ -7,6 +7,7 @@ import { generateReturnMessage } from '@/lib/claude'
 export async function GET(req: NextRequest) {
   const salonId = req.nextUrl.searchParams.get('salon_id')
   const status = req.nextUrl.searchParams.get('status') // active | at_risk | lost
+  const masterName = req.nextUrl.searchParams.get('master_name')
   const limit = parseInt(req.nextUrl.searchParams.get('limit') || '50')
 
   if (!salonId) {
@@ -22,6 +23,10 @@ export async function GET(req: NextRequest) {
 
   if (status) {
     query = query.eq('status', status)
+  }
+
+  if (masterName) {
+    query = query.eq('primary_master_name', masterName)
   }
 
   const { data, error } = await query

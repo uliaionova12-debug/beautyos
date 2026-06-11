@@ -8,8 +8,9 @@ import Link from 'next/link'
 import {
   ArrowLeft, Scissors, TrendingUp, Trophy, Star,
   CalendarDays, Users, Plus, Sparkles,
+  Phone, MessageCircle, Loader2, Copy, CheckCircle2, ChevronRight,
 } from 'lucide-react'
-import { Master } from '@/types'
+import { Master, Client } from '@/types'
 
 interface MasterLevel {
   name: string
@@ -151,11 +152,17 @@ function MasterOnboarding() {
 export default function MasterPage() {
   const searchParams = useSearchParams()
   const salonId = searchParams.get('salon_id') || ''
+  const preselectedMaster = searchParams.get('master') || ''
   const [masters, setMasters] = useState<Master[]>([])
   const [selected, setSelected] = useState<Master | null>(null)
   const [loading, setLoading] = useState(true)
   const [msgLoading, setMsgLoading] = useState<string | null>(null)
   const [messages, setMessages] = useState<Record<string, string>>({})
+  const [atRiskClients, setAtRiskClients] = useState<Client[]>([])
+  const [clientsLoading, setClientsLoading] = useState(false)
+  const [smsModal, setSmsModal] = useState<{ client: Client; text: string } | null>(null)
+  const [smsCopied, setSmsCopied] = useState(false)
+  const [showAllAtRisk, setShowAllAtRisk] = useState(false)
 
   useEffect(() => {
     if (!salonId) { setLoading(false); return }
@@ -164,11 +171,64 @@ export default function MasterPage() {
       .then(d => {
         const list: Master[] = d.masters || []
         setMasters(list)
-        if (list.length > 0) setSelected(list[0])
+        if (list.length > 0) {
+          const match = preselectedMaster
+            ? list.find(m => m.name === preselectedMaster) ?? list[0]
+            : list[0]
+          setSelected(match)
+        }
         setLoading(false)
       })
       .catch(() => setLoading(false))
-  }, [salonId])
+  }, [salonId, preselectedMaster])
+
+  useEffect(() => {
+    if (!selected || !salonId) { setAtRiskClients([]); return }
+    setClientsLoading(true)
+    setShowAllAtRisk(false)
+    fetch(`/api/clients?salon_id=${salonId}&status=at_risk&master_name=${encodeURIComponent(selected.name)}&limit=50`)
+      .then(r => r.json())
+      .then(d => { setAtRiskClients(d.clients || []); setClientsLoading(false) })
+      .catch(() => setClientsLoading(false))
+  }, [selected, salonId])
+
+  function formatPhone(raw: string): string {
+    const digits = raw.replace(/\D/g, '')
+    if (digits.startsWith('8') && digits.length === 11) return '+7' + digits.slice(1)
+    if (digits.startsWith('7') && digits.length === 11) return '+' + digits
+    if (digits.length === 10) return '+7' + digits
+    return '+' + digits
+  }
+
+  async function openSmsForClient(client: Client) {
+    setSmsModal(null)
+    setMsgLoading(client.id)
+    try {
+      const res = await fetch('/api/clients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ client_id: client.id, salon_name: 'Салон красоты' }),
+      })
+      const data = await res.json()
+      setSmsModal({ client, text: data.message || '' })
+    } catch {
+      // ignore
+    } finally {
+      setMsgLoading(null)
+    }
+  }
+
+  function sendSms() {
+    if (!smsModal?.client.phone) return
+    window.location.href = `sms:${formatPhone(smsModal.client.phone)}?body=${encodeURIComponent(smsModal.text)}`
+  }
+
+  function copySms() {
+    if (!smsModal) return
+    navigator.clipboard.writeText(smsModal.text)
+    setSmsCopied(true)
+    setTimeout(() => setSmsCopied(false), 2000)
+  }
 
   async function generateRecommendation(master: Master) {
     if (messages[master.id]) return
@@ -248,6 +308,55 @@ export default function MasterPage() {
                   {m.name}
                 </button>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* SMS Модал */}
+        {smsModal && (
+          <div
+            className="fixed inset-0 bg-graphite/40 z-50 flex items-end sm:items-center justify-center p-4"
+            onClick={() => setSmsModal(null)}
+          >
+            <div
+              className="bg-cream rounded-2xl p-5 w-full max-w-sm shadow-xl"
+              onClick={e => e.stopPropagation()}
+            >
+              <p className="text-sm font-semibold text-graphite mb-1">{smsModal.client.name}</p>
+              {smsModal.client.phone ? (
+                <a
+                  href={`tel:${formatPhone(smsModal.client.phone)}`}
+                  className="flex items-center gap-2 text-sm text-rose font-medium mb-4"
+                >
+                  <Phone size={13} />
+                  {formatPhone(smsModal.client.phone)}
+                </a>
+              ) : (
+                <p className="text-xs text-dusk/50 mb-4">Телефон не указан</p>
+              )}
+              <div className="bg-card border border-parchment rounded-xl p-4 mb-4">
+                <p className="text-sm text-graphite leading-relaxed">{smsModal.text}</p>
+              </div>
+              <div className="flex flex-col gap-2">
+                {smsModal.client.phone && (
+                  <button
+                    onClick={sendSms}
+                    className="flex items-center justify-center gap-2 bg-rose text-white py-3 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity"
+                  >
+                    <MessageCircle size={14} />
+                    Отправить сообщение
+                  </button>
+                )}
+                <button
+                  onClick={copySms}
+                  className="flex items-center justify-center gap-2 bg-card border border-parchment text-graphite py-3 rounded-xl text-sm font-medium hover:border-rose/30 transition-colors"
+                >
+                  {smsCopied
+                    ? <><CheckCircle2 size={13} className="text-emerald-500" /> Скопировано!</>
+                    : <><Copy size={13} /> Скопировать текст</>
+                  }
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -360,6 +469,91 @@ export default function MasterPage() {
                 </div>
               )}
             </div>
+
+            {/* Клиенты в группе риска */}
+            {(clientsLoading || atRiskClients.length > 0) && (
+              <div className="bg-card border border-parchment rounded-2xl p-5 mb-4">
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-xs font-semibold text-dusk uppercase tracking-wider">
+                    Давно не приходили
+                  </p>
+                  {atRiskClients.length > 0 && (
+                    <span className="text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                      {atRiskClients.length}
+                    </span>
+                  )}
+                </div>
+
+                {clientsLoading ? (
+                  <div className="space-y-3">
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="h-14 bg-parchment/60 rounded-xl animate-pulse" />
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    <div className="space-y-2">
+                      {(showAllAtRisk ? atRiskClients : atRiskClients.slice(0, 5)).map(client => {
+                        const isGenerating = msgLoading === client.id
+                        const phone = client.phone ? formatPhone(client.phone) : null
+                        return (
+                          <div
+                            key={client.id}
+                            className="flex items-center justify-between gap-3 bg-cream border border-parchment rounded-xl px-4 py-3"
+                          >
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-graphite truncate">{client.name}</p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                {phone ? (
+                                  <a
+                                    href={`tel:${phone}`}
+                                    className="flex items-center gap-1 text-xs text-rose hover:opacity-80 transition-opacity"
+                                    onClick={e => e.stopPropagation()}
+                                  >
+                                    <Phone size={10} />
+                                    {phone}
+                                  </a>
+                                ) : (
+                                  <span className="text-xs text-dusk/40">нет телефона</span>
+                                )}
+                                <span className="text-xs text-dusk/30">·</span>
+                                <span className="text-xs text-amber-600">
+                                  {client.days_since_last_visit} дн.
+                                </span>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => openSmsForClient(client)}
+                              disabled={isGenerating}
+                              className="flex items-center gap-1.5 shrink-0 bg-rose text-white text-xs font-semibold px-3 py-2 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50"
+                            >
+                              {isGenerating
+                                ? <Loader2 size={11} className="animate-spin" />
+                                : <MessageCircle size={11} />
+                              }
+                              {isGenerating ? 'Пишу...' : 'Написать'}
+                            </button>
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                    {atRiskClients.length > 5 && (
+                      <button
+                        onClick={() => setShowAllAtRisk(v => !v)}
+                        className="flex items-center gap-1.5 text-xs text-dusk hover:text-graphite transition-colors mt-3 w-full justify-center"
+                      >
+                        {showAllAtRisk
+                          ? 'Свернуть'
+                          : `Показать всех ${atRiskClients.length} →`
+                        }
+                        {!showAllAtRisk && <ChevronRight size={12} />}
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
 
             {/* AI Coach */}
             <div className="bg-card border border-parchment rounded-2xl p-5">

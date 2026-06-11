@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic'
 import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { AgentCard } from '@/components/dashboard/AgentCard'
+import { RetentionTrend } from '@/components/dashboard/RetentionTrend'
 import { Users, ArrowRight, Phone, Star, Target, Megaphone, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { DailyAction } from '@/types'
@@ -60,6 +61,7 @@ export default function DashboardPage() {
   const salonId = searchParams.get('salon_id') || ''
   const [summary, setSummary] = useState<Summary | null>(null)
   const [dailyAction, setDailyAction] = useState<DailyAction | null>(null)
+  const [snapshots, setSnapshots] = useState<Array<{ snapshot_date: string; retention_rate: number; total_clients: number; active_clients: number; at_risk_clients: number; lost_clients: number }>>([])
   const [loading, setLoading] = useState(true)
 
   const now = new Date()
@@ -71,10 +73,12 @@ export default function DashboardPage() {
     Promise.all([
       fetch(`/api/summary?salon_id=${salonId}`).then(r => r.json()),
       fetch(`/api/daily-action?salon_id=${salonId}`).then(r => r.json()),
+      fetch(`/api/snapshots?salon_id=${salonId}`).then(r => r.json()),
     ])
-      .then(([summaryData, actionData]) => {
+      .then(([summaryData, actionData, snapshotData]) => {
         setSummary(summaryData)
         setDailyAction(actionData.action ?? null)
+        setSnapshots(snapshotData.snapshots ?? [])
         setLoading(false)
       })
       .catch(() => setLoading(false))
@@ -126,15 +130,18 @@ export default function DashboardPage() {
               <span className="text-dusk text-sm">{Math.round(dailyAction.probability * 100)}% вероятность</span>
             </div>
             <button
-              onClick={() => router.push(`/retention?salon_id=${salonId}&tab=at_risk`)}
+              onClick={() => router.push(`/master?salon_id=${salonId}&master=${encodeURIComponent(dailyAction.master_name)}`)}
               className="flex items-center gap-2 text-sm font-semibold text-sage hover:opacity-80 transition-opacity"
             >
               <Phone size={14} />
-              Открыть список
+              Открыть мастера
               <ArrowRight size={14} />
             </button>
           </div>
         )}
+
+        {/* ТРЕНД ВОЗВРАТНОСТИ */}
+        <RetentionTrend snapshots={snapshots} />
 
         {/* ГЛАВНЫЙ БЛОК */}
         {loading ? (

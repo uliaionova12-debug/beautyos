@@ -142,6 +142,7 @@ export default function RetentionPage() {
               <ClientRiskList
                 clients={atRisk}
                 salonName="Салон красоты"
+                salonId={salonId}
                 title="Клиенты в группе риска"
                 emptyText="Клиентов в группе риска нет"
               />
@@ -150,6 +151,7 @@ export default function RetentionPage() {
               <ClientRiskList
                 clients={lost}
                 salonName="Салон красоты"
+                salonId={salonId}
                 title="Потерянные клиенты"
                 emptyText="Потерянных клиентов нет — отличный результат!"
               />

@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Client } from '@/types'
-import { MessageCircle, Clock, TrendingUp, Loader2, Phone } from 'lucide-react'
+import { MessageCircle, Clock, TrendingUp, Loader2, Phone, ChevronRight } from 'lucide-react'
 
 function formatMoney(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + ' млн ₽'
@@ -41,11 +42,13 @@ function statusLabel(status: string, riskScore: number): { label: string; color:
 interface Props {
   clients: Client[]
   salonName: string
+  salonId?: string
   title: string
   emptyText: string
 }
 
-export function ClientRiskList({ clients, salonName, title, emptyText }: Props) {
+export function ClientRiskList({ clients, salonName, salonId, title, emptyText }: Props) {
+  const router = useRouter()
   const [loadingId, setLoadingId] = useState<string | null>(null)
   const [modal, setModal] = useState<{ name: string; phone: string | null; text: string } | null>(null)
   const [copied, setCopied] = useState(false)
@@ -136,13 +139,18 @@ export function ClientRiskList({ clients, salonName, title, emptyText }: Props) 
           const isLoading = loadingId === client.id
 
           return (
-            <div key={client.id} className="bg-card border border-parchment rounded-xl p-4">
+            <div
+              key={client.id}
+              className="bg-card border border-parchment rounded-xl p-4 cursor-pointer hover:border-sage/40 transition-colors"
+              onClick={() => salonId && router.push(`/retention/${client.id}?salon_id=${salonId}`)}
+            >
               {/* Верхняя строка: имя + статус + кнопка */}
               <div className="flex items-start justify-between gap-2 mb-2">
-                <div>
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-0.5">
                     <span className="text-sm font-semibold text-graphite">{client.name}</span>
                     <span className={`text-xs font-medium ${sColor}`}>{sLabel}</span>
+                    {salonId && <ChevronRight size={12} className="text-dusk/30 ml-auto shrink-0" />}
                   </div>
                   {client.phone && (
                     <div className="flex items-center gap-1 text-xs text-dusk/60">
@@ -153,7 +161,7 @@ export function ClientRiskList({ clients, salonName, title, emptyText }: Props) 
                 </div>
 
                 <button
-                  onClick={() => handleWrite(client)}
+                  onClick={(e) => { e.stopPropagation(); handleWrite(client) }}
                   disabled={isLoading}
                   className="flex items-center gap-1.5 shrink-0 bg-rose text-white text-xs font-semibold px-3 py-2 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
