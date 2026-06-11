@@ -9,6 +9,7 @@ export function ContactSection() {
   const [name, setName] = useState('')
   const [contact, setContact] = useState('')
   const [message, setMessage] = useState('')
+  const [agreed, setAgreed] = useState(false)
   const [status, setStatus] = useState<Status>('idle')
 
   async function handleSubmit(e: React.FormEvent) {
@@ -140,6 +141,19 @@ export function ContactSection() {
                   />
                 </div>
 
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={agreed}
+                    onChange={e => setAgreed(e.target.checked)}
+                    className="mt-0.5 shrink-0 accent-sage w-4 h-4"
+                  />
+                  <span className="text-xs text-dusk/60 leading-relaxed">
+                    Я согласен(-на) с{' '}
+                    <a href="/privacy" className="underline hover:text-dusk transition-colors">политикой обработки персональных данных</a>
+                  </span>
+                </label>
+
                 {status === 'error' && (
                   <p className="text-xs text-terracotta">Что-то пошло не так. Напишите напрямую в Telegram{' '}
                     <a href="https://t.me/beautyos_ai" target="_blank" rel="noopener noreferrer" className="underline">@beautyos_ai</a>
@@ -148,7 +162,7 @@ export function ContactSection() {
 
                 <button
                   type="submit"
-                  disabled={!name.trim() || !contact.trim() || status === 'loading'}
+                  disabled={!name.trim() || !contact.trim() || !agreed || status === 'loading'}
                   className="w-full flex items-center justify-center gap-2 bg-sage text-white py-4 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40"
                 >
                   {status === 'loading' ? (
