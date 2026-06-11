@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { ArrowRight, Users, Star, Target, Megaphone, Sparkles, CheckCircle, Phone, Shield, Quote } from 'lucide-react'
 import { RoiCalculator } from '@/components/landing/RoiCalculator'
 import { FaqSection } from '@/components/landing/FaqSection'
+import { AppScreenshots } from '@/components/landing/AppScreenshots'
 
 /* eslint-disable @next/next/no-img-element */
 
@@ -178,18 +179,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── BEAUTY VISUAL ─── */}
-      <section className="py-0 overflow-hidden">
-        <div className="grid grid-cols-3 h-52 md:h-72">
-          <img src="https://images.unsplash.com/photo-1604654894610-df63bc536371?w=600&q=80&auto=format&fit=crop&crop=center"
-            alt="Маникюр" className="w-full h-full object-cover" />
-          <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600&q=80&auto=format&fit=crop"
-            alt="Салон красоты" className="w-full h-full object-cover" />
-          <img src="https://images.unsplash.com/photo-1487412912498-0447578fcca8?w=600&q=80&auto=format&fit=crop&crop=faces"
-            alt="Клиент салона" className="w-full h-full object-cover" />
-        </div>
-      </section>
-
       {/* ─── HOW IT WORKS ─── */}
       <section className="py-20 px-6">
         <div className="max-w-6xl mx-auto">
@@ -199,24 +188,43 @@ export default function LandingPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { num: '01', title: 'Загружаете данные', desc: 'CSV из DIKIDI, YClients или Excel — 2 минуты, никаких технических знаний', img: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=500&q=80&auto=format&fit=crop' },
-              { num: '02', title: 'AI анализирует базу', desc: 'Каждый клиент получает статус: активный, в риске или потерянный', img: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=500&q=80&auto=format&fit=crop&crop=center' },
-              { num: '03', title: 'Звоните и зарабатываете', desc: 'Список готов, скрипты готовы, прогноз выручки — перед вами', img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=500&q=80&auto=format&fit=crop&crop=faces' },
+              {
+                num: '01', bg: 'bg-blush', emoji: '📂',
+                title: 'Загружаете данные',
+                desc: 'CSV из DIKIDI, YClients или Excel — 2 минуты, никаких технических знаний',
+                detail: 'Поддерживаем форматы всех популярных CRM в России',
+              },
+              {
+                num: '02', bg: 'bg-violet-50', emoji: '✦',
+                title: 'AI анализирует базу',
+                desc: 'Каждый клиент получает статус: активный, в риске или потерянный',
+                detail: 'Расчёт по интервалам визитов, среднему чеку и поведенческим паттернам',
+              },
+              {
+                num: '03', bg: 'bg-sage/10', emoji: '📞',
+                title: 'Звоните и зарабатываете',
+                desc: 'Список готов, скрипты готовы, прогноз выручки — перед вами',
+                detail: 'Персональный AI-скрипт для каждого клиента по имени',
+              },
             ].map(step => (
               <div key={step.num} className="bg-card border border-parchment rounded-2xl overflow-hidden">
-                <div className="h-44 overflow-hidden">
-                  <img src={step.img} alt={step.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                <div className={`${step.bg} h-40 flex items-center justify-center`}>
+                  <span className="text-6xl">{step.emoji}</span>
                 </div>
                 <div className="p-6">
                   <p className="text-4xl font-bold text-parchment mb-3">{step.num}</p>
                   <h3 className="text-base font-semibold text-graphite mb-2">{step.title}</h3>
-                  <p className="text-sm text-dusk leading-relaxed">{step.desc}</p>
+                  <p className="text-sm text-dusk leading-relaxed mb-3">{step.desc}</p>
+                  <p className="text-xs text-dusk/60 leading-relaxed">{step.detail}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
       </section>
+
+      {/* ─── APP SCREENSHOTS ─── */}
+      <AppScreenshots />
 
       {/* ─── DASHBOARD PREVIEW ─── */}
       <section className="py-16 px-6 bg-sage/5">
