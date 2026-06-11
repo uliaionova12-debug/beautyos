@@ -5,26 +5,32 @@ import { FaqSection } from '@/components/landing/FaqSection'
 
 /* eslint-disable @next/next/no-img-element */
 
+const DEMO_SALON_ID = '2e908b6f-5e39-44a3-bf9b-477db21dfaa9'
+
 const DIRECTORS = [
   {
     icon: Users, color: 'bg-sage/10 text-sage',
     title: 'Директор по возврату',
     desc: 'Определяет клиентов в зоне риска, считает потенциальную выручку и даёт список — кому позвонить сегодня.',
+    href: '/retention',
   },
   {
     icon: Star, color: 'bg-amber-50 text-amber-600',
     title: 'Директор по репутации',
     desc: 'Мониторит отзывы, генерирует AI-ответы и отслеживает динамику рейтинга на всех площадках.',
+    href: '/reputation',
   },
   {
     icon: Target, color: 'bg-blue-50 text-blue-600',
     title: 'Директор по конкурентам',
     desc: 'Анализирует ценовую политику, акции и слабые места конкурентов в вашем районе.',
+    href: '/competitors',
   },
   {
     icon: Megaphone, color: 'bg-violet-50 text-violet-600',
     title: 'Директор по маркетингу',
     desc: 'Генерирует контент-план, идеи акций и офферы под сезон — готовые к публикации.',
+    href: '/marketing',
   },
 ]
 
@@ -119,10 +125,10 @@ export default function LandingPage() {
                 Загрузить базу бесплатно
                 <ArrowRight size={18} />
               </Link>
-              <Link href="/role"
-                className="inline-flex items-center justify-center gap-2 border border-parchment text-dusk px-8 py-4 rounded-xl text-base font-medium hover:border-sage hover:text-sage transition-colors">
+              <Link href={`/dashboard?salon_id=${DEMO_SALON_ID}`}
+                className="inline-flex items-center justify-center gap-2 border-2 border-sage text-sage px-8 py-4 rounded-xl text-base font-semibold hover:bg-sage hover:text-white transition-colors">
                 <Sparkles size={16} />
-                Посмотреть демо
+                Открыть демо-дашборд
               </Link>
             </div>
             <div className="flex items-center gap-6">
@@ -193,9 +199,9 @@ export default function LandingPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { num: '01', title: 'Загружаете данные', desc: 'CSV из DIKIDI, YClients или Excel — 2 минуты, никаких технических знаний', img: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&q=80&auto=format&fit=crop' },
-              { num: '02', title: 'AI анализирует базу', desc: 'Каждый клиент получает статус: активный, в риске или потерянный', img: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&q=80&auto=format&fit=crop' },
-              { num: '03', title: 'Звоните и зарабатываете', desc: 'Список готов, скрипты готовы, прогноз выручки — перед вами', img: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=500&q=80&auto=format&fit=crop&crop=faces' },
+              { num: '01', title: 'Загружаете данные', desc: 'CSV из DIKIDI, YClients или Excel — 2 минуты, никаких технических знаний', img: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=500&q=80&auto=format&fit=crop' },
+              { num: '02', title: 'AI анализирует базу', desc: 'Каждый клиент получает статус: активный, в риске или потерянный', img: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=500&q=80&auto=format&fit=crop&crop=center' },
+              { num: '03', title: 'Звоните и зарабатываете', desc: 'Список готов, скрипты готовы, прогноз выручки — перед вами', img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=500&q=80&auto=format&fit=crop&crop=faces' },
             ].map(step => (
               <div key={step.num} className="bg-card border border-parchment rounded-2xl overflow-hidden">
                 <div className="h-44 overflow-hidden">
@@ -220,8 +226,8 @@ export default function LandingPage() {
               {/* Photo */}
               <div className="relative h-64 md:h-auto min-h-[320px] overflow-hidden">
                 <img
-                  src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=800&q=80&auto=format&fit=crop&crop=faces,top"
-                  alt="Владелец салона смотрит в телефон"
+                  src="https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&q=80&auto=format&fit=crop"
+                  alt="Владелец салона за работой с данными"
                   className="absolute inset-0 w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent to-card/80 hidden md:block" />
@@ -342,12 +348,18 @@ export default function LandingPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
             {DIRECTORS.map(d => (
-              <div key={d.title} className="bg-cream border border-parchment rounded-2xl p-7 hover:shadow-md transition-shadow">
+              <div key={d.title} className="bg-cream border border-parchment rounded-2xl p-7 hover:shadow-md transition-shadow flex flex-col">
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 ${d.color}`}>
                   <d.icon size={22} />
                 </div>
                 <h3 className="text-base font-semibold text-graphite mb-2">{d.title}</h3>
-                <p className="text-sm text-dusk leading-relaxed">{d.desc}</p>
+                <p className="text-sm text-dusk leading-relaxed mb-5 flex-1">{d.desc}</p>
+                <Link
+                  href={`${d.href}?salon_id=${DEMO_SALON_ID}`}
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-sage hover:opacity-70 transition-opacity"
+                >
+                  Посмотреть в деле <ArrowRight size={14} />
+                </Link>
               </div>
             ))}
           </div>
@@ -409,15 +421,25 @@ export default function LandingPage() {
       </section>
 
       {/* ─── FOOTER ─── */}
-      <footer className="py-8 px-6 border-t border-parchment bg-cream">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <span className="text-sm font-bold text-graphite">BeautyOS</span>
-          <div className="flex gap-6">
-            <Link href="/pricing" className="text-xs text-dusk hover:text-graphite transition-colors">Тарифы</Link>
-            <Link href="/role" className="text-xs text-dusk hover:text-graphite transition-colors">Войти</Link>
-            <Link href="/join/salon" className="text-xs text-dusk hover:text-graphite transition-colors">Регистрация</Link>
+      <footer className="py-10 px-6 border-t border-parchment bg-cream">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-6">
+            <span className="text-sm font-bold text-graphite">BeautyOS</span>
+            <div className="flex flex-wrap gap-6">
+              <Link href="/pricing" className="text-xs text-dusk hover:text-graphite transition-colors">Тарифы</Link>
+              <Link href="/role" className="text-xs text-dusk hover:text-graphite transition-colors">Войти</Link>
+              <Link href="/join/salon" className="text-xs text-dusk hover:text-graphite transition-colors">Регистрация</Link>
+              <a href="https://t.me/beautyos_ai" target="_blank" rel="noopener noreferrer"
+                className="text-xs text-dusk hover:text-graphite transition-colors">Telegram</a>
+            </div>
           </div>
-          <p className="text-xs text-dusk/50">© 2025 BeautyOS. AI для салонов красоты.</p>
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 pt-5 border-t border-parchment">
+            <p className="text-xs text-dusk/50">© 2025 BeautyOS. AI для салонов красоты.</p>
+            <div className="flex gap-5">
+              <Link href="/privacy" className="text-xs text-dusk/50 hover:text-dusk transition-colors">Политика обработки данных</Link>
+              <a href="mailto:hello@beautyos.ai" className="text-xs text-dusk/50 hover:text-dusk transition-colors">hello@beautyos.ai</a>
+            </div>
+          </div>
         </div>
       </footer>
 
