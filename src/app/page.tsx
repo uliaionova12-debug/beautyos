@@ -4,6 +4,7 @@ import { RoiCalculator } from '@/components/landing/RoiCalculator'
 import { FaqSection } from '@/components/landing/FaqSection'
 import { AppScreenshots } from '@/components/landing/AppScreenshots'
 import { NeuroConsultant, ConsultantTeaser } from '@/components/landing/NeuroConsultant'
+import { ContactSection } from '@/components/landing/ContactSection'
 
 /* eslint-disable @next/next/no-img-element */
 
@@ -387,6 +388,9 @@ export default function LandingPage() {
           <RoiCalculator />
         </div>
       </section>
+
+      {/* ─── КОНТАКТ ─── */}
+      <ContactSection />
 
       {/* ─── FAQ ─── */}
       <section className="py-20 px-6 bg-cream">
