@@ -151,8 +151,8 @@ export default function LandingPage() {
         {/* Photo */}
         <div className="md:w-[48%] h-64 md:h-auto relative order-1 md:order-2 overflow-hidden">
           <img
-            src="/hero.png"
-            alt="BeautyOS"
+            src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1000&q=85&auto=format&fit=crop"
+            alt="Мастер в салоне красоты"
             className="absolute inset-0 w-full h-full object-cover object-center"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-cream via-transparent to-transparent md:block hidden" />
