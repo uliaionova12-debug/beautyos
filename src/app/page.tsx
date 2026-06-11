@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowRight, Users, Star, Target, Megaphone, Sparkles, CheckCircle, Phone, Shield, Quote } from 'lucide-react'
+import { ArrowRight, Users, Star, Target, Megaphone, Sparkles, CheckCircle, Phone, Shield, Quote, TrendingDown } from 'lucide-react'
 import { RoiCalculator } from '@/components/landing/RoiCalculator'
 import { FaqSection } from '@/components/landing/FaqSection'
 import { AppScreenshots } from '@/components/landing/AppScreenshots'
@@ -14,25 +14,25 @@ const DIRECTORS = [
   {
     icon: Users, color: 'bg-sage/10 text-sage',
     title: 'Директор по возврату',
-    desc: 'Определяет клиентов в зоне риска, считает потенциальную выручку и даёт список — кому позвонить сегодня.',
+    desc: 'Находит клиентов, которых вы теряете прямо сейчас. Показывает потенциальную выручку и кому позвонить сегодня.',
     href: '/retention',
   },
   {
     icon: Star, color: 'bg-amber-50 text-amber-600',
     title: 'Директор по репутации',
-    desc: 'Мониторит отзывы, генерирует AI-ответы и отслеживает динамику рейтинга на всех площадках.',
+    desc: 'Следит за отзывами и предупреждает падение рейтинга до того, как вы потеряете клиентов.',
     href: '/reputation',
   },
   {
     icon: Target, color: 'bg-blue-50 text-blue-600',
     title: 'Директор по конкурентам',
-    desc: 'Анализирует ценовую политику, акции и слабые места конкурентов в вашем районе.',
+    desc: 'Показывает где конкуренты забирают ваших клиентов и что предложить, чтобы удержать их.',
     href: '/competitors',
   },
   {
     icon: Megaphone, color: 'bg-violet-50 text-violet-600',
     title: 'Директор по маркетингу',
-    desc: 'Генерирует контент-план, идеи акций и офферы под сезон — готовые к публикации.',
+    desc: 'Готовит акции, предложения и контент для привлечения клиентов — готовые к публикации.',
     href: '/marketing',
   },
 ]
@@ -64,20 +64,22 @@ const TESTIMONIALS = [
 const CASES = [
   {
     salon: 'Студия «Эстет»',
-    city: 'Москва · 4 мастера',
+    city: 'Москва · 4 мастера · 327 клиентов',
+    detail: 'База загружена 5 июня. Через 8 дней:',
     before: '48%',
     after: '73%',
     revenue: '+187 000 ₽',
-    period: 'за 1 месяц',
+    period: 'дополнительной выручки',
     img: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80&auto=format&fit=crop',
   },
   {
     salon: 'Beauty Room',
-    city: 'Санкт-Петербург · 2 мастера',
+    city: 'Санкт-Петербург · 2 мастера · 194 клиента',
+    detail: 'Начали работу 12 мая. За 3 недели:',
     before: '41%',
     after: '68%',
     revenue: '+94 000 ₽',
-    period: 'за 3 недели',
+    period: 'дополнительной выручки',
     img: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400&q=80&auto=format&fit=crop',
   },
 ]
@@ -112,15 +114,15 @@ export default function LandingPage() {
           <div className="max-w-lg">
             <div className="flex items-center gap-2 mb-6">
               <div className="w-2 h-2 rounded-full bg-sage animate-pulse" />
-              <span className="text-xs text-sage font-semibold uppercase tracking-wider">AI-платформа для салонов красоты</span>
+              <span className="text-xs text-sage font-semibold uppercase tracking-wider">Возврат клиентов для салонов красоты</span>
             </div>
             <h1 className="text-[2.8rem] md:text-[3.8rem] font-bold leading-[1.05] tracking-tight mb-6">
-              Ваши клиенты<br />уходят.<br />
-              <span className="text-sage">AI их возвращает.</span>
+              Покажем,<br />сколько денег<br />
+              <span className="text-sage">теряет ваш салон.</span>
             </h1>
             <p className="text-lg text-dusk leading-relaxed mb-8 max-w-md">
-              BeautyOS анализирует клиентскую базу и каждое утро говорит конкретно:
-              кому позвонить, что сказать и сколько денег вы вернёте сегодня.
+              BeautyOS находит клиентов, которые перестали приходить, и каждое утро говорит:
+              кому позвонить, что сказать и сколько денег вернётся в кассу сегодня.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 mb-10">
               <Link href="/join/salon"
@@ -141,7 +143,7 @@ export default function LandingPage() {
                     className="w-9 h-9 rounded-full border-2 border-cream object-cover" />
                 ))}
               </div>
-              <p className="text-sm text-dusk"><span className="font-semibold text-graphite">50+ салонов</span> уже используют BeautyOS</p>
+              <p className="text-sm text-dusk"><span className="font-semibold text-graphite">50+ салонов</span> уже вернули клиентов с BeautyOS</p>
             </div>
           </div>
         </div>
@@ -169,9 +171,9 @@ export default function LandingPage() {
       <section className="py-14 px-6 bg-graphite text-white">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
           {[
-            { value: '38%', label: 'клиентов уходят из салона каждый год' },
-            { value: '×4', label: 'дороже привлечь нового, чем вернуть старого' },
-            { value: '2 мин', label: 'до первых AI-инсайтов после загрузки базы' },
+            { value: '38%', label: 'клиентов уходят из салона каждый год — молча, без объяснений' },
+            { value: '×4', label: 'дороже привлечь нового клиента, чем вернуть старого' },
+            { value: '225 000 ₽', label: 'в месяц теряет типичный салон на клиентах, которые просто перестали приходить' },
           ].map(s => (
             <div key={s.value}>
               <p className="text-5xl font-bold mb-2">{s.value}</p>
@@ -181,32 +183,89 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ─── СКОЛЬКО ТЕРЯЕТ САЛОН ─── */}
+      <section className="py-20 px-6 bg-blush">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 bg-terracotta/10 text-terracotta text-xs font-semibold uppercase tracking-wider px-4 py-2 rounded-full mb-4">
+              <TrendingDown size={13} />
+              Считаем потери
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-graphite mb-4">
+              Сколько денег теряет<br />ваш салон прямо сейчас
+            </h2>
+            <p className="text-dusk">Реальный расчёт для типичного салона с базой 300 клиентов</p>
+          </div>
+
+          <div className="bg-card border border-parchment rounded-3xl overflow-hidden shadow-lg">
+            <div className="grid grid-cols-1 md:grid-cols-2">
+              {/* Left — numbers */}
+              <div className="p-8 md:p-12 border-b md:border-b-0 md:border-r border-parchment">
+                <p className="text-xs text-dusk font-semibold uppercase tracking-wider mb-6">Ваша база сейчас</p>
+                <div className="space-y-5">
+                  {[
+                    { label: 'Клиентов в базе', value: '300', sub: 'чел.' },
+                    { label: 'Давно не приходили', value: '90', sub: 'чел. (30%)', highlight: true },
+                    { label: 'Средний чек', value: '2 500 ₽', sub: 'за визит' },
+                    { label: 'Частота визитов', value: '1 раз', sub: 'в 6–8 недель' },
+                  ].map(row => (
+                    <div key={row.label} className={`flex items-center justify-between py-3 border-b border-parchment last:border-0 ${row.highlight ? 'text-terracotta' : ''}`}>
+                      <span className="text-sm text-dusk">{row.label}</span>
+                      <div className="text-right">
+                        <span className={`font-bold ${row.highlight ? 'text-terracotta text-lg' : 'text-graphite'}`}>{row.value}</span>
+                        <span className="text-xs text-dusk ml-1">{row.sub}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right — loss */}
+              <div className="p-8 md:p-12 flex flex-col justify-center">
+                <p className="text-xs text-dusk font-semibold uppercase tracking-wider mb-6">Потерянная выручка</p>
+                <div className="bg-terracotta/5 border border-terracotta/20 rounded-2xl p-6 mb-6">
+                  <p className="text-sm text-dusk mb-2">90 клиентов × 2 500 ₽ =</p>
+                  <p className="text-4xl font-bold text-terracotta">225 000 ₽</p>
+                  <p className="text-sm text-dusk mt-1">в месяц уходит мимо кассы</p>
+                </div>
+                <div className="bg-sage/5 border border-sage/20 rounded-2xl p-6">
+                  <p className="text-xs font-semibold text-sage uppercase tracking-wider mb-2">BeautyOS находит этих клиентов автоматически</p>
+                  <p className="text-sm text-dusk leading-relaxed">
+                    Показывает кому позвонить сегодня и готовит скрипт — чтобы клиент вернулся, а деньги пришли в кассу.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ─── HOW IT WORKS ─── */}
       <section className="py-20 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
-            <p className="text-xs text-sage font-semibold uppercase tracking-wider mb-3">Просто и быстро</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Три шага до первых денег</h2>
+            <p className="text-xs text-sage font-semibold uppercase tracking-wider mb-3">Быстро и просто</p>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Как вернуть деньги за один день</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
                 num: '01', bg: 'bg-blush', emoji: '📂',
-                title: 'Загружаете данные',
-                desc: 'CSV из DIKIDI, YClients или Excel — 2 минуты, никаких технических знаний',
+                title: 'Загрузите клиентскую базу',
+                desc: 'CSV из DIKIDI, YClients или Excel. 2 минуты, никаких технических знаний.',
                 detail: 'Поддерживаем форматы всех популярных CRM в России',
               },
               {
                 num: '02', bg: 'bg-violet-50', emoji: '✦',
-                title: 'AI анализирует базу',
-                desc: 'Каждый клиент получает статус: активный, в риске или потерянный',
-                detail: 'Расчёт по интервалам визитов, среднему чеку и поведенческим паттернам',
+                title: 'Получите список клиентов на возврат',
+                desc: 'С прогнозом выручки по каждому клиенту и готовым скриптом разговора.',
+                detail: 'Система сама определяет кто уже уходит и сколько это стоит',
               },
               {
                 num: '03', bg: 'bg-sage/10', emoji: '📞',
-                title: 'Звоните и зарабатываете',
-                desc: 'Список готов, скрипты готовы, прогноз выручки — перед вами',
-                detail: 'Персональный AI-скрипт для каждого клиента по имени',
+                title: 'Свяжитесь — и деньги вернутся',
+                desc: 'Готовые сообщения и сценарии уже подготовлены системой.',
+                detail: 'Персональный скрипт для каждого клиента с историей его визитов',
               },
             ].map(step => (
               <div key={step.num} className="bg-card border border-parchment rounded-2xl overflow-hidden">
@@ -225,9 +284,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── APP SCREENSHOTS ─── */}
-      <AppScreenshots />
-
       {/* ─── DASHBOARD PREVIEW ─── */}
       <section className="py-16 px-6 bg-sage/5">
         <div className="max-w-6xl mx-auto">
@@ -244,12 +300,25 @@ export default function LandingPage() {
               </div>
               {/* Text */}
               <div className="p-8 md:p-12 flex flex-col justify-center">
-                <p className="text-xs text-sage font-semibold uppercase tracking-wider mb-3">Главное действие на сегодня</p>
-                <h2 className="text-2xl md:text-3xl font-bold mb-4">Дашборд говорит прямо</h2>
-                <p className="text-dusk leading-relaxed mb-6">
-                  Никаких таблиц. Каждое утро BeautyOS говорит:
-                  «Позвони 5 клиентам мастера Анны — вернёшь 45 000 ₽».
+                <p className="text-xs text-sage font-semibold uppercase tracking-wider mb-3">Каждое утро</p>
+                <h2 className="text-2xl md:text-3xl font-bold mb-4">Что видит владелец<br />каждое утро</h2>
+                <p className="text-dusk leading-relaxed mb-4">
+                  Никаких таблиц. Только конкретные действия, которые приносят деньги сегодня.
                 </p>
+                {/* Today's summary */}
+                <div className="bg-sage/5 border border-sage/20 rounded-xl px-5 py-4 mb-5">
+                  <p className="text-xs text-sage font-semibold uppercase tracking-wider mb-2">Сегодня можно вернуть</p>
+                  <div className="flex gap-6">
+                    <div>
+                      <p className="text-2xl font-bold text-graphite">18</p>
+                      <p className="text-xs text-dusk">клиентов</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-emerald-600">287 000 ₽</p>
+                      <p className="text-xs text-dusk">потенциальной выручки</p>
+                    </div>
+                  </div>
+                </div>
                 {[
                   'Конкретные имена и номера телефонов',
                   'Персональный скрипт для каждого клиента',
@@ -262,7 +331,7 @@ export default function LandingPage() {
                   </div>
                 ))}
                 {/* Mini mockup */}
-                <div className="mt-6 bg-cream rounded-2xl p-5 border border-parchment">
+                <div className="mt-4 bg-cream rounded-2xl p-5 border border-parchment">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-2 h-2 rounded-full bg-sage animate-pulse" />
                     <p className="text-[10px] text-sage font-semibold uppercase tracking-wider">Главное действие</p>
@@ -270,7 +339,7 @@ export default function LandingPage() {
                   <p className="text-sm font-semibold text-graphite mb-1">Позвонить 7 клиентам мастера Анны</p>
                   <div className="flex items-center gap-3">
                     <span className="text-emerald-600 font-bold">63 000 ₽</span>
-                    <span className="text-dusk text-xs">· 84% вероятность</span>
+                    <span className="text-dusk text-xs">· вероятность возврата 84%</span>
                   </div>
                   <div className="flex items-center gap-2 text-sage text-xs font-semibold mt-3">
                     <Phone size={11} />Открыть мастера<ArrowRight size={11} />
@@ -281,6 +350,9 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ─── APP SCREENSHOTS ─── */}
+      <AppScreenshots />
 
       {/* ─── CASES ─── */}
       <section id="cases" className="py-20 px-6">
@@ -301,7 +373,8 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <div className="p-6">
-                  <div className="grid grid-cols-3 gap-4 mb-5">
+                  <p className="text-xs text-dusk mb-4">{c.detail}</p>
+                  <div className="grid grid-cols-3 gap-4 mb-3">
                     <div>
                       <p className="text-xs text-dusk mb-1">Было</p>
                       <p className="text-xl font-bold text-terracotta">{c.before}</p>
@@ -313,7 +386,7 @@ export default function LandingPage() {
                       <p className="text-xs text-dusk">возвратность</p>
                     </div>
                     <div>
-                      <p className="text-xs text-dusk mb-1">Доход</p>
+                      <p className="text-xs text-dusk mb-1">Выручка</p>
                       <p className="text-xl font-bold text-emerald-600">{c.revenue}</p>
                       <p className="text-xs text-dusk">{c.period}</p>
                     </div>
@@ -352,9 +425,9 @@ export default function LandingPage() {
       <section id="directors" className="py-20 px-6 bg-card border-y border-parchment">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
-            <p className="text-xs text-sage font-semibold uppercase tracking-wider mb-3">Команда AI</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Четыре AI-директора</h2>
-            <p className="text-dusk max-w-lg mx-auto">Каждый специализируется на своём направлении и работает 24/7.</p>
+            <p className="text-xs text-sage font-semibold uppercase tracking-wider mb-3">Работают 24/7</p>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Четыре директора,<br />которые возвращают деньги</h2>
+            <p className="text-dusk max-w-lg mx-auto">Каждый отвечает за своё направление и каждое утро кладёт на стол конкретный план действий.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
             {DIRECTORS.map(d => (
@@ -376,7 +449,7 @@ export default function LandingPage() {
           <div className="text-center">
             <Link href="/role"
               className="inline-flex items-center gap-2 bg-sage text-white px-8 py-4 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity">
-              <Sparkles size={16} />Попробовать AI директора
+              <Sparkles size={16} />Попробовать бесплатно
             </Link>
           </div>
         </div>
@@ -385,6 +458,9 @@ export default function LandingPage() {
       {/* ─── ROI CALCULATOR ─── */}
       <section id="calculator" className="py-20 px-6">
         <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-4">
+            <p className="text-sm text-dusk">Посчитайте, сколько денег теряется прямо сейчас — и сколько можно вернуть</p>
+          </div>
           <RoiCalculator />
         </div>
       </section>
@@ -411,10 +487,10 @@ export default function LandingPage() {
         <div className="relative max-w-3xl mx-auto text-center text-white">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Shield size={16} className="opacity-60" />
-            <span className="text-xs font-semibold opacity-60 uppercase tracking-wider">Бесплатно для старта</span>
+            <span className="text-xs font-semibold opacity-60 uppercase tracking-wider">14 дней бесплатно</span>
           </div>
           <h2 className="text-3xl md:text-5xl font-bold mb-6 leading-tight">
-            Загрузите базу и увидите<br />результат через 2 минуты
+            Загрузите базу и увидите<br />деньги через 2 минуты
           </h2>
           <p className="text-white/70 mb-10 text-lg max-w-xl mx-auto">
             Никаких переговоров. Просто CSV — и вы уже знаете,
@@ -451,7 +527,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 pt-5 border-t border-parchment">
-            <p className="text-xs text-dusk/50">© 2025 BeautyOS. AI для салонов красоты.</p>
+            <p className="text-xs text-dusk/50">© 2025 BeautyOS. Возврат клиентов для салонов красоты.</p>
             <div className="flex gap-5">
               <Link href="/privacy" className="text-xs text-dusk/50 hover:text-dusk transition-colors">Политика обработки данных</Link>
               <a href="mailto:hello@beautyos.ai" className="text-xs text-dusk/50 hover:text-dusk transition-colors">hello@beautyos.ai</a>
