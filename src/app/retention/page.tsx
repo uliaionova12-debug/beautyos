@@ -49,7 +49,7 @@ export default function RetentionPage() {
         active_clients: summaryData.active_clients || 0,
         at_risk_clients: summaryData.at_risk_count || riskClients.length,
         lost_clients: summaryData.lost_count || lostClients.length,
-        total_financial_impact: totalSpent,
+        total_financial_impact: summaryData.at_risk_revenue || 0,
         retention_rate: (summaryData.retention_rate || 0) / 100,
         at_risk_list: riskClients,
         lost_list: lostClients,
@@ -150,14 +150,14 @@ export default function RetentionPage() {
             )}
             {tab === 'lost' && (
               <>
-                {lostStats && lostStats.totalSpent > 0 && (
+                {lostStats && (
                   <div className="bg-red-50 border border-red-200 rounded-2xl p-5 mb-5">
                     <p className="text-xs text-red-500 font-semibold uppercase tracking-wider mb-2">Потеряны навсегда</p>
                     <p className="text-sm text-graphite leading-snug">
-                      С <span className="font-semibold">{lostStats.fromDate}</span> по <span className="font-semibold">{lostStats.toDate}</span> ушли <span className="font-semibold">{analysis?.lost_clients ?? lost.length} клиентов</span>.
+                      <span className="font-semibold">{analysis?.lost_clients ?? lost.length} клиентов</span> не возвращались более 90 дней.
                     </p>
-                    <p className="text-sm text-graphite mt-1">
-                      Пока ходили — потратили у вас <span className="font-bold text-red-600">{lostStats.totalSpent >= 1_000_000 ? (lostStats.totalSpent / 1_000_000).toFixed(1) + ' млн ₽' : lostStats.totalSpent >= 1_000 ? Math.round(lostStats.totalSpent / 1_000) + ' тыс ₽' : lostStats.totalSpent.toLocaleString('ru-RU') + ' ₽'}</span> суммарно. Теперь эти деньги идут конкурентам.
+                    <p className="text-sm text-dusk mt-1">
+                      Последний визит: с <span className="font-medium">{lostStats.fromDate}</span> по <span className="font-medium">{lostStats.toDate}</span>. Вероятность возврата крайне низкая.
                     </p>
                   </div>
                 )}

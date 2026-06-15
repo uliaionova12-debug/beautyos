@@ -165,19 +165,19 @@ export function FinancialImpact({ analysis }: Props) {
       {modal && <ExplainModal exp={modal} onClose={() => setModal(null)} />}
 
       <div className="space-y-4">
-        {/* Финансовый ущерб */}
-        <div className="bg-red-50 border border-red-200 rounded-2xl p-6">
+        {/* Потенциал возврата */}
+        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6">
           <div className="flex items-center mb-2">
-            <p className="text-sm text-red-600 font-semibold uppercase tracking-wider">
-              Финансовый ущерб за 90 дней
+            <p className="text-sm text-emerald-700 font-semibold uppercase tracking-wider">
+              Можно вернуть прямо сейчас
             </p>
             <InfoButton onClick={() => setModal(explanations.impact)} />
           </div>
           <p className="text-5xl font-bold text-graphite tracking-tight">
             {formatMoney(analysis.total_financial_impact)}
           </p>
-          <p className="text-sm text-red-500 mt-2">
-            Потеряно {analysis.lost_clients} клиентов из {analysis.total_clients}
+          <p className="text-sm text-emerald-600 mt-2">
+            {analysis.at_risk_clients} клиентов не были 30–90 дней — позвоните им сегодня
           </p>
         </div>
 
