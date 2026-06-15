@@ -59,17 +59,14 @@ function calcStatus(
   avgInterval: number
 ): { status: ClientStatus; riskScore: number } {
   if (avgInterval === 0) {
-    // Клиент с одним визитом — даём ему средний интервал 30 дней
-    const assumedInterval = 30
-    const lostThreshold = assumedInterval * 2.5
-    const riskThreshold = assumedInterval * 1.5
-    if (daysSinceLast > lostThreshold) return { status: 'lost', riskScore: 1.0 }
-    if (daysSinceLast > riskThreshold) return { status: 'at_risk', riskScore: parseFloat((daysSinceLast / lostThreshold).toFixed(3)) }
-    return { status: 'active', riskScore: parseFloat((daysSinceLast / riskThreshold).toFixed(3)) }
+    // Клиент с одним визитом: > 90 дней — потерян, 30–90 — под угрозой
+    if (daysSinceLast > 90) return { status: 'lost', riskScore: 1.0 }
+    if (daysSinceLast > 30) return { status: 'at_risk', riskScore: parseFloat(((daysSinceLast - 30) / 60).toFixed(3)) }
+    return { status: 'active', riskScore: parseFloat((daysSinceLast / 30).toFixed(3)) }
   }
 
   const riskThreshold = avgInterval * 1.5
-  const lostThreshold = avgInterval * 2.5
+  const lostThreshold = Math.max(avgInterval * 2.5, 90)
 
   if (daysSinceLast >= lostThreshold) {
     return { status: 'lost', riskScore: 1.0 }

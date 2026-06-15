@@ -13,12 +13,12 @@ function daysSince(dateStr: string): number {
 }
 
 function calcStatus(days: number): { status: string; riskScore: number } {
-  // Assumed avg interval 30 days (no history available)
-  const risk = 45   // 30 * 1.5
-  const lost = 75   // 30 * 2.5
+  // > 90 дней — клиент потерян, уже выбрал другой салон
+  const active = 30
+  const lost = 90
   if (days > lost) return { status: 'lost', riskScore: 1.0 }
-  if (days > risk) return { status: 'at_risk', riskScore: parseFloat(((days - risk) / (lost - risk)).toFixed(3)) }
-  return { status: 'active', riskScore: parseFloat((days / risk).toFixed(3)) }
+  if (days > active) return { status: 'at_risk', riskScore: parseFloat(((days - active) / (lost - active)).toFixed(3)) }
+  return { status: 'active', riskScore: parseFloat((days / active).toFixed(3)) }
 }
 
 function parseDikidiClients(text: string) {
