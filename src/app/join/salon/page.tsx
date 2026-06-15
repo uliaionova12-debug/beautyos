@@ -246,6 +246,7 @@ export default function JoinSalonPage() {
                     ref={el => { dikidiRef.current = el }}
                     type="file"
                     multiple
+                    accept=".xls,.xlsx,application/vnd.ms-excel,application/octet-stream,*/*"
                     className="hidden"
                     onChange={e => { if (e.target.files?.length) handleDikidiFiles(e.target.files) }}
                   />
