@@ -31,6 +31,14 @@ export default function JoinSalonPage() {
       setStage('error')
       return
     }
+    // Auto-detect Dikidi clients CSV by peeking at the first line
+    try {
+      const firstChunk = await file.slice(0, 2000).text()
+      if (firstChunk.includes('Последний визит') && firstChunk.includes(';')) {
+        return handleDikidiClientsFile(file)
+      }
+    } catch { /* ignore peek errors, fall through to normal upload */ }
+
     setFileName(file.name)
     setStage('uploading')
     setProgress('Читаю файл...')

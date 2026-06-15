@@ -116,17 +116,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'В файле не найдено клиентов' }, { status: 422 })
     }
 
-    // Create or find salon
+    // Use existing salon_id if provided, otherwise create or find by name
+    const existingSalonId = (formData.get('salon_id') as string) || ''
     let salonId: string
-    const { data: found } = await supabaseAdmin.from('salons').select('id').eq('name', salonName).single()
-    if (found) {
-      salonId = found.id
+    if (existingSalonId) {
+      salonId = existingSalonId
     } else {
-      const { data: created, error } = await supabaseAdmin.from('salons').insert({ name: salonName }).select('id').single()
-      if (error || !created) {
-        return NextResponse.json({ error: 'Не удалось создать салон' }, { status: 500 })
+      const { data: found } = await supabaseAdmin.from('salons').select('id').eq('name', salonName).single()
+      if (found) {
+        salonId = found.id
+      } else {
+        const { data: created, error } = await supabaseAdmin.from('salons').insert({ name: salonName }).select('id').single()
+        if (error || !created) {
+          return NextResponse.json({ error: 'Не удалось создать салон' }, { status: 500 })
+        }
+        salonId = created.id
       }
-      salonId = created.id
     }
 
     // Delete old clients for this salon (from client CSV uploads)
