@@ -71,9 +71,14 @@ export interface ParseResult {
 export async function parseYClientsCSV(file: File): Promise<ParseResult> {
   const text = await file.text()
   return new Promise((resolve) => {
+    // Определяем разделитель: ; или ,
+    const firstLine = text.split('\n')[0] || ''
+    const delimiter = (firstLine.split(';').length > firstLine.split(',').length) ? ';' : ','
+
     Papa.parse(text, {
       header: true,
       skipEmptyLines: true,
+      delimiter,
       complete: (results) => {
         const errors: string[] = []
         const rows: CSVRow[] = []
