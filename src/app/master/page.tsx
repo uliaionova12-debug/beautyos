@@ -155,6 +155,7 @@ export default function MasterPage() {
   const preselectedMaster = searchParams.get('master') || ''
   const [masters, setMasters] = useState<Master[]>([])
   const [selected, setSelected] = useState<Master | null>(null)
+  const [period, setPeriod] = useState<{ from: string; to: string } | null>(null)
   const [loading, setLoading] = useState(true)
   const [msgLoading, setMsgLoading] = useState<string | null>(null)
   const [messages, setMessages] = useState<Record<string, string>>({})
@@ -176,6 +177,12 @@ export default function MasterPage() {
             ? list.find(m => m.name === preselectedMaster) ?? list[0]
             : list[0]
           setSelected(match)
+        }
+        if (d.period_from && d.period_to) {
+          const fmt = (s: string) => new Date(s).toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })
+          const from = fmt(d.period_from)
+          const to = fmt(d.period_to)
+          setPeriod({ from, to: from === to ? '' : to })
         }
         setLoading(false)
       })
@@ -450,7 +457,9 @@ export default function MasterPage() {
             <div className="bg-card border border-parchment rounded-2xl p-5 mb-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-dusk uppercase tracking-wider mb-1">Выручка</p>
+                  <p className="text-xs text-dusk uppercase tracking-wider mb-1">
+                    Выручка{period ? ` · ${period.from}${period.to ? ' — ' + period.to : ''}` : ''}
+                  </p>
                   <p className="text-2xl font-bold text-graphite">{formatMoney(selected.total_revenue)}</p>
                 </div>
                 <div className="text-right">
