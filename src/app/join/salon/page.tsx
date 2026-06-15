@@ -85,31 +85,93 @@ export default function JoinSalonPage() {
   async function handleDikidiFiles(files: FileList) {
     const fileArr = Array.from(files)
     setStage('uploading')
-    setProgress(`Загружаю ${fileArr.length} файл(а)...`)
-    let lastSalonId = ''
+    setProgress('Загружаю библиотеку...')
+
+    // Parse XLS in the browser — avoids Vercel serverless bundling issues
+    let XLSX: typeof import('xlsx')
+    try {
+      XLSX = await import('xlsx')
+    } catch {
+      setError('Не удалось загрузить конвертер XLS. Попробуйте обновить страницу.')
+      setStage('error')
+      return
+    }
+
+    function parseBookingCell(cellText: string, master: string, dateStr: string) {
+      const lines = cellText.split('\n').map((l: string) => l.trim()).filter(Boolean)
+      if (lines.length < 2) return null
+      const amountMatch = lines[0].match(/\((\d+)\s*RUB\)/)
+      const amount = amountMatch ? amountMatch[1] : '0'
+      let clientName = '', phone = ''
+      const serviceParts: string[] = []
+      for (const line of lines.slice(1)) {
+        if (/^[78]\d{10}$/.test(line.replace(/\D/g, ''))) {
+          const digits = line.replace(/\D/g, '')
+          phone = digits.startsWith('8') ? '7' + digits.slice(1) : digits
+        } else if (!clientName) { clientName = line }
+        else if (!/^(долг|потреб|могу|4ног)/i.test(line)) { serviceParts.push(line) }
+      }
+      if (!clientName) return null
+      const [d, m, y] = dateStr.split('.')
+      return { client_name: clientName, phone, visit_date: `${y}-${m}-${d}`, master_name: master, service_name: serviceParts.join(', '), amount }
+    }
+
+    const allRows: object[] = []
 
     for (let i = 0; i < fileArr.length; i++) {
       const file = fileArr[i]
       setFileName(`${file.name} (${i + 1}/${fileArr.length})`)
-      setProgress(`Конвертирую ${file.name}...`)
-      const form = new FormData()
-      form.append('file', file)
-      form.append('salon_name', salonName || 'Мой салон')
-      if (lastSalonId) form.append('salon_id', lastSalonId)
+      setProgress(`Читаю ${file.name}...`)
+
       try {
-        const res = await fetch('/api/upload-dikidi', { method: 'POST', body: form })
-        const data = await res.json()
-        if (!res.ok) { setError(data.error || 'Ошибка загрузки'); setStage('error'); return }
-        lastSalonId = data.salon_id
+        const buffer = await file.arrayBuffer()
+        const wb = XLSX.read(buffer, { type: 'array' })
+
+        for (const sheetName of wb.SheetNames) {
+          if (!/^\d{2}\.\d{2}\.\d{4}$/.test(sheetName)) continue
+          const ws = wb.Sheets[sheetName]
+          const grid = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' }) as string[][]
+          if (grid.length < 2) continue
+          const masters = grid[0].slice(1).map((v: string) => String(v).trim()).filter(Boolean)
+          for (let r = 1; r < grid.length; r++) {
+            for (let ci = 0; ci < masters.length; ci++) {
+              const cellVal = String(grid[r][ci + 1] || '').trim()
+              if (!cellVal) continue
+              const rec = parseBookingCell(cellVal, masters[ci], sheetName)
+              if (rec) allRows.push(rec)
+            }
+          }
+        }
       } catch {
-        setError('Не удалось загрузить файл. Проверьте подключение.')
+        setError(`Не удалось прочитать файл ${file.name}`)
         setStage('error')
         return
       }
     }
 
-    setStage('done')
-    setTimeout(() => router.push(`/dashboard?salon_id=${lastSalonId}`), 1200)
+    if (allRows.length === 0) {
+      setError('В файлах не найдено записей клиентов')
+      setStage('error')
+      return
+    }
+
+    setStage('analyzing')
+    setProgress(`Анализирую ${allRows.length} записей...`)
+
+    try {
+      const res = await fetch('/api/upload-dikidi-rows', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rows: allRows, salon_name: salonName || 'Мой салон', salon_id: existingSalonId || undefined }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error || 'Ошибка анализа'); setStage('error'); return }
+      setStage('done')
+      setTimeout(() => router.push(`/dashboard?salon_id=${data.salon_id}`), 1200)
+    } catch {
+      setError('Не удалось отправить данные на сервер.')
+      setStage('error')
+    }
   }
 
   // ── Source selection screen ──
