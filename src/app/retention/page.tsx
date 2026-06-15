@@ -26,8 +26,8 @@ export default function RetentionPage() {
     if (!salonId) { setLoading(false); return }
 
     Promise.all([
-      fetch(`/api/clients?salon_id=${salonId}&status=at_risk&limit=100`).then(r => r.json()),
-      fetch(`/api/clients?salon_id=${salonId}&status=lost&limit=100`).then(r => r.json()),
+      fetch(`/api/clients?salon_id=${salonId}&status=at_risk&limit=500`).then(r => r.json()),
+      fetch(`/api/clients?salon_id=${salonId}&status=lost&limit=500`).then(r => r.json()),
       fetch(`/api/summary?salon_id=${salonId}`).then(r => r.json()),
     ]).then(([riskData, lostData, summaryData]) => {
       const riskClients: Client[] = riskData.clients || []
@@ -35,12 +35,11 @@ export default function RetentionPage() {
       setAtRisk(riskClients)
       setLost(lostClients)
 
-      // Реальные деньги — сумма поля "Потрачено" из Dikidi
-      const totalSpent = lostClients.reduce((s, c) => s + (c.total_revenue || 0), 0)
-      const lostDates = lostClients.map(c => c.last_visit_date).filter(Boolean).sort() as string[]
-      if (lostDates.length) {
+      // Берём реальные цифры из summary (там все клиенты без лимита)
+      const totalSpent = summaryData.lost_total_revenue || 0
+      if (summaryData.lost_from_date && summaryData.lost_to_date) {
         const fmt = (d: string) => new Date(d).toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })
-        setLostStats({ totalSpent, fromDate: fmt(lostDates[0]), toDate: fmt(lostDates[lostDates.length - 1]) })
+        setLostStats({ totalSpent, fromDate: fmt(summaryData.lost_from_date), toDate: fmt(summaryData.lost_to_date) })
       }
 
       setAnalysis({
@@ -48,8 +47,8 @@ export default function RetentionPage() {
         period_days: 90,
         total_clients: summaryData.total_clients || 0,
         active_clients: summaryData.active_clients || 0,
-        at_risk_clients: riskClients.length,
-        lost_clients: lostClients.length,
+        at_risk_clients: summaryData.at_risk_count || riskClients.length,
+        lost_clients: summaryData.lost_count || lostClients.length,
         total_financial_impact: totalSpent,
         retention_rate: (summaryData.retention_rate || 0) / 100,
         at_risk_list: riskClients,
@@ -76,8 +75,8 @@ export default function RetentionPage() {
   }
 
   const TABS: { key: Tab; label: string; count: number }[] = [
-    { key: 'at_risk', label: 'Позвонить сейчас', count: atRisk.length },
-    { key: 'lost', label: 'Потеряны', count: lost.length },
+    { key: 'at_risk', label: 'Позвонить сейчас', count: analysis?.at_risk_clients ?? atRisk.length },
+    { key: 'lost', label: 'Потеряны', count: analysis?.lost_clients ?? lost.length },
     { key: 'masters', label: 'Мастера', count: 0 },
   ]
 
@@ -155,7 +154,7 @@ export default function RetentionPage() {
                   <div className="bg-red-50 border border-red-200 rounded-2xl p-5 mb-5">
                     <p className="text-xs text-red-500 font-semibold uppercase tracking-wider mb-2">Потеряны навсегда</p>
                     <p className="text-sm text-graphite leading-snug">
-                      С <span className="font-semibold">{lostStats.fromDate}</span> по <span className="font-semibold">{lostStats.toDate}</span> ушли <span className="font-semibold">{lost.length} клиентов</span>.
+                      С <span className="font-semibold">{lostStats.fromDate}</span> по <span className="font-semibold">{lostStats.toDate}</span> ушли <span className="font-semibold">{analysis?.lost_clients ?? lost.length} клиентов</span>.
                     </p>
                     <p className="text-sm text-graphite mt-1">
                       Пока ходили — потратили у вас <span className="font-bold text-red-600">{lostStats.totalSpent >= 1_000_000 ? (lostStats.totalSpent / 1_000_000).toFixed(1) + ' млн ₽' : lostStats.totalSpent >= 1_000 ? Math.round(lostStats.totalSpent / 1_000) + ' тыс ₽' : lostStats.totalSpent.toLocaleString('ru-RU') + ' ₽'}</span> суммарно. Теперь эти деньги идут конкурентам.

@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     supabaseAdmin.from('salons').select('name').eq('id', salonId).single(),
     supabaseAdmin
       .from('clients')
-      .select('name, phone, status, avg_check, days_since_last_visit, avg_interval_days, total_visits, total_revenue, return_score, revenue_opportunity')
+      .select('name, phone, status, avg_check, days_since_last_visit, avg_interval_days, total_visits, total_revenue, return_score, revenue_opportunity, last_visit_date')
       .eq('salon_id', salonId)
       .order('return_score', { ascending: false }),
     supabaseAdmin
@@ -43,6 +43,12 @@ export async function GET(req: NextRequest) {
     return s + Math.round((c.avg_check || 0) * visitsLost)
   }, 0)
 
+  // Реальные деньги потерянных клиентов (поле "Потрачено" из Dikidi)
+  const lostTotalRevenue = lost.reduce((s, c) => s + (c.total_revenue || 0), 0)
+  const lostDates = lost.map(c => c.last_visit_date).filter(Boolean).sort() as string[]
+  const lostFromDate = lostDates[0] || null
+  const lostToDate = lostDates[lostDates.length - 1] || null
+
   // Топ клиентов в риске — по вероятности возврата (return_score)
   const atRiskTop = atRisk.slice(0, 8).map(c => ({
     name: c.name,
@@ -73,6 +79,9 @@ export async function GET(req: NextRequest) {
     at_risk_revenue: Math.round(atRiskRevenue),
     lost_count: lost.length,
     lost_impact: lostImpact,
+    lost_total_revenue: Math.round(lostTotalRevenue),
+    lost_from_date: lostFromDate,
+    lost_to_date: lostToDate,
     retention_rate: Math.round(retentionRate * 100),
     avg_check: avgCheck,
     total_revenue: Math.round(totalRevenue),
