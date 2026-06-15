@@ -22,11 +22,16 @@ function calcStatus(days: number): { status: string; riskScore: number } {
 }
 
 function parseDikidiClients(text: string) {
-  const lines = text.split('\n').filter(l => l.trim())
-  if (!lines.length) return []
+  const allLines = text.split('\n').filter(l => l.trim())
+  if (!allLines.length) return []
 
   const sep = ';'
-  const header = lines[0].split(sep).map(h => h.trim())
+  const header = allLines[0].split(sep).map(h => h.trim())
+  const minCols = header.length - 5
+
+  // Пропускаем строки с меньше чем (ожидаемых - 5) колонок — это продолжения
+  // многострочных полей Комментарий (нестандартный CSV без кавычек)
+  const lines = allLines.filter((l, i) => i === 0 || l.split(sep).length >= minCols)
 
   const idx = (name: string) => header.findIndex(h => h.includes(name))
   const iName = idx('Имя клиента')

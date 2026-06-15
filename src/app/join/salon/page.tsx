@@ -3,7 +3,7 @@
 export const dynamic = 'force-dynamic'
 
 import { useState, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   Upload, CheckCircle, AlertCircle, Loader2, ArrowLeft,
   PlugZap, FileSpreadsheet, PenLine, Users,
@@ -15,6 +15,8 @@ type View = 'select' | 'csv' | 'dikidi' | 'dikidi-clients'
 
 export default function JoinSalonPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const existingSalonId = searchParams.get('salon_id') || ''
   const inputRef = useRef<HTMLInputElement>(null)
   const [view, setView] = useState<View>('select')
   const [stage, setStage] = useState<Stage>('idle')
@@ -35,6 +37,7 @@ export default function JoinSalonPage() {
     const form = new FormData()
     form.append('file', file)
     form.append('salon_name', salonName || 'Мой салон')
+    if (existingSalonId) form.append('salon_id', existingSalonId)
     try {
       setStage('analyzing')
       setProgress('Анализирую клиентскую базу...')
@@ -56,6 +59,7 @@ export default function JoinSalonPage() {
     const form = new FormData()
     form.append('file', file)
     form.append('salon_name', salonName || 'Мой салон')
+    if (existingSalonId) form.append('salon_id', existingSalonId)
     try {
       setStage('analyzing')
       setProgress('Анализирую клиентов...')

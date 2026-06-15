@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { AgentCard } from '@/components/dashboard/AgentCard'
 import { RetentionTrend } from '@/components/dashboard/RetentionTrend'
-import { Users, ArrowRight, Phone, Star, Target, Megaphone, Sparkles } from 'lucide-react'
+import { Users, ArrowRight, Phone, Star, Target, Megaphone, Sparkles, Upload } from 'lucide-react'
 import Link from 'next/link'
 import { DailyAction } from '@/types'
 
@@ -107,9 +107,19 @@ export default function DashboardPage() {
             <h1 className="text-xl font-semibold text-graphite tracking-tight">BeautyOS</h1>
             <p className="text-dusk text-sm capitalize mt-0.5">{dateStr} · {timeStr}</p>
           </div>
-          <Link href={`/role?salon_id=${salonId}`} className="text-xs text-dusk hover:text-sage transition-colors">
-            Сменить роль
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href={`/join/salon?salon_id=${salonId}`}
+              className="flex items-center gap-1.5 text-xs text-dusk hover:text-sage transition-colors"
+            >
+              <Upload size={12} />
+              Загрузить документ
+            </Link>
+            <span className="text-parchment">|</span>
+            <Link href={`/role?salon_id=${salonId}`} className="text-xs text-dusk hover:text-sage transition-colors">
+              Сменить роль
+            </Link>
+          </div>
         </div>
 
         {/* DAILY AI BRIEF */}
