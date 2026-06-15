@@ -11,7 +11,7 @@ import {
 import Link from 'next/link'
 
 type Stage = 'idle' | 'uploading' | 'analyzing' | 'done' | 'error'
-type View = 'select' | 'csv'
+type View = 'select' | 'csv' | 'dikidi'
 
 export default function JoinSalonPage() {
   const router = useRouter()
@@ -39,6 +39,27 @@ export default function JoinSalonPage() {
       setStage('analyzing')
       setProgress('Анализирую клиентскую базу...')
       const res = await fetch('/api/upload', { method: 'POST', body: form })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error || 'Ошибка загрузки'); setStage('error'); return }
+      setStage('done')
+      setTimeout(() => router.push(`/dashboard?salon_id=${data.salon_id}`), 1200)
+    } catch {
+      setError('Не удалось загрузить файл. Проверьте подключение.')
+      setStage('error')
+    }
+  }
+
+  async function handleDikidiFile(file: File) {
+    setFileName(file.name)
+    setStage('uploading')
+    setProgress('Читаю расписание Dikidi...')
+    const form = new FormData()
+    form.append('file', file)
+    form.append('salon_name', salonName || 'Мой салон')
+    try {
+      setStage('analyzing')
+      setProgress('Конвертирую и анализирую данные...')
+      const res = await fetch('/api/upload-dikidi', { method: 'POST', body: form })
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Ошибка загрузки'); setStage('error'); return }
       setStage('done')
@@ -91,6 +112,26 @@ export default function JoinSalonPage() {
               </div>
             </button>
 
+            {/* Dikidi */}
+            <button
+              onClick={() => setView('dikidi')}
+              className="w-full text-left bg-card border border-parchment rounded-2xl p-5 hover:border-sage/50 hover:shadow-sm transition-all group"
+            >
+              <div className="flex items-start gap-4">
+                <div className="w-11 h-11 bg-cream border border-parchment rounded-xl flex items-center justify-center shrink-0 group-hover:border-sage/30 transition-colors">
+                  <FileSpreadsheet size={18} className="text-sage" />
+                </div>
+                <div className="pt-0.5">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold text-graphite">Загрузить из Dikidi</p>
+                  </div>
+                  <p className="text-xs text-dusk mt-1 leading-snug">
+                    Файл расписания из Dikidi — конвертируем автоматически и покажем аналитику.
+                  </p>
+                </div>
+              </div>
+            </button>
+
             {/* CSV */}
             <button
               onClick={() => setView('csv')}
@@ -101,9 +142,9 @@ export default function JoinSalonPage() {
                   <FileSpreadsheet size={18} className="text-sage" />
                 </div>
                 <div className="pt-0.5">
-                  <p className="text-sm font-semibold text-graphite">Загрузить файл</p>
+                  <p className="text-sm font-semibold text-graphite">Загрузить CSV</p>
                   <p className="text-xs text-dusk mt-1 leading-snug">
-                    Для тех, кто может выгрузить данные — CSV из YClients, Dikidi или любой таблицы.
+                    Выгрузка из YClients или любой таблицы в формате CSV.
                   </p>
                 </div>
               </div>
@@ -146,6 +187,106 @@ export default function JoinSalonPage() {
             </button>
           </p>
 
+        </div>
+      </div>
+    )
+  }
+
+  // ── Dikidi upload screen ──
+  if (view === 'dikidi') {
+    return (
+      <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6">
+        <div className="w-full max-w-md">
+
+          <div className="mb-8">
+            <button
+              onClick={() => { setView('select'); setStage('idle'); setError('') }}
+              className="inline-flex items-center gap-1.5 text-sm text-dusk hover:text-sage transition-colors"
+            >
+              <ArrowLeft size={14} />
+              Назад
+            </button>
+          </div>
+
+          <div className="text-center mb-10">
+            <p className="text-base font-semibold text-graphite">BeautyOS</p>
+            <h1 className="text-xl font-semibold text-graphite mt-3 mb-2">Загрузите файл из Dikidi</h1>
+            <p className="text-sm text-dusk leading-relaxed max-w-xs mx-auto">
+              Файл расписания — скачайте его в Dikidi и загрузите сюда. Мы сконвертируем автоматически.
+            </p>
+          </div>
+
+          <div className="bg-card border border-parchment rounded-2xl p-8 shadow-sm">
+
+            {stage === 'idle' && (() => {
+              const dikidiRef = { current: null as HTMLInputElement | null }
+              return (
+                <>
+                  <div className="mb-5">
+                    <label className="block text-xs font-semibold text-dusk mb-2 tracking-wide">Название салона</label>
+                    <input
+                      type="text"
+                      value={salonName}
+                      onChange={e => setSalonName(e.target.value)}
+                      placeholder="Например: Лотос"
+                      className="w-full bg-cream border border-parchment rounded-xl px-4 py-3 text-sm text-graphite placeholder-dusk/40 focus:outline-none focus:border-sage/60 transition-colors"
+                    />
+                  </div>
+
+                  <input
+                    ref={el => { dikidiRef.current = el }}
+                    type="file"
+                    className="hidden"
+                    onChange={e => { const f = e.target.files?.[0]; if (f) handleDikidiFile(f) }}
+                  />
+
+                  <button
+                    onClick={() => dikidiRef.current?.click()}
+                    className="w-full border-2 border-dashed border-parchment hover:border-sage/40 rounded-xl py-8 flex flex-col items-center gap-2 transition-colors group"
+                  >
+                    <Upload size={22} className="text-dusk/40 group-hover:text-sage transition-colors" />
+                    <span className="text-sm text-dusk group-hover:text-graphite transition-colors font-medium">Нажмите, чтобы выбрать файл</span>
+                    <span className="text-xs text-dusk/40">Файл расписания из Dikidi</span>
+                  </button>
+                </>
+              )
+            })()}
+
+            {(stage === 'uploading' || stage === 'analyzing') && (
+              <div className="flex flex-col items-center py-8 gap-4">
+                <Loader2 size={32} className="text-sage animate-spin" />
+                <div className="text-center">
+                  <p className="text-graphite font-medium">{progress}</p>
+                  <p className="text-dusk text-sm mt-1">{fileName}</p>
+                </div>
+              </div>
+            )}
+
+            {stage === 'done' && (
+              <div className="flex flex-col items-center py-8 gap-4">
+                <CheckCircle size={32} className="text-sage" />
+                <div className="text-center">
+                  <p className="text-graphite font-medium">Анализ завершён</p>
+                  <p className="text-dusk text-sm mt-1">Открываю дашборд...</p>
+                </div>
+              </div>
+            )}
+
+            {stage === 'error' && (
+              <div className="flex flex-col items-center py-6 gap-4">
+                <AlertCircle size={32} className="text-terracotta" />
+                <div className="text-center">
+                  <p className="text-graphite font-medium">Ошибка</p>
+                  <p className="text-dusk text-sm mt-1">{error}</p>
+                </div>
+                <button onClick={() => { setStage('idle'); setError('') }}
+                  className="text-sm text-sage hover:opacity-80 transition-opacity font-medium">
+                  Попробовать снова
+                </button>
+              </div>
+            )}
+
+          </div>
         </div>
       </div>
     )
