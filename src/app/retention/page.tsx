@@ -74,7 +74,7 @@ export default function RetentionPage() {
   }
 
   const TABS: { key: Tab; label: string; count: number }[] = [
-    { key: 'at_risk', label: 'Группа риска', count: atRisk.length },
+    { key: 'at_risk', label: 'Позвонить сейчас', count: atRisk.length },
     { key: 'lost', label: 'Потеряны', count: lost.length },
     { key: 'masters', label: 'Мастера', count: 0 },
   ]
@@ -143,8 +143,8 @@ export default function RetentionPage() {
                 clients={atRisk}
                 salonName="Салон красоты"
                 salonId={salonId}
-                title="Клиенты в группе риска"
-                emptyText="Клиентов в группе риска нет"
+                title="Не были 30–90 дней — позвоните сегодня"
+                emptyText="Все клиенты активны — отлично!"
               />
             )}
             {tab === 'lost' && (
@@ -152,7 +152,7 @@ export default function RetentionPage() {
                 clients={lost}
                 salonName="Салон красоты"
                 salonId={salonId}
-                title="Потерянные клиенты"
+                title="Потеряны (90+ дней) — уже выбрали другой салон"
                 emptyText="Потерянных клиентов нет — отличный результат!"
               />
             )}
