@@ -16,6 +16,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Файл не передан' }, { status: 400 })
     }
 
+    const existingSalonId = (formData.get('salon_id') as string) || ''
+
     const { rows, errors, totalRows, skippedRows } = await parseDikidiXLS(file)
 
     if (errors.length > 0) {
@@ -26,33 +28,32 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'В файле нет данных для анализа' }, { status: 422 })
     }
 
-    // Ищем или создаём салон
-    let salonId: string
-    const { data: existingSalon } = await supabaseAdmin
-      .from('salons')
-      .select('id')
-      .eq('name', salonName)
-      .single()
-
     const uploadDates = rows.map(r => r.visit_date).sort()
     const periodFrom = uploadDates[0]
     const periodTo = uploadDates[uploadDates.length - 1]
 
-    if (existingSalon) {
-      salonId = existingSalon.id
-      await supabaseAdmin.from('visits').delete().eq('salon_id', salonId)
-        .gte('visit_date', periodFrom).lte('visit_date', periodTo)
-      await supabaseAdmin.from('clients').delete().eq('salon_id', salonId)
-      await supabaseAdmin.from('masters').delete().eq('salon_id', salonId)
-      await supabaseAdmin.from('insights').delete().eq('salon_id', salonId)
+    // Определяем salon_id: передан явно → по имени → создаём новый
+    let salonId: string
+    if (existingSalonId) {
+      salonId = existingSalonId
     } else {
-      const { data: newSalon, error } = await supabaseAdmin
-        .from('salons').insert({ name: salonName }).select('id').single()
-      if (error || !newSalon) {
-        return NextResponse.json({ error: 'Не удалось создать салон' }, { status: 500 })
+      const { data: foundSalon } = await supabaseAdmin
+        .from('salons').select('id').eq('name', salonName).single()
+      if (foundSalon) {
+        salonId = foundSalon.id
+      } else {
+        const { data: newSalon, error } = await supabaseAdmin
+          .from('salons').insert({ name: salonName }).select('id').single()
+        if (error || !newSalon) {
+          return NextResponse.json({ error: 'Не удалось создать салон' }, { status: 500 })
+        }
+        salonId = newSalon.id
       }
-      salonId = newSalon.id
     }
+
+    // Удаляем визиты только в диапазоне этого файла — остальная история остаётся
+    await supabaseAdmin.from('visits').delete().eq('salon_id', salonId)
+      .gte('visit_date', periodFrom).lte('visit_date', periodTo)
 
     let uploadId: string | undefined
     try {

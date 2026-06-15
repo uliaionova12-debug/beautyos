@@ -49,25 +49,34 @@ export default function JoinSalonPage() {
     }
   }
 
-  async function handleDikidiFile(file: File) {
-    setFileName(file.name)
+  async function handleDikidiFiles(files: FileList) {
+    const fileArr = Array.from(files)
     setStage('uploading')
-    setProgress('Читаю расписание Dikidi...')
-    const form = new FormData()
-    form.append('file', file)
-    form.append('salon_name', salonName || 'Мой салон')
-    try {
-      setStage('analyzing')
-      setProgress('Конвертирую и анализирую данные...')
-      const res = await fetch('/api/upload-dikidi', { method: 'POST', body: form })
-      const data = await res.json()
-      if (!res.ok) { setError(data.error || 'Ошибка загрузки'); setStage('error'); return }
-      setStage('done')
-      setTimeout(() => router.push(`/dashboard?salon_id=${data.salon_id}`), 1200)
-    } catch {
-      setError('Не удалось загрузить файл. Проверьте подключение.')
-      setStage('error')
+    setProgress(`Загружаю ${fileArr.length} файл(а)...`)
+    let lastSalonId = ''
+
+    for (let i = 0; i < fileArr.length; i++) {
+      const file = fileArr[i]
+      setFileName(`${file.name} (${i + 1}/${fileArr.length})`)
+      setProgress(`Конвертирую ${file.name}...`)
+      const form = new FormData()
+      form.append('file', file)
+      form.append('salon_name', salonName || 'Мой салон')
+      if (lastSalonId) form.append('salon_id', lastSalonId)
+      try {
+        const res = await fetch('/api/upload-dikidi', { method: 'POST', body: form })
+        const data = await res.json()
+        if (!res.ok) { setError(data.error || 'Ошибка загрузки'); setStage('error'); return }
+        lastSalonId = data.salon_id
+      } catch {
+        setError('Не удалось загрузить файл. Проверьте подключение.')
+        setStage('error')
+        return
+      }
     }
+
+    setStage('done')
+    setTimeout(() => router.push(`/dashboard?salon_id=${lastSalonId}`), 1200)
   }
 
   // ── Source selection screen ──
@@ -236,8 +245,9 @@ export default function JoinSalonPage() {
                   <input
                     ref={el => { dikidiRef.current = el }}
                     type="file"
+                    multiple
                     className="hidden"
-                    onChange={e => { const f = e.target.files?.[0]; if (f) handleDikidiFile(f) }}
+                    onChange={e => { if (e.target.files?.length) handleDikidiFiles(e.target.files) }}
                   />
 
                   <button
@@ -245,8 +255,8 @@ export default function JoinSalonPage() {
                     className="w-full border-2 border-dashed border-parchment hover:border-sage/40 rounded-xl py-8 flex flex-col items-center gap-2 transition-colors group"
                   >
                     <Upload size={22} className="text-dusk/40 group-hover:text-sage transition-colors" />
-                    <span className="text-sm text-dusk group-hover:text-graphite transition-colors font-medium">Нажмите, чтобы выбрать файл</span>
-                    <span className="text-xs text-dusk/40">Файл расписания из Dikidi</span>
+                    <span className="text-sm text-dusk group-hover:text-graphite transition-colors font-medium">Нажмите, чтобы выбрать файлы</span>
+                    <span className="text-xs text-dusk/40">Можно выбрать сразу несколько файлов</span>
                   </button>
                 </>
               )
