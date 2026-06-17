@@ -311,47 +311,55 @@ export default function ActionsPage() {
               </div>
             ))
           ) : !salonId ? (
-            /* No salon_id — static placeholder */
-            (['cash', 'growth', 'market'] as Layer[]).map(layer => {
-              const meta = LAYER_META[layer]
-              const placeholder: Record<Layer, { text: string; sub: string; href: string }[]> = {
-                cash: [
-                  { text: 'Написать клиентам в зоне риска', sub: 'Загрузите данные, чтобы узнать кому', href: `/execution/cash_at_risk` },
-                  { text: 'Вернуть потерянных клиентов', sub: 'Расчёт потенциала после загрузки', href: `/execution/cash_lost` },
-                  { text: 'Заполнить пустые окна в расписании', sub: 'Нужны данные по записям', href: `/execution/cash_slots` },
-                ],
-                growth: [
-                  { text: 'Поднять средний чек через дополнительные услуги', sub: 'Расчёт прироста после загрузки данных', href: `/execution/growth_check` },
-                  { text: 'Увеличить частоту визитов активных клиентов', sub: 'Долгосрочный рост без рекламы', href: `/execution/growth_freq` },
-                  { text: 'Повысить системную возвратность', sub: 'Удержание = стабильный поток дохода', href: `/execution/growth_ltv` },
-                ],
-                market: [
-                  { text: 'Найти слабые стороны конкурентов', sub: 'Введите ссылку — получите уязвимости', href: `/execution/market_comp` },
-                  { text: 'Создать контент, который приводит на запись', sub: 'Формулы продающих постов под ваши услуги', href: `/execution/market_content` },
-                  { text: 'Проверить репутацию в интернете', sub: 'Отзывы влияют на выбор клиентов', href: `/execution/market_rep` },
-                ],
-              }
-              return (
-                <div key={layer} className={`rounded-2xl overflow-hidden border border-parchment border-l-4 ${meta.accentBorder}`}>
-                  <div className={`px-5 pt-4 pb-3 ${meta.headerBg}`}>
-                    <span className={`inline-block text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full ${meta.badge}`}>
-                      {meta.label}
-                    </span>
-                  </div>
-                  <div className="bg-white divide-y divide-parchment/60">
-                    {placeholder[layer].map((item, i) => (
-                      <Link key={i} href={item.href} className="flex items-start justify-between px-5 py-4 hover:bg-cream/50 transition-colors group">
-                        <div className="flex-1 min-w-0 mr-3">
-                          <p className="text-sm font-medium text-graphite leading-snug mb-0.5">{item.text}</p>
-                          <p className="text-xs text-dusk/45 leading-snug">{item.sub}</p>
-                        </div>
-                        <ArrowRight size={14} className="text-dusk/20 shrink-0 mt-0.5 group-hover:text-graphite/40 transition-colors" />
-                      </Link>
-                    ))}
-                  </div>
+            /* No salon_id — locked preview, not clickable */
+            <>
+              <div className="bg-sage/10 border border-sage/20 rounded-2xl px-5 py-4 mb-4 flex items-start gap-3">
+                <Zap size={16} className="text-sage shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-graphite">Загрузите данные, чтобы разблокировать</p>
+                  <p className="text-xs text-dusk mt-0.5">После загрузки клиентской базы каждое действие получит реальные цифры и список клиентов.</p>
                 </div>
-              )
-            })
+              </div>
+              {(['cash', 'growth', 'market'] as Layer[]).map(layer => {
+                const meta = LAYER_META[layer]
+                const placeholder: Record<Layer, { text: string; sub: string }[]> = {
+                  cash: [
+                    { text: 'Написать клиентам в зоне риска', sub: 'Загрузите данные, чтобы узнать кому' },
+                    { text: 'Вернуть потерянных клиентов', sub: 'Расчёт потенциала после загрузки' },
+                    { text: 'Заполнить пустые окна в расписании', sub: 'Нужны данные по записям' },
+                  ],
+                  growth: [
+                    { text: 'Поднять средний чек через дополнительные услуги', sub: 'Расчёт прироста после загрузки данных' },
+                    { text: 'Увеличить частоту визитов активных клиентов', sub: 'Долгосрочный рост без рекламы' },
+                    { text: 'Повысить системную возвратность', sub: 'Удержание = стабильный поток дохода' },
+                  ],
+                  market: [
+                    { text: 'Найти слабые стороны конкурентов', sub: 'Введите ссылку — получите уязвимости' },
+                    { text: 'Создать контент, который приводит на запись', sub: 'Формулы продающих постов под ваши услуги' },
+                    { text: 'Проверить репутацию в интернете', sub: 'Отзывы влияют на выбор клиентов' },
+                  ],
+                }
+                return (
+                  <div key={layer} className={`rounded-2xl overflow-hidden border border-parchment border-l-4 ${meta.accentBorder} opacity-50 mb-3`}>
+                    <div className={`px-5 pt-4 pb-3 ${meta.headerBg}`}>
+                      <span className={`inline-block text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full ${meta.badge}`}>
+                        {meta.label}
+                      </span>
+                    </div>
+                    <div className="bg-white divide-y divide-parchment/60">
+                      {placeholder[layer].map((item, i) => (
+                        <div key={i} className="flex items-start justify-between px-5 py-4 cursor-default">
+                          <div className="flex-1 min-w-0 mr-3">
+                            <p className="text-sm font-medium text-graphite leading-snug mb-0.5">{item.text}</p>
+                            <p className="text-xs text-dusk/45 leading-snug">{item.sub}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
+            </>
           ) : (
             /* Loading skeleton for secondary */
             <div className="rounded-2xl border border-parchment animate-pulse">

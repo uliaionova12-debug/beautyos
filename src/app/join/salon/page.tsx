@@ -211,20 +211,17 @@ export default function JoinSalonPage() {
 
           <div className="space-y-3">
 
-            {/* Manual — highlighted, new */}
+            {/* Manual */}
             <button
               onClick={() => router.push('/join/manual' + (existingSalonId ? `?salon_id=${existingSalonId}` : ''))}
-              className="w-full text-left bg-card border-2 border-rose/30 rounded-2xl p-5 hover:border-rose/60 hover:shadow-sm transition-all group"
+              className="w-full text-left bg-card border border-parchment rounded-2xl p-5 hover:border-graphite/25 hover:shadow-sm transition-all group"
             >
               <div className="flex items-start gap-4">
-                <div className="w-11 h-11 bg-rose/10 rounded-xl flex items-center justify-center shrink-0">
-                  <PenLine size={18} className="text-rose" />
+                <div className="w-11 h-11 bg-parchment rounded-xl flex items-center justify-center shrink-0">
+                  <PenLine size={18} className="text-dusk" />
                 </div>
                 <div className="flex-1 pt-0.5">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold text-graphite">Начать вручную</p>
-                    <span className="text-[10px] font-bold tracking-wider text-rose uppercase bg-rose/10 px-2 py-0.5 rounded-full">Рекомендуем</span>
-                  </div>
+                  <p className="text-sm font-semibold text-graphite">Начать вручную</p>
                   <p className="text-xs text-dusk mt-1 leading-snug">
                     Для мастеров без CRM — добавьте несколько клиентов и получите первый анализ за 3 минуты.
                   </p>

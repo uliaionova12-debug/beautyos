@@ -317,17 +317,17 @@ export default function ClientPage() {
                 Записаться онлайн
               </a>
             ) : (
-              <div className="flex items-center gap-2 text-sm text-dusk">
-                <Clock size={14} />
-                Свяжитесь с салоном для записи
+              <div className="bg-parchment/60 rounded-xl px-4 py-3 text-sm text-dusk leading-snug">
+                <p className="font-medium text-graphite mb-0.5">Как записаться?</p>
+                <p className="text-xs">Попросите мастера прислать ссылку для записи — или свяжитесь с салоном напрямую.</p>
               </div>
             )}
           </div>
         )}
 
         {/* Quick actions */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          {salon.booking_url ? (
+        <div className={`grid gap-3 mb-6 ${salon.booking_url ? 'grid-cols-2' : 'grid-cols-1'}`}>
+          {salon.booking_url && (
             <a
               href={salon.booking_url}
               target="_blank"
@@ -337,11 +337,6 @@ export default function ClientPage() {
               <Calendar size={18} className="text-dusk" />
               <span className="text-xs text-dusk">Записаться</span>
             </a>
-          ) : (
-            <div className="bg-card border border-parchment rounded-xl py-4 flex flex-col items-center gap-2 opacity-40">
-              <Calendar size={18} className="text-dusk" />
-              <span className="text-xs text-dusk">Записаться</span>
-            </div>
           )}
           <a
             href="#last-visit"

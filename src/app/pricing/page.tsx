@@ -154,7 +154,7 @@ export default function PricingPage() {
           </div>
           <div className="flex items-center gap-6">
             <span className="text-sm font-medium text-rose hidden sm:block">Тарифы</span>
-            <Link href="/role" className="text-sm font-medium text-dusk hover:text-rose transition-colors">Войти</Link>
+            <Link href="/explain" className="text-sm font-medium text-dusk hover:text-rose transition-colors">Войти</Link>
           </div>
         </header>
 

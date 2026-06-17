@@ -107,7 +107,7 @@ export default function LandingPage() {
             <a href="#calculator" className="text-sm text-dusk hover:text-graphite transition-colors">Калькулятор</a>
             <Link href="/pricing" className="text-sm text-dusk hover:text-graphite transition-colors">Тарифы</Link>
           </nav>
-          <Link href="/role" className="bg-sage text-white text-sm font-semibold px-5 py-2.5 rounded-full hover:opacity-90 transition-opacity">
+          <Link href="/explain" className="bg-sage text-white text-sm font-semibold px-5 py-2.5 rounded-full hover:opacity-90 transition-opacity">
             Войти
           </Link>
         </div>
@@ -453,7 +453,7 @@ export default function LandingPage() {
             ))}
           </div>
           <div className="text-center">
-            <Link href="/role"
+            <Link href="/explain"
               className="inline-flex items-center gap-2 bg-sage text-white px-8 py-4 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity">
               <Sparkles size={16} />Попробовать бесплатно
             </Link>
@@ -526,7 +526,7 @@ export default function LandingPage() {
             <span className="text-sm font-bold text-graphite">BeautyOS</span>
             <div className="flex flex-wrap gap-6">
               <Link href="/pricing" className="text-xs text-dusk hover:text-graphite transition-colors">Тарифы</Link>
-              <Link href="/role" className="text-xs text-dusk hover:text-graphite transition-colors">Войти</Link>
+              <Link href="/explain" className="text-xs text-dusk hover:text-graphite transition-colors">Войти</Link>
               <Link href="/join/salon" className="text-xs text-dusk hover:text-graphite transition-colors">Регистрация</Link>
               <a href="https://t.me/beautyos_ai" target="_blank" rel="noopener noreferrer"
                 className="text-xs text-dusk hover:text-graphite transition-colors">Telegram</a>
