@@ -175,18 +175,21 @@ export default function ActionsPage() {
 
   return (
     <div className="min-h-screen bg-cream">
-      <div className="max-w-2xl mx-auto px-4 py-8">
+      <div className="max-w-2xl mx-auto px-4 pt-5 pb-8">
 
         {/* Nav */}
-        <div className="mb-6">
-          <Link href={`/dashboard${q}`} className="inline-flex items-center gap-1.5 text-sm text-dusk hover:text-sage transition-colors">
-            <ArrowLeft size={14} />
+        <div className="mb-7">
+          <Link
+            href={`/dashboard${q}`}
+            className="inline-flex items-center gap-1.5 text-sm text-dusk hover:text-sage transition-colors -ml-2 px-2 py-3 rounded-xl"
+          >
+            <ArrowLeft size={16} />
             Карта бизнеса
           </Link>
         </div>
 
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-7">
           <p className="text-[10px] font-bold text-dusk/40 uppercase tracking-widest mb-2">BeautyOS</p>
           <h1 className="text-2xl font-bold text-graphite mb-3">Что делать дальше</h1>
           <p className="text-sm text-dusk/70 leading-relaxed border-l-2 border-sage/40 pl-3">

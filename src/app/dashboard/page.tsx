@@ -3,51 +3,23 @@
 export const dynamic = 'force-dynamic'
 
 import { useEffect, useState } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
-import { AgentCard } from '@/components/dashboard/AgentCard'
-import { RetentionTrend } from '@/components/dashboard/RetentionTrend'
-import { Users, ArrowRight, Phone, Star, Target, Megaphone, Sparkles, Upload } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
+import { ArrowLeft, ArrowRight, Upload, Share2, Copy, CheckCircle2, QrCode, Sparkles } from 'lucide-react'
 import Link from 'next/link'
-import { DailyAction } from '@/types'
+import { QRCodeSVG } from 'qrcode.react'
 
 interface Summary {
+  salon_name?: string
+  total_clients: number
+  active_clients: number
   at_risk_count: number
   at_risk_revenue: number
   lost_count: number
   lost_impact: number
-  total_clients: number
+  avg_check: number
+  total_revenue: number
+  retention_rate: number
 }
-
-const AGENTS = [
-  {
-    title: 'Директор по возврату',
-    description: 'Возвратность клиентов и финансовые потери от оттока',
-    icon: Users,
-    href: '/retention',
-    status: 'active' as const,
-  },
-  {
-    title: 'Директор по репутации',
-    description: 'Рейтинг, неотвеченные отзывы и AI-ответы',
-    icon: Star,
-    href: '/reputation',
-    status: 'active' as const,
-  },
-  {
-    title: 'Директор по конкурентам',
-    description: 'Анализ рынка, чек и акции конкурентов',
-    icon: Target,
-    href: '/competitors',
-    status: 'active' as const,
-  },
-  {
-    title: 'Директор по маркетингу',
-    description: 'Контент-план, акции и идеи для роста',
-    icon: Megaphone,
-    href: '/marketing',
-    status: 'active' as const,
-  },
-]
 
 function formatMoney(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + ' млн ₽'
@@ -57,28 +29,39 @@ function formatMoney(n: number): string {
 
 export default function DashboardPage() {
   const searchParams = useSearchParams()
-  const router = useRouter()
   const salonId = searchParams.get('salon_id') || ''
   const [summary, setSummary] = useState<Summary | null>(null)
-  const [dailyAction, setDailyAction] = useState<DailyAction | null>(null)
-  const [snapshots, setSnapshots] = useState<Array<{ snapshot_date: string; retention_rate: number; total_clients: number; active_clients: number; at_risk_clients: number; lost_clients: number }>>([])
   const [loading, setLoading] = useState(true)
+  const [inviteSlug, setInviteSlug] = useState<string | null>(null)
+  const [inviteLoading, setInviteLoading] = useState(false)
+  const [inviteCopied, setInviteCopied] = useState(false)
+  const [showQr, setShowQr] = useState(false)
 
-  const now = new Date()
-  const timeStr = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
-  const dateStr = now.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' })
+  function generateInviteLink() {
+    setInviteSlug(salonId)
+  }
+
+  function inviteUrl() {
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://beautyos-bice.vercel.app'
+    return `${origin}/join?salon_id=${salonId}`
+  }
+
+  function copyInviteLink() {
+    navigator.clipboard.writeText(inviteUrl())
+    setInviteCopied(true)
+    setTimeout(() => setInviteCopied(false), 2000)
+  }
 
   useEffect(() => {
     if (!salonId) { setLoading(false); return }
     Promise.all([
       fetch(`/api/summary?salon_id=${salonId}`).then(r => r.json()),
-      fetch(`/api/daily-action?salon_id=${salonId}`).then(r => r.json()),
-      fetch(`/api/snapshots?salon_id=${salonId}`).then(r => r.json()),
+      fetch(`/api/salon?id=${salonId}`).then(r => r.json()).catch(() => null),
     ])
-      .then(([summaryData, actionData, snapshotData]) => {
+      .then(([summaryData, salonData]) => {
         setSummary(summaryData)
-        setDailyAction(actionData.action ?? null)
-        setSnapshots(snapshotData.snapshots ?? [])
+        if (salonData?.salon_slug) setInviteSlug(salonData.salon_slug)
+        else setInviteSlug(salonId) // fallback: use salonId directly
         setLoading(false)
       })
       .catch(() => setLoading(false))
@@ -97,147 +80,223 @@ export default function DashboardPage() {
     )
   }
 
+  const q = `?salon_id=${salonId}`
+
   return (
     <div className="min-h-screen bg-cream">
-      <div className="max-w-2xl mx-auto px-4 py-8">
+      <div className="max-w-2xl mx-auto px-4 pt-5 pb-8">
 
         {/* Шапка */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-xl font-semibold text-graphite tracking-tight">BeautyOS</h1>
-            <p className="text-dusk text-sm capitalize mt-0.5">{dateStr} · {timeStr}</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link
-              href={`/join/salon?salon_id=${salonId}`}
-              className="flex items-center gap-1.5 text-xs text-dusk hover:text-sage transition-colors"
-            >
-              <Upload size={12} />
-              Загрузить документ
-            </Link>
-            <span className="text-parchment">|</span>
-            <Link href={`/role?salon_id=${salonId}`} className="text-xs text-dusk hover:text-sage transition-colors">
-              Сменить роль
-            </Link>
-          </div>
+        <div className="flex items-center justify-between mb-7">
+          <Link
+            href="/explain"
+            className="inline-flex items-center gap-1.5 text-sm text-dusk hover:text-sage transition-colors -ml-2 px-2 py-3 rounded-xl"
+          >
+            <ArrowLeft size={16} />
+            Назад
+          </Link>
+          <Link
+            href={`/join/salon${q}`}
+            className="inline-flex items-center gap-1.5 text-xs text-dusk hover:text-sage transition-colors px-2 py-3 rounded-xl"
+          >
+            <Upload size={12} />
+            Обновить данные
+          </Link>
         </div>
 
-        {/* DAILY AI BRIEF */}
-        {!loading && dailyAction && (
-          <div className="bg-violet-50 border border-violet-200 rounded-2xl p-5 mb-4">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-2 h-2 rounded-full bg-sage animate-pulse" />
-              <p className="text-xs text-sage font-semibold uppercase tracking-wider">
-                Главное действие на сегодня
-              </p>
-            </div>
-            <p className="text-graphite font-semibold text-base leading-snug mb-1">
-              Позвонить {dailyAction.client_count} клиентам мастера {dailyAction.master_name.split(' ')[0]}
-            </p>
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-emerald-600 font-bold">{formatMoney(dailyAction.potential_revenue)}</span>
-              <span className="text-dusk/40">·</span>
-              <span className="text-dusk text-sm">{Math.round(dailyAction.probability * 100)}% вероятность</span>
-            </div>
-            <button
-              onClick={() => router.push(`/master?salon_id=${salonId}&master=${encodeURIComponent(dailyAction.master_name)}`)}
-              className="flex items-center gap-2 text-sm font-semibold text-sage hover:opacity-80 transition-opacity"
-            >
-              <Phone size={14} />
-              Открыть мастера
-              <ArrowRight size={14} />
-            </button>
-          </div>
-        )}
+        <div className="mb-7">
+          <p className="text-[10px] font-bold text-dusk/40 uppercase tracking-widest mb-1.5">BeautyOS</p>
+          <h1 className="text-2xl font-bold text-graphite">
+            {summary?.salon_name || 'Карта бизнеса'}
+          </h1>
+        </div>
 
-        {/* ТРЕНД ВОЗВРАТНОСТИ */}
-        <RetentionTrend snapshots={snapshots} />
-
-        {/* ГЛАВНЫЙ БЛОК */}
-        {loading ? (
-          <div className="bg-card border border-parchment rounded-2xl p-6 mb-6 animate-pulse">
-            <div className="h-5 bg-parchment rounded w-1/3 mb-4" />
-            <div className="h-12 bg-parchment rounded w-1/2 mb-2" />
-            <div className="h-4 bg-parchment rounded w-2/3 mb-6" />
-            <div className="h-12 bg-parchment rounded" />
-          </div>
-        ) : summary && summary.at_risk_count > 0 ? (
-          <div className="bg-blush border border-terracotta/20 rounded-2xl p-6 mb-6">
-            <p className="text-xs text-terracotta font-semibold uppercase tracking-wider mb-3">
-              Сегодня можно вернуть
-            </p>
-            <div className="flex items-end gap-3 mb-1">
-              <span className="text-5xl font-bold text-graphite tracking-tight">
-                {summary.at_risk_count}
-              </span>
-              <span className="text-xl text-dusk pb-1">клиентов</span>
-            </div>
-            <p className="text-dusk text-sm mb-2">Потенциальная выручка</p>
-            <p className="text-2xl font-bold text-emerald-600 mb-6">
-              {formatMoney(summary.at_risk_revenue)}
-            </p>
-            <button
-              onClick={() => router.push(`/retention?salon_id=${salonId}`)}
-              className="w-full bg-sage text-white font-semibold py-4 rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2 text-base"
-            >
-              Вернуть клиентов
-              <ArrowRight size={18} />
-            </button>
-          </div>
-        ) : (
-          <div className="bg-card border border-parchment rounded-2xl p-6 mb-6">
-            <p className="text-dusk text-sm">Нет клиентов, требующих внимания</p>
-          </div>
-        )}
-
-        {/* Вторичные метрики */}
-        {summary && (
-          <div className="grid grid-cols-3 gap-3 mb-8">
-            <div className="bg-card border border-parchment rounded-xl p-4">
-              <p className="text-xl font-bold text-graphite">{summary.total_clients}</p>
-              <p className="text-xs text-dusk mt-1">Всего клиентов</p>
-            </div>
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-              <p className="text-xl font-bold text-red-600">{summary.lost_count}</p>
-              <p className="text-xs text-dusk mt-1">Потеряно</p>
-            </div>
-            <div className="bg-card border border-parchment rounded-xl p-4">
-              <p className="text-xl font-bold text-terracotta">−{formatMoney(summary.lost_impact)}</p>
-              <p className="text-xs text-dusk mt-1">Ущерб</p>
-            </div>
-          </div>
-        )}
-
-        {/* AI Director CTA */}
-        <Link
-          href={`/ai-director?salon_id=${salonId}`}
-          className="flex items-center justify-between bg-sage text-white rounded-2xl p-5 mb-6 hover:opacity-95 transition-opacity"
-        >
-          <div className="flex items-center gap-3">
-            <Sparkles size={18} className="opacity-80 shrink-0" />
-            <div>
-              <p className="text-sm font-semibold">AI Директор</p>
-              <p className="text-xs opacity-70">Задайте любой вопрос о бизнесе</p>
-            </div>
-          </div>
-          <span className="text-sm font-medium opacity-80">→</span>
-        </Link>
-
-        {/* AI Директора */}
-        <div>
-          <p className="text-xs text-dusk font-semibold uppercase tracking-wider mb-3">
-            AI директора
-          </p>
-          <div className="grid grid-cols-2 gap-3">
-            {AGENTS.map(agent => (
-              <AgentCard
-                key={agent.title}
-                {...agent}
-                href={agent.href === '#' ? '#' : `${agent.href}?salon_id=${salonId}`}
-              />
+        {/* Skeleton */}
+        {loading && (
+          <div className="space-y-3 animate-pulse">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="bg-card border border-parchment rounded-2xl p-6 h-32" />
             ))}
           </div>
-        </div>
+        )}
+
+        {/* 4 блока Карты бизнеса */}
+        {!loading && summary && (
+          <div className="space-y-3 mb-8">
+
+            {/* 1. Финансовые потоки */}
+            <div className="bg-card border border-parchment rounded-2xl p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-lg">💰</span>
+                <div>
+                  <p className="text-sm font-bold text-graphite">Финансовые потоки</p>
+                  <p className="text-xs text-dusk/60">где формируется доход</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <p className="text-xl font-bold text-graphite">{formatMoney(summary.avg_check)}</p>
+                  <p className="text-[11px] text-dusk/60 mt-0.5">средний чек</p>
+                </div>
+                <div>
+                  <p className="text-xl font-bold text-emerald-600">{formatMoney(summary.at_risk_revenue)}</p>
+                  <p className="text-[11px] text-dusk/60 mt-0.5">можно вернуть</p>
+                </div>
+                <div>
+                  <p className="text-xl font-bold text-red-500">−{formatMoney(summary.lost_impact)}</p>
+                  <p className="text-[11px] text-dusk/60 mt-0.5">потери</p>
+                </div>
+              </div>
+            </div>
+
+            {/* 2. Клиенты */}
+            <div className="bg-card border border-parchment rounded-2xl p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-lg">👥</span>
+                <div>
+                  <p className="text-sm font-bold text-graphite">Клиенты</p>
+                  <p className="text-xs text-dusk/60">кто возвращается / не возвращается</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  { val: summary.total_clients, label: 'всего', color: 'text-graphite' },
+                  { val: summary.active_clients, label: 'активных', color: 'text-emerald-600' },
+                  { val: summary.at_risk_count, label: 'в риске', color: 'text-amber-600' },
+                  { val: summary.lost_count, label: 'потеряно', color: 'text-red-500' },
+                ].map(m => (
+                  <div key={m.label} className="text-center">
+                    <p className={`text-xl font-bold ${m.color}`}>{m.val}</p>
+                    <p className="text-[10px] text-dusk/50 mt-0.5">{m.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 3. Дефициты */}
+            <div className="bg-red-50 border border-red-100 rounded-2xl p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-lg">📉</span>
+                <div>
+                  <p className="text-sm font-bold text-graphite">Дефициты</p>
+                  <p className="text-xs text-dusk/60">где теряется потенциал</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <p className="text-xl font-bold text-red-600">{summary.lost_count}</p>
+                  <p className="text-[11px] text-dusk/60 mt-0.5">потерянных</p>
+                </div>
+                <div>
+                  <p className="text-xl font-bold text-red-600">−{formatMoney(summary.lost_impact)}</p>
+                  <p className="text-[11px] text-dusk/60 mt-0.5">финансовый ущерб</p>
+                </div>
+                <div>
+                  <p className="text-xl font-bold text-red-600">{100 - summary.retention_rate}%</p>
+                  <p className="text-[11px] text-dusk/60 mt-0.5">уходят</p>
+                </div>
+              </div>
+            </div>
+
+            {/* 4. Точки роста */}
+            <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-lg">📈</span>
+                <div>
+                  <p className="text-sm font-bold text-graphite">Точки роста</p>
+                  <p className="text-xs text-dusk/60">зоны увеличения дохода</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-3xl font-bold text-emerald-700">{summary.at_risk_count}</p>
+                  <p className="text-xs text-dusk/60 mt-0.5">клиентов можно вернуть</p>
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-emerald-700">{formatMoney(summary.at_risk_revenue)}</p>
+                  <p className="text-xs text-dusk/60 mt-0.5">потенциал выручки</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        )}
+
+        {/* CTA — Перейти к действиям */}
+        {!loading && summary && (
+          <Link
+            href={`/actions${q}`}
+            className="w-full flex items-center justify-center gap-2 bg-graphite text-white font-semibold text-base rounded-2xl py-4 hover:bg-graphite/90 active:scale-95 transition-all shadow-md shadow-graphite/10 mb-6"
+          >
+            <Sparkles size={16} className="opacity-60" />
+            Перейти к действиям
+            <ArrowRight size={18} />
+          </Link>
+        )}
+
+        {/* Invite link */}
+        {!loading && salonId && (
+          <div className="bg-card border border-parchment rounded-2xl p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Share2 size={15} className="text-terracotta" />
+              <p className="text-sm font-semibold text-graphite">Ссылка для клиентов</p>
+            </div>
+            <p className="text-xs text-dusk leading-relaxed mb-4">
+              Отправьте ссылку — клиент попадает прямо к вам. Больше повторных визитов без затрат на рекламу.
+            </p>
+
+            {salonId ? (
+              <div className="space-y-3">
+                {/* Link row */}
+                <div className="flex items-center gap-2 bg-parchment/60 rounded-xl px-3 py-2.5 border border-parchment">
+                  <code className="text-xs text-graphite/70 flex-1 truncate">
+                    {inviteUrl()}
+                  </code>
+                  <button onClick={copyInviteLink} className="shrink-0 text-dusk/50 hover:text-graphite transition-colors">
+                    {inviteCopied ? <CheckCircle2 size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                  </button>
+                </div>
+
+                {/* Action buttons */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={copyInviteLink}
+                    className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold bg-terracotta text-white rounded-xl py-2.5 hover:bg-terracotta/90 transition-colors"
+                  >
+                    {inviteCopied ? <><CheckCircle2 size={12} />Скопировано</> : <><Copy size={12} />Скопировать</>}
+                  </button>
+                  <button
+                    onClick={() => setShowQr(v => !v)}
+                    className={`flex items-center justify-center gap-1.5 text-xs font-semibold border rounded-xl px-4 py-2.5 transition-colors ${
+                      showQr
+                        ? 'bg-terracotta/10 border-terracotta/40 text-terracotta'
+                        : 'border-parchment text-graphite/70 hover:border-terracotta/40'
+                    }`}
+                  >
+                    <QrCode size={12} />
+                    QR-код
+                  </button>
+                </div>
+
+                {/* QR code */}
+                {showQr && (
+                  <div className="flex flex-col items-center gap-3 bg-white border border-parchment rounded-2xl py-6 px-4">
+                    <QRCodeSVG
+                      value={inviteUrl()}
+                      size={200}
+                      bgColor="#ffffff"
+                      fgColor="#2d2d2d"
+                      level="M"
+                    />
+                    <p className="text-xs text-dusk text-center leading-relaxed">
+                      Покажите клиенту — он сканирует и попадает на страницу входа
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : null}
+          </div>
+        )}
 
       </div>
     </div>

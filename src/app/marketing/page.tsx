@@ -235,6 +235,7 @@ function MessageBubble({ msg }: { msg: Message }) {
 }
 
 // ─── Breadcrumb ───────────────────────────────────────────────────────────────
+// Compact single-line trail. Taps navigate back; each segment has 36px min height.
 
 function Breadcrumb({
   goal, platform, format, onGoTo,
@@ -246,32 +247,31 @@ function Breadcrumb({
 }) {
   if (!goal) return null
   return (
-    <div className="flex items-center gap-1 flex-wrap mb-6">
+    <div className="flex items-center gap-0.5 mb-5 overflow-hidden">
       <button
         onClick={() => onGoTo('goal')}
-        className="flex items-center gap-1 text-xs bg-terracotta/10 text-terracotta px-2.5 py-1.5 rounded-full hover:bg-terracotta/20 transition-colors"
+        className="inline-flex items-center gap-1 text-[11px] text-terracotta/80 hover:text-terracotta py-2 px-1.5 rounded-lg transition-colors shrink-0 min-h-[36px]"
       >
         <span>{goal.emoji}</span>
-        <span className="font-medium">{goal.label}</span>
+        <span className="font-medium max-w-[72px] truncate">{goal.label}</span>
       </button>
       {platform && (
         <>
-          <ChevronRight size={12} className="text-dusk/30" />
+          <ChevronRight size={10} className="text-dusk/25 shrink-0" />
           <button
             onClick={() => onGoTo('platform')}
-            className="flex items-center gap-1 text-xs bg-parchment text-graphite/70 px-2.5 py-1.5 rounded-full hover:bg-terracotta/10 hover:text-terracotta transition-colors"
+            className="inline-flex items-center gap-0.5 text-[11px] text-dusk/60 hover:text-terracotta py-2 px-1.5 rounded-lg transition-colors shrink-0 min-h-[36px]"
           >
             <span>{platform.emoji}</span>
-            <span>{platform.label}</span>
           </button>
         </>
       )}
       {format && (
         <>
-          <ChevronRight size={12} className="text-dusk/30" />
+          <ChevronRight size={10} className="text-dusk/25 shrink-0" />
           <button
             onClick={() => onGoTo('format')}
-            className="text-xs bg-parchment text-graphite/70 px-2.5 py-1.5 rounded-full hover:bg-terracotta/10 hover:text-terracotta transition-colors"
+            className="text-[11px] text-dusk/60 hover:text-terracotta py-2 px-1.5 rounded-lg transition-colors shrink-0 min-h-[36px]"
           >
             {format.label}
           </button>
@@ -317,8 +317,9 @@ export default function MarketingPage() {
   const [isAutoStyling, setIsAutoStyling]       = useState(false)
   const [autoStyleReason, setAutoStyleReason]   = useState('')
 
-  const bottomRef    = useRef<HTMLDivElement>(null)
-  const photoInputRef = useRef<HTMLInputElement>(null)
+  const bottomRef     = useRef<HTMLDivElement>(null)
+  const photoInputRef  = useRef<HTMLInputElement>(null)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -710,22 +711,22 @@ export default function MarketingPage() {
 
   return (
     <div className="min-h-screen bg-cream">
-      <div className="max-w-2xl mx-auto px-4 py-8">
+      <div className="max-w-2xl mx-auto px-4 pt-5 pb-8">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <Link
             href={`/actions?salon_id=${salonId}`}
-            className="flex items-center gap-1.5 text-sm text-dusk hover:text-graphite transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm text-dusk hover:text-graphite transition-colors -ml-2 px-2 py-3 rounded-xl"
           >
-            <ArrowLeft size={14} />
+            <ArrowLeft size={16} />
             Действия
           </Link>
           <div className="text-center">
             <p className="text-sm font-semibold text-graphite">
               {step === 'compose' ? 'AI Content Studio' : 'Директор по маркетингу'}
             </p>
-            <p className="text-[10px] text-dusk">
+            <p className="text-[10px] text-dusk/60">
               {step === 'compose' ? 'Визуал · Заголовок · Публикация' : 'Бизнес-задача → контент'}
             </p>
           </div>
@@ -929,50 +930,73 @@ export default function MarketingPage() {
 
             <button
               onClick={() => goTo('result')}
-              className="flex items-center gap-1.5 text-sm text-dusk hover:text-graphite transition-colors mb-6"
+              className="inline-flex items-center gap-1.5 text-sm text-dusk hover:text-graphite transition-colors -ml-2 px-2 py-3 rounded-xl mb-4"
             >
-              <ArrowLeft size={14} />
+              <ArrowLeft size={16} />
               Назад к тексту
             </button>
 
-            <h2 className="text-xl font-bold text-graphite mb-1">Визуал для публикации</h2>
-            <p className="text-sm text-dusk mb-6">Выберите источник изображения</p>
+            <h2 className="text-xl font-bold text-graphite mb-1">Создать изображение</h2>
+            <p className="text-sm text-dusk mb-5">Как будем создавать визуал?</p>
 
-            {/* Option cards — shown when nothing selected yet */}
+            {/* Source choice — shown when nothing selected yet */}
             {!visualChoice && (
-              <div className="space-y-3">
+              <div className="space-y-2.5">
+                {/* AI Generate */}
+                <button
+                  onClick={handleGenerateImage}
+                  className="w-full flex items-center gap-4 bg-graphite text-white rounded-2xl p-5 text-left hover:opacity-95 active:scale-[0.99] transition-all group"
+                >
+                  <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-2xl shrink-0">✨</div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold">Сгенерировать AI</p>
+                    <p className="text-xs text-white/55 mt-0.5">Soft Luxury фото по содержанию поста — ~20 сек</p>
+                  </div>
+                  <ChevronRight size={15} className="text-white/30 shrink-0" />
+                </button>
+
+                {/* Gallery */}
                 <button
                   onClick={() => { setVisualChoice('photos'); setTimeout(() => photoInputRef.current?.click(), 50) }}
                   className="w-full flex items-center gap-4 bg-card border border-parchment hover:border-terracotta/40 rounded-2xl p-5 text-left transition-all group"
                 >
-                  <div className="w-12 h-12 bg-terracotta/8 rounded-xl flex items-center justify-center text-2xl shrink-0">📷</div>
+                  <div className="w-12 h-12 bg-terracotta/8 rounded-xl flex items-center justify-center text-2xl shrink-0">🖼</div>
                   <div className="flex-1">
-                    <p className="text-sm font-semibold text-graphite">Использовать мои фотографии</p>
-                    <p className="text-xs text-dusk mt-1">До 5 фото — AI выберет лучшее для поста</p>
+                    <p className="text-sm font-semibold text-graphite">Выбрать из галереи</p>
+                    <p className="text-xs text-dusk mt-0.5">До 5 фото — AI выберет лучшее</p>
                   </div>
                   <ChevronRight size={15} className="text-dusk/30 shrink-0" />
                 </button>
 
+                {/* Camera */}
                 <button
-                  onClick={handleGenerateImage}
+                  onClick={() => { setVisualChoice('photos'); setTimeout(() => cameraInputRef.current?.click(), 50) }}
                   className="w-full flex items-center gap-4 bg-card border border-parchment hover:border-terracotta/40 rounded-2xl p-5 text-left transition-all group"
                 >
-                  <div className="w-12 h-12 bg-terracotta/8 rounded-xl flex items-center justify-center text-2xl shrink-0">✨</div>
+                  <div className="w-12 h-12 bg-terracotta/8 rounded-xl flex items-center justify-center text-2xl shrink-0">📷</div>
                   <div className="flex-1">
-                    <p className="text-sm font-semibold text-graphite">Сгенерировать изображение</p>
-                    <p className="text-xs text-dusk mt-1">AI создаст Soft Luxury фото по содержанию поста</p>
+                    <p className="text-sm font-semibold text-graphite">Сфотографировать</p>
+                    <p className="text-xs text-dusk mt-0.5">Открыть камеру и снять прямо сейчас</p>
                   </div>
                   <ChevronRight size={15} className="text-dusk/30 shrink-0" />
                 </button>
               </div>
             )}
 
-            {/* Hidden file input */}
+            {/* Hidden file inputs */}
             <input
               ref={photoInputRef}
               type="file"
               accept="image/*"
               multiple
+              className="hidden"
+              onChange={handlePhotoUpload}
+            />
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
               className="hidden"
               onChange={handlePhotoUpload}
             />
@@ -1178,9 +1202,9 @@ export default function MarketingPage() {
             <div>
               <button
                 onClick={() => setStep('visual')}
-                className="flex items-center gap-1.5 text-sm text-dusk hover:text-graphite transition-colors mb-5"
+                className="inline-flex items-center gap-1.5 text-sm text-dusk hover:text-graphite transition-colors -ml-2 px-2 py-3 rounded-xl mb-3"
               >
-                <ArrowLeft size={14} />
+                <ArrowLeft size={16} />
                 Назад
               </button>
 
@@ -1364,6 +1388,8 @@ export default function MarketingPage() {
               </div>
 
               {/* ── Download ────────────────────────── */}
+              {/* pb accounts for FAB + bottom safe area so button doesn't hide under them */}
+              <div style={{ paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}>
               <button
                 onClick={handleDownload}
                 disabled={!activeHeadline || isDownloading}
@@ -1387,6 +1413,7 @@ export default function MarketingPage() {
               {!activeHeadline && (
                 <p className="text-center text-xs text-dusk/50 mt-2">Выберите или введите заголовок</p>
               )}
+              </div>
             </div>
           )
         })()}
