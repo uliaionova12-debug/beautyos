@@ -37,7 +37,6 @@ export async function POST(req: NextRequest) {
       n: 1,
       size: '1024x1024',
       quality: 'standard', // 'hd' takes 15-30 sec and risks timeout; standard is 8-12 sec
-      style: 'natural',
     })
 
     const imageUrl = response.data?.[0]?.url
