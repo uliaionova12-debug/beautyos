@@ -158,7 +158,7 @@ export default function ForBusinessPage() {
         <section className="relative min-h-[calc(100svh-76px)] flex items-center pt-24 md:pt-28 pb-8 md:pb-10 px-5 md:px-6 overflow-hidden">
           <div className="absolute inset-0 pointer-events-none">
             <img
-              src="/landing-screens/beauty-atmosphere.jpg"
+              src="/landing-screens/beauty-atmosphere-clean.png"
               alt=""
               className="absolute inset-y-0 right-0 w-full lg:w-[62%] h-full object-cover object-center opacity-25 lg:opacity-50"
             />
@@ -221,17 +221,11 @@ export default function ForBusinessPage() {
           <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-8 items-stretch">
             <div className="relative min-h-[360px] overflow-hidden rounded-[2rem] border border-parchment shadow-2xl shadow-graphite/10">
               <img
-                src="/landing-screens/beauty-atmosphere.jpg"
+                src="/landing-screens/beauty-atmosphere-clean.png"
                 alt="Мягкая эстетика BeautyOS для beauty-бизнеса"
                 className="absolute inset-0 w-full h-full object-cover object-center"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-graphite/35 via-transparent to-transparent" />
-              <div className="absolute left-6 bottom-6 right-6 max-w-md">
-                <p className="text-xs text-white/70 font-semibold uppercase tracking-wider mb-3">Soft luxury beauty layer</p>
-                <h2 className="text-3xl md:text-4xl font-bold text-white leading-tight">
-                  Технология, которая выглядит как часть красивого сервиса
-                </h2>
-              </div>
+              <div className="absolute inset-0 bg-gradient-to-r from-cream/5 via-transparent to-cream/10" />
             </div>
             <div className="bg-card border border-parchment rounded-[2rem] p-8 md:p-10 flex flex-col justify-center">
               <p className="text-xs text-terracotta font-semibold uppercase tracking-wider mb-3">Живость без шума</p>
