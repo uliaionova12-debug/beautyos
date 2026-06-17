@@ -44,12 +44,25 @@ const FORMATS = [
   { id: 'monthly_plan',   label: 'На месяц',      desc: '20+ постов по неделям' },
 ] as const
 
-type FormatId   = typeof FORMATS[number]['id']
-type Step       = 'goal' | 'platform' | 'format' | 'result' | 'visual' | 'compose'
+type FormatId     = typeof FORMATS[number]['id']
+type Step         = 'goal' | 'platform' | 'format' | 'result' | 'visual' | 'compose'
 type VisualChoice = 'photos' | 'generate' | null
 type ImageSizeId  = 'ig_post' | 'ig_story' | 'telegram' | 'vk'
+type StylePresetId = 'soft_luxury' | 'minimal' | 'editorial' | 'magazine' | 'premium'
+type PositionId   = 'top-left' | 'top-center' | 'top-right' | 'center' | 'bottom-left' | 'bottom-center' | 'bottom-right'
 
 interface Message { role: 'user' | 'assistant'; content: string }
+
+interface StylePreset {
+  label:         string
+  fontFamily:    string
+  fontWeight:    string
+  textTransform: 'none' | 'uppercase'
+  letterSpacing: string
+  color:         string
+  gradientOpacity: number
+  defaultPosition: PositionId
+}
 
 const SUPPORTS_VISUAL = new Set<FormatId>(['post', 'photo_series', 'stories'])
 
@@ -58,6 +71,78 @@ const IMAGE_SIZES: { id: ImageSizeId; label: string; aspect: string; w: number; 
   { id: 'ig_story', label: 'Stories',    aspect: '9/16', w: 1080, h: 1920 },
   { id: 'telegram', label: 'Telegram',   aspect: '16/9', w: 1280, h: 720  },
   { id: 'vk',       label: 'ВКонтакте', aspect: '16/9', w: 1200, h: 628  },
+]
+
+const STYLE_PRESETS: Record<StylePresetId, StylePreset> = {
+  soft_luxury: {
+    label: 'Soft Luxury',
+    fontFamily: 'Playfair Display',
+    fontWeight: '400',
+    textTransform: 'none',
+    letterSpacing: '0.02em',
+    color: '#FFFFFF',
+    gradientOpacity: 0.65,
+    defaultPosition: 'bottom-left',
+  },
+  minimal: {
+    label: 'Minimal',
+    fontFamily: 'Manrope',
+    fontWeight: '300',
+    textTransform: 'none',
+    letterSpacing: '-0.01em',
+    color: '#FFFFFF',
+    gradientOpacity: 0.38,
+    defaultPosition: 'bottom-center',
+  },
+  editorial: {
+    label: 'Editorial',
+    fontFamily: 'Manrope',
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: '0.12em',
+    color: '#FFFFFF',
+    gradientOpacity: 0.75,
+    defaultPosition: 'bottom-left',
+  },
+  magazine: {
+    label: 'Magazine',
+    fontFamily: 'Playfair Display',
+    fontWeight: '700',
+    textTransform: 'none',
+    letterSpacing: '0.01em',
+    color: '#FFFFFF',
+    gradientOpacity: 0.78,
+    defaultPosition: 'bottom-center',
+  },
+  premium: {
+    label: 'Premium',
+    fontFamily: 'Manrope',
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: '0.18em',
+    color: '#F5E6D0',
+    gradientOpacity: 0.82,
+    defaultPosition: 'bottom-left',
+  },
+}
+
+// 3×3 grid; null = disabled cell (middle-left and middle-right)
+const POSITION_GRID: ({ id: PositionId; arrow: string } | null)[][] = [
+  [
+    { id: 'top-left',    arrow: '↖' },
+    { id: 'top-center',  arrow: '↑' },
+    { id: 'top-right',   arrow: '↗' },
+  ],
+  [
+    null,
+    { id: 'center',      arrow: '✦' },
+    null,
+  ],
+  [
+    { id: 'bottom-left',   arrow: '↙' },
+    { id: 'bottom-center', arrow: '↓' },
+    { id: 'bottom-right',  arrow: '↘' },
+  ],
 ]
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -226,6 +311,11 @@ export default function MarketingPage() {
   const [isLoadingHeadlines, setIsLoadingHeadlines] = useState(false)
   const [isDownloading, setIsDownloading]       = useState(false)
   const [customHeadline, setCustomHeadline]     = useState('')
+  const [stylePreset, setStylePreset]           = useState<StylePresetId>('soft_luxury')
+  const [textPosition, setTextPosition]         = useState<PositionId>('bottom-left')
+  const [secondLine, setSecondLine]             = useState('')
+  const [isAutoStyling, setIsAutoStyling]       = useState(false)
+  const [autoStyleReason, setAutoStyleReason]   = useState('')
 
   const bottomRef    = useRef<HTMLDivElement>(null)
   const photoInputRef = useRef<HTMLInputElement>(null)
@@ -244,8 +334,13 @@ export default function MarketingPage() {
     setHeadlines([])
     setSelectedHeadline(null)
     setCustomHeadline('')
+    setSecondLine('')
+    setStylePreset('soft_luxury')
+    setTextPosition('bottom-left')
+    setAutoStyleReason('')
     setIsAnalyzing(false)
     setIsGenerating(false)
+    setIsAutoStyling(false)
     setIsLoadingHeadlines(false)
   }
 
@@ -368,6 +463,36 @@ export default function MarketingPage() {
     }
   }
 
+  async function handleAutoStyle() {
+    if (!selectedImage || isAutoStyling) return
+    setIsAutoStyling(true)
+    setAutoStyleReason('')
+    try {
+      const lastAi = messages.filter(m => m.role === 'assistant').slice(-1)[0]
+      const res = await fetch('/api/marketing-agent/auto-style', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageDataUrl: selectedImage,
+          goal: selectedGoal?.id || '',
+          postText: lastAi?.content?.slice(0, 200) || '',
+        }),
+      })
+      const data = await res.json()
+      if (data.preset && STYLE_PRESETS[data.preset as StylePresetId]) {
+        setStylePreset(data.preset as StylePresetId)
+      }
+      if (data.position) {
+        setTextPosition(data.position as PositionId)
+      }
+      if (data.reason) setAutoStyleReason(data.reason)
+    } catch {
+      // silently keep current settings
+    } finally {
+      setIsAutoStyling(false)
+    }
+  }
+
   async function handleGenerateImage() {
     const lastAi = messages.filter(m => m.role === 'assistant').slice(-1)[0]
     setVisualChoice('generate')
@@ -441,41 +566,125 @@ export default function MarketingPage() {
       const ctx = canvas.getContext('2d')!
       await document.fonts.ready
 
+      const preset = STYLE_PRESETS[stylePreset]
+      const pos = textPosition
+
       await new Promise<void>(resolve => {
         const img = new Image()
         img.onload = () => {
+          // — draw image —
           const scale = Math.max(w / img.width, h / img.height)
           const iw = img.width * scale
           const ih = img.height * scale
           ctx.drawImage(img, (w - iw) / 2, (h - ih) / 2, iw, ih)
 
-          const grad = ctx.createLinearGradient(0, h * 0.4, 0, h)
-          grad.addColorStop(0, 'rgba(0,0,0,0)')
-          grad.addColorStop(1, 'rgba(0,0,0,0.7)')
-          ctx.fillStyle = grad
-          ctx.fillRect(0, 0, w, h)
+          // — gradient overlay based on position —
+          const opacity = preset.gradientOpacity
+          if (pos.startsWith('top')) {
+            const grad = ctx.createLinearGradient(0, 0, 0, h * 0.58)
+            grad.addColorStop(0, `rgba(0,0,0,${opacity})`)
+            grad.addColorStop(1, 'rgba(0,0,0,0)')
+            ctx.fillStyle = grad
+            ctx.fillRect(0, 0, w, h)
+          } else if (pos === 'center') {
+            const grad = ctx.createRadialGradient(w / 2, h / 2, h * 0.15, w / 2, h / 2, h * 0.65)
+            grad.addColorStop(0, `rgba(0,0,0,${opacity * 0.5})`)
+            grad.addColorStop(1, `rgba(0,0,0,${opacity})`)
+            ctx.fillStyle = grad
+            ctx.fillRect(0, 0, w, h)
+          } else {
+            const grad = ctx.createLinearGradient(0, h * 0.38, 0, h)
+            grad.addColorStop(0, 'rgba(0,0,0,0)')
+            grad.addColorStop(1, `rgba(0,0,0,${opacity})`)
+            ctx.fillStyle = grad
+            ctx.fillRect(0, 0, w, h)
+          }
 
-          const fontSize = Math.round(w * 0.053)
-          ctx.font = `700 ${fontSize}px Manrope, -apple-system, system-ui, sans-serif`
-          ctx.fillStyle = '#FFFFFF'
-          ctx.shadowBlur = 14
-          ctx.shadowColor = 'rgba(0,0,0,0.35)'
+          // — text rendering helpers —
+          ctx.textBaseline = 'top'
+          ctx.fillStyle = preset.color
+          ctx.shadowBlur = 12
+          ctx.shadowColor = 'rgba(0,0,0,0.4)'
 
           const pad = Math.round(w * 0.046)
-          const maxW = w - pad * 2
-          const lineH = fontSize * 1.3
-          const words = headline.split(' ')
-          const lines: string[] = []
-          let line = ''
-          for (const word of words) {
-            const test = line + word + ' '
-            if (ctx.measureText(test).width > maxW && line) { lines.push(line.trim()); line = word + ' ' }
-            else line = test
-          }
-          if (line.trim()) lines.push(line.trim())
+          const maxTextW = w - pad * 2
 
-          const startY = h - lines.length * lineH - pad
-          lines.forEach((l, i) => ctx.fillText(l, pad, startY + i * lineH))
+          function wrapText(text: string, fontSize: number): string[] {
+            const words = text.split(' ')
+            const wrapped: string[] = []
+            let line = ''
+            for (const word of words) {
+              const test = line + word + ' '
+              if (ctx.measureText(test).width > maxTextW && line) {
+                wrapped.push(line.trim())
+                line = word + ' '
+              } else {
+                line = test
+              }
+            }
+            if (line.trim()) wrapped.push(line.trim())
+            return wrapped
+          }
+
+          function applyFont(size: number, weight: string) {
+            const family = preset.fontFamily === 'Playfair Display'
+              ? '"Playfair Display", Georgia, serif'
+              : 'Manrope, -apple-system, system-ui, sans-serif'
+            ctx.font = `${weight} ${size}px ${family}`
+            if ('letterSpacing' in ctx) {
+              // convert em to px
+              const emVal = parseFloat(preset.letterSpacing)
+              ;(ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = `${Math.round(emVal * size)}px`
+            }
+          }
+
+          // — headline —
+          const fontSize = Math.round(w * 0.052)
+          applyFont(fontSize, preset.fontWeight)
+          const displayHeadline = preset.textTransform === 'uppercase' ? headline.toUpperCase() : headline
+          const lines = wrapText(displayHeadline, fontSize)
+          const lineH = fontSize * 1.28
+
+          // — optional second line —
+          const hasSecond = secondLine.trim().length > 0
+          const fontSize2 = Math.round(fontSize * 0.62)
+          const lineH2 = fontSize2 * 1.3
+          let lines2: string[] = []
+          if (hasSecond) {
+            applyFont(fontSize2, '400')
+            const displaySecond = preset.textTransform === 'uppercase' ? secondLine.trim().toUpperCase() : secondLine.trim()
+            lines2 = wrapText(displaySecond, fontSize2)
+          }
+
+          const blockH = lines.length * lineH + (hasSecond ? 8 + lines2.length * lineH2 : 0)
+
+          // — text anchor point —
+          let startX: number
+          let startY: number
+          let align: CanvasTextAlign
+
+          if (pos === 'top-left')      { startX = pad;     startY = pad;              align = 'left'   }
+          else if (pos === 'top-center') { startX = w / 2;  startY = pad;              align = 'center' }
+          else if (pos === 'top-right')  { startX = w - pad; startY = pad;              align = 'right'  }
+          else if (pos === 'center')     { startX = w / 2;  startY = (h - blockH) / 2; align = 'center' }
+          else if (pos === 'bottom-left')   { startX = pad;     startY = h - pad - blockH; align = 'left'   }
+          else if (pos === 'bottom-center') { startX = w / 2;   startY = h - pad - blockH; align = 'center' }
+          else                              { startX = w - pad;  startY = h - pad - blockH; align = 'right'  }
+
+          ctx.textAlign = align
+
+          // — draw headline lines —
+          applyFont(fontSize, preset.fontWeight)
+          lines.forEach((l, i) => ctx.fillText(l, startX, startY + i * lineH))
+
+          // — draw second line —
+          if (hasSecond && lines2.length) {
+            applyFont(fontSize2, '400')
+            ctx.globalAlpha = 0.82
+            const secondY = startY + lines.length * lineH + 8
+            lines2.forEach((l, i) => ctx.fillText(l, startX, secondY + i * lineH2))
+            ctx.globalAlpha = 1
+          }
 
           canvas.toBlob(blob => {
             if (!blob) { resolve(); return }
@@ -937,89 +1146,201 @@ export default function MarketingPage() {
         )}
 
         {/* ── STEP 6: Compose ───────────────────────────────────────────────── */}
-        {step === 'compose' && selectedImage && (
-          <div>
-            <button
-              onClick={() => setStep('visual')}
-              className="flex items-center gap-1.5 text-sm text-dusk hover:text-graphite transition-colors mb-6"
-            >
-              <ArrowLeft size={14} />
-              Назад
-            </button>
+        {step === 'compose' && selectedImage && (() => {
+          const preset  = STYLE_PRESETS[stylePreset]
+          const sz      = IMAGE_SIZES.find(s => s.id === imageSize)!
+          const isTop   = textPosition.startsWith('top')
+          const isCenter = textPosition === 'center'
 
-            <h2 className="text-xl font-bold text-graphite mb-6">Готово к публикации</h2>
+          // CSS preview gradient
+          const overlayClass = isTop
+            ? 'bg-gradient-to-b from-black/65 via-black/0 to-transparent'
+            : isCenter
+            ? 'bg-black/30'
+            : 'bg-gradient-to-t from-black/65 via-transparent to-transparent'
 
-            {/* Size selector */}
-            <div className="flex gap-2 mb-4 overflow-x-auto pb-1 scrollbar-hide">
-              {IMAGE_SIZES.map(s => (
-                <button
-                  key={s.id}
-                  onClick={() => setImageSize(s.id)}
-                  className={`shrink-0 text-xs px-3 py-2 rounded-xl border transition-colors ${
-                    imageSize === s.id
-                      ? 'bg-graphite text-white border-graphite'
-                      : 'bg-card border-parchment text-dusk hover:border-graphite/30 hover:text-graphite'
-                  }`}
-                >
-                  {s.label}
-                </button>
-              ))}
-            </div>
+          // CSS preview text position
+          const textWrapperClass: string = {
+            'top-left':      'absolute top-0 left-0 p-4 sm:p-5',
+            'top-center':    'absolute top-0 left-0 right-0 p-4 sm:p-5 text-center',
+            'top-right':     'absolute top-0 left-0 right-0 p-4 sm:p-5 text-right',
+            'center':        'absolute inset-0 flex flex-col items-center justify-center p-4 text-center',
+            'bottom-left':   'absolute bottom-0 left-0 right-0 p-4 sm:p-5',
+            'bottom-center': 'absolute bottom-0 left-0 right-0 p-4 sm:p-5 text-center',
+            'bottom-right':  'absolute bottom-0 left-0 right-0 p-4 sm:p-5 text-right',
+          }[textPosition]
 
-            {/* Preview */}
-            {(() => {
-              const sz = IMAGE_SIZES.find(s => s.id === imageSize)!
-              return (
-                <div
-                  className="relative overflow-hidden rounded-2xl bg-graphite/5 mb-6 w-full"
-                  style={{ aspectRatio: sz.aspect, maxHeight: '70vw' }}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={selectedImage}
-                    alt=""
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent" />
-                  {activeHeadline && (
-                    <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5">
-                      <p className="text-white font-bold text-base sm:text-lg leading-tight drop-shadow-lg">
-                        {activeHeadline}
+          const fontVar = preset.fontFamily === 'Playfair Display'
+            ? 'var(--font-playfair)'
+            : 'var(--font-manrope)'
+
+          return (
+            <div>
+              <button
+                onClick={() => setStep('visual')}
+                className="flex items-center gap-1.5 text-sm text-dusk hover:text-graphite transition-colors mb-5"
+              >
+                <ArrowLeft size={14} />
+                Назад
+              </button>
+
+              {/* ── Preview ─────────────────────────── */}
+              <div
+                className="relative overflow-hidden rounded-2xl bg-graphite/5 mb-5 w-full"
+                style={{ aspectRatio: sz.aspect, maxHeight: '72vw' }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={selectedImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                <div className={`absolute inset-0 ${overlayClass}`} />
+                {activeHeadline && (
+                  <div className={textWrapperClass}>
+                    <p
+                      style={{
+                        fontFamily: fontVar,
+                        fontWeight: preset.fontWeight,
+                        textTransform: preset.textTransform,
+                        letterSpacing: preset.letterSpacing,
+                        color: preset.color,
+                        textShadow: '0 2px 10px rgba(0,0,0,0.45)',
+                      }}
+                      className="text-base sm:text-lg leading-tight"
+                    >
+                      {activeHeadline}
+                    </p>
+                    {secondLine.trim() && (
+                      <p
+                        style={{
+                          fontFamily: fontVar,
+                          fontWeight: '400',
+                          textTransform: preset.textTransform,
+                          letterSpacing: preset.letterSpacing,
+                          color: preset.color,
+                          textShadow: '0 2px 8px rgba(0,0,0,0.4)',
+                          opacity: 0.82,
+                        }}
+                        className="text-xs sm:text-sm leading-snug mt-1"
+                      >
+                        {secondLine}
                       </p>
-                    </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* ── Auto-style ──────────────────────── */}
+              <div className="mb-5">
+                <button
+                  onClick={handleAutoStyle}
+                  disabled={isAutoStyling}
+                  className="w-full flex items-center justify-center gap-2 bg-graphite/5 hover:bg-graphite/10 border border-parchment rounded-xl py-3 text-sm font-medium text-graphite disabled:opacity-50 transition-colors"
+                >
+                  {isAutoStyling ? (
+                    <>
+                      <div className="flex gap-1">
+                        {[0, 100, 200].map(d => <span key={d} className="w-1.5 h-1.5 bg-graphite/40 rounded-full animate-bounce" style={{ animationDelay: `${d}ms` }} />)}
+                      </div>
+                      Анализирую фото...
+                    </>
+                  ) : (
+                    <><Sparkles size={14} className="text-amber-500" /> ✨ Сделать как журнал</>
+                  )}
+                </button>
+                {autoStyleReason && !isAutoStyling && (
+                  <p className="text-xs text-dusk/60 italic mt-1.5 px-1">{autoStyleReason}</p>
+                )}
+              </div>
+
+              {/* ── Style presets ───────────────────── */}
+              <div className="mb-4">
+                <p className="text-[10px] font-bold text-dusk/40 uppercase tracking-widest mb-2">Стиль</p>
+                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                  {(Object.keys(STYLE_PRESETS) as StylePresetId[]).map(id => (
+                    <button
+                      key={id}
+                      onClick={() => setStylePreset(id)}
+                      className={`shrink-0 text-xs px-3.5 py-2 rounded-xl border transition-all ${
+                        stylePreset === id
+                          ? 'bg-graphite text-white border-graphite'
+                          : 'bg-card border-parchment text-dusk hover:border-graphite/30 hover:text-graphite'
+                      }`}
+                    >
+                      {STYLE_PRESETS[id].label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* ── Position grid ───────────────────── */}
+              <div className="mb-5">
+                <p className="text-[10px] font-bold text-dusk/40 uppercase tracking-widest mb-2">Позиция текста</p>
+                <div className="inline-grid grid-cols-3 gap-1.5">
+                  {POSITION_GRID.map((row, ri) =>
+                    row.map((cell, ci) =>
+                      cell ? (
+                        <button
+                          key={`${ri}-${ci}`}
+                          onClick={() => setTextPosition(cell.id)}
+                          title={cell.id}
+                          className={`w-10 h-10 rounded-lg text-sm font-mono border transition-all ${
+                            textPosition === cell.id
+                              ? 'bg-graphite text-white border-graphite'
+                              : 'bg-card border-parchment text-dusk/60 hover:border-graphite/30 hover:text-graphite'
+                          }`}
+                        >
+                          {cell.arrow}
+                        </button>
+                      ) : (
+                        <div key={`${ri}-${ci}`} className="w-10 h-10" />
+                      )
+                    )
                   )}
                 </div>
-              )
-            })()}
+              </div>
 
-            {/* Headline selection */}
-            <div className="space-y-2 mb-5">
-              <p className="text-[10px] font-bold text-dusk/40 uppercase tracking-widest mb-3">Заголовок на изображении</p>
-
-              {isLoadingHeadlines ? (
-                <div className="flex items-center gap-2 py-3 text-sm text-dusk">
-                  <div className="flex gap-1">
-                    {[0, 100, 200].map(d => <span key={d} className="w-1.5 h-1.5 bg-terracotta/50 rounded-full animate-bounce" style={{ animationDelay: `${d}ms` }} />)}
-                  </div>
-                  Подбираю заголовки...
-                </div>
-              ) : (
-                headlines.map((h, i) => (
+              {/* ── Size selector ───────────────────── */}
+              <div className="flex gap-2 mb-5 overflow-x-auto pb-1 scrollbar-hide">
+                {IMAGE_SIZES.map(s => (
                   <button
-                    key={i}
-                    onClick={() => { setSelectedHeadline(h); setCustomHeadline('') }}
-                    className={`w-full text-left px-4 py-3 rounded-xl border text-sm transition-all ${
-                      selectedHeadline === h && !customHeadline.trim()
-                        ? 'border-graphite bg-graphite/5 font-semibold text-graphite'
-                        : 'border-parchment bg-card text-graphite/70 hover:border-graphite/30'
+                    key={s.id}
+                    onClick={() => setImageSize(s.id)}
+                    className={`shrink-0 text-xs px-3 py-2 rounded-xl border transition-colors ${
+                      imageSize === s.id
+                        ? 'bg-graphite text-white border-graphite'
+                        : 'bg-card border-parchment text-dusk hover:border-graphite/30 hover:text-graphite'
                     }`}
                   >
-                    {h}
+                    {s.label}
                   </button>
-                ))
-              )}
+                ))}
+              </div>
 
-              <div className="relative">
+              {/* ── Headline selection ──────────────── */}
+              <div className="space-y-2 mb-3">
+                <p className="text-[10px] font-bold text-dusk/40 uppercase tracking-widest">Заголовок</p>
+
+                {isLoadingHeadlines ? (
+                  <div className="flex items-center gap-2 py-2 text-sm text-dusk">
+                    <div className="flex gap-1">
+                      {[0, 100, 200].map(d => <span key={d} className="w-1.5 h-1.5 bg-terracotta/50 rounded-full animate-bounce" style={{ animationDelay: `${d}ms` }} />)}
+                    </div>
+                    Подбираю заголовки...
+                  </div>
+                ) : (
+                  headlines.map((h, i) => (
+                    <button
+                      key={i}
+                      onClick={() => { setSelectedHeadline(h); setCustomHeadline('') }}
+                      className={`w-full text-left px-4 py-3 rounded-xl border text-sm transition-all ${
+                        selectedHeadline === h && !customHeadline.trim()
+                          ? 'border-graphite bg-graphite/5 font-semibold text-graphite'
+                          : 'border-parchment bg-card text-graphite/70 hover:border-graphite/30'
+                      }`}
+                    >
+                      {h}
+                    </button>
+                  ))
+                )}
+
                 <input
                   type="text"
                   value={customHeadline}
@@ -1030,34 +1351,45 @@ export default function MarketingPage() {
                   }`}
                 />
               </div>
-            </div>
 
-            {/* Download */}
-            <button
-              onClick={handleDownload}
-              disabled={!activeHeadline || isDownloading}
-              className="w-full bg-graphite text-white rounded-2xl py-4 text-sm font-semibold hover:opacity-90 disabled:opacity-35 transition-all flex items-center justify-center gap-2"
-            >
-              {isDownloading ? (
-                <>
-                  <div className="flex gap-1">
-                    {[0, 100, 200].map(d => <span key={d} className="w-1.5 h-1.5 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: `${d}ms` }} />)}
-                  </div>
-                  Создаю файл...
-                </>
-              ) : (
-                <>
-                  <Download size={16} />
-                  Скачать изображение
-                </>
+              {/* ── Second line ─────────────────────── */}
+              <div className="mb-5">
+                <input
+                  type="text"
+                  value={secondLine}
+                  onChange={e => setSecondLine(e.target.value)}
+                  placeholder="Вторая строка (необязательно) — подзаголовок, CTA..."
+                  className="w-full border border-parchment rounded-xl px-4 py-3 text-sm text-graphite placeholder:text-dusk/40 outline-none focus:border-graphite/40 transition-colors bg-cream"
+                />
+              </div>
+
+              {/* ── Download ────────────────────────── */}
+              <button
+                onClick={handleDownload}
+                disabled={!activeHeadline || isDownloading}
+                className="w-full bg-graphite text-white rounded-2xl py-4 text-sm font-semibold hover:opacity-90 disabled:opacity-35 transition-all flex items-center justify-center gap-2"
+              >
+                {isDownloading ? (
+                  <>
+                    <div className="flex gap-1">
+                      {[0, 100, 200].map(d => <span key={d} className="w-1.5 h-1.5 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: `${d}ms` }} />)}
+                    </div>
+                    Создаю файл...
+                  </>
+                ) : (
+                  <>
+                    <Download size={16} />
+                    Скачать {sz.w}×{sz.h}
+                  </>
+                )}
+              </button>
+
+              {!activeHeadline && (
+                <p className="text-center text-xs text-dusk/50 mt-2">Выберите или введите заголовок</p>
               )}
-            </button>
-
-            {!activeHeadline && (
-              <p className="text-center text-xs text-dusk/50 mt-2">Выберите или введите заголовок</p>
-            )}
-          </div>
-        )}
+            </div>
+          )
+        })()}
 
         {/* No salon_id warning */}
         {!salonId && step === 'goal' && (
