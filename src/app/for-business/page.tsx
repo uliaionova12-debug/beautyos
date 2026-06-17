@@ -225,7 +225,13 @@ export default function ForBusinessPage() {
                 alt="Мягкая эстетика BeautyOS для beauty-бизнеса"
                 className="absolute inset-0 w-full h-full object-cover object-center"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-cream/5 via-transparent to-cream/10" />
+              <div className="absolute inset-0 bg-gradient-to-r from-graphite/35 via-transparent to-cream/10" />
+              <div className="absolute left-6 bottom-6 right-6 max-w-md">
+                <p className="text-xs text-white/70 font-semibold uppercase tracking-[0.22em] mb-3">BeautyOS</p>
+                <h2 className="font-serif text-4xl md:text-5xl font-medium leading-[0.95] text-white">
+                  Красота, которая помнит о вас
+                </h2>
+              </div>
             </div>
             <div className="bg-card border border-parchment rounded-[2rem] p-8 md:p-10 flex flex-col justify-center">
               <p className="text-xs text-terracotta font-semibold uppercase tracking-wider mb-3">Между визитами</p>
