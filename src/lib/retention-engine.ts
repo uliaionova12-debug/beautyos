@@ -53,31 +53,27 @@ function calcAvgInterval(dates: string[]): number {
   return Math.round(average(gaps))
 }
 
-// Определяем статус и risk_score
+// Фиксированные пороги сегментации:
+// Активные: < 90 дней — действующая база, работа через Beauty Companion
+// Риск:     90–180 дней — главная группа для ежедневных действий
+// Архив:    > 180 дней — не участвуют в ежедневной работе, только спецкампании
+const ACTIVE_THRESHOLD = 90
+const ARCHIVE_THRESHOLD = 180
+
 function calcStatus(
   daysSinceLast: number,
-  avgInterval: number
 ): { status: ClientStatus; riskScore: number } {
-  if (avgInterval === 0) {
-    // Клиент с одним визитом: > 90 дней — потерян, 30–90 — под угрозой
-    if (daysSinceLast > 90) return { status: 'lost', riskScore: 1.0 }
-    if (daysSinceLast > 30) return { status: 'at_risk', riskScore: parseFloat(((daysSinceLast - 30) / 60).toFixed(3)) }
-    return { status: 'active', riskScore: parseFloat((daysSinceLast / 30).toFixed(3)) }
-  }
-
-  const riskThreshold = avgInterval * 1.5
-  const lostThreshold = Math.max(avgInterval * 2.5, 90)
-
-  if (daysSinceLast >= lostThreshold) {
+  if (daysSinceLast >= ARCHIVE_THRESHOLD) {
     return { status: 'lost', riskScore: 1.0 }
   }
-  if (daysSinceLast >= riskThreshold) {
-    const score = (daysSinceLast - riskThreshold) / (lostThreshold - riskThreshold)
+  if (daysSinceLast >= ACTIVE_THRESHOLD) {
+    // Риск линейно растёт от 0.1 до 0.99 в окне 90–180 дней
+    const score = (daysSinceLast - ACTIVE_THRESHOLD) / (ARCHIVE_THRESHOLD - ACTIVE_THRESHOLD)
     return { status: 'at_risk', riskScore: parseFloat(Math.min(score, 0.999).toFixed(3)) }
   }
   return {
     status: 'active',
-    riskScore: parseFloat((daysSinceLast / riskThreshold).toFixed(3)),
+    riskScore: parseFloat((daysSinceLast / ACTIVE_THRESHOLD).toFixed(3)),
   }
 }
 
@@ -155,7 +151,7 @@ export function runRetentionAnalysis(input: AnalysisInput): AnalysisOutput {
     const totalRevenue = rc.visits.reduce((s, v) => s + v.amount, 0)
     const avgCheck = totalRevenue / rc.visits.length
 
-    const { status, riskScore } = calcStatus(daysSinceLast, avgInterval)
+    const { status, riskScore } = calcStatus(daysSinceLast)
     const returnScore = calcReturnScore({
       totalVisits: rc.visits.length,
       daysSinceLast,

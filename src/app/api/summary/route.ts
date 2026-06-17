@@ -25,9 +25,13 @@ export async function GET(req: NextRequest) {
   const masters = mastersRes.data || []
   const salonName = salonRes.data?.name
 
-  const atRisk = allClients.filter(c => c.status === 'at_risk')
-  const lost = allClients.filter(c => c.status === 'lost')
-  const active = allClients.filter(c => c.status === 'active')
+  // Сегментация на лету по фиксированным порогам (90 / 180 дней).
+  // Не зависит от поля status в БД, которое могло быть рассчитано по старой логике.
+  const active   = allClients.filter(c => (c.days_since_last_visit ?? 0) < 90)
+  const atRisk   = allClients.filter(c => { const d = c.days_since_last_visit ?? 0; return d >= 90 && d < 180 })
+  const archived = allClients.filter(c => (c.days_since_last_visit ?? 0) >= 180)
+  // Сохраняем псевдоним lost для обратной совместимости внутри роута
+  const lost = archived
 
   const totalRevenue = allClients.reduce((s, c) => s + (c.total_revenue || 0), 0)
   const avgCheck = allClients.length > 0
@@ -75,9 +79,10 @@ export async function GET(req: NextRequest) {
     salon_name: salonName,
     total_clients: allClients.length,
     active_clients: active.length,
-    at_risk_count: atRisk.length,
+    at_risk_count: atRisk.length,        // 90–180 дней — ежедневная работа
     at_risk_revenue: Math.round(atRiskRevenue),
-    lost_count: lost.length,
+    archived_count: archived.length,     // > 180 дней — спецкампании
+    lost_count: archived.length,         // обратная совместимость
     lost_impact: lostImpact,
     lost_total_revenue: Math.round(lostTotalRevenue),
     lost_from_date: lostFromDate,

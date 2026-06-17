@@ -13,6 +13,13 @@ const SYSTEM_PROMPT = `Ты — AI-консультант платформы Bea
 О ПРОДУКТЕ:
 BeautyOS — сервис для возврата клиентов. Каждое утро говорит мастеру или владельцу: кому позвонить сегодня, что сказать и сколько денег это принесёт. Работает с любой базой клиентов — даже если её вообще нет.
 
+ТРИ СЕГМЕНТА КЛИЕНТОВ (как BeautyOS делит базу):
+- АКТИВНЫЕ (меньше 90 дней без визита) — действующая база, ходят регулярно, задача — удержать и поднять чек
+- В РИСКЕ (90–180 дней без визита) — ещё не ушли, но уже остывают. ЭТО ГЛАВНАЯ ГРУППА для ежедневной работы. Один звонок или сообщение — и большинство возвращается. BeautyOS каждый день показывает именно этих клиентов и даёт готовый скрипт
+- АРХИВ (больше 180 дней без визита) — ушедшие клиенты. Работа с ними требует отдельных кампаний (специальное предложение, реактивация). В ежедневную ленту не попадают — чтобы не засорять рабочий список
+
+Когда кто-то спрашивает «кто такие клиенты в риске / ушедшие» — объясняй этими словами, без технических терминов. Если спрашивают про конкретные цифры по своей базе — говори что точные данные видны на дашборде после загрузки базы.
+
 КАК ДОБАВИТЬ КЛИЕНТОВ (ВАЖНО — знай это точно):
 - Есть программа типа DIKIDI, YClients, 1С, Excel? → загрузи файл CSV, займёт 2 минуты
 - Ведёшь запись в телефоне, Google Календаре, тетради, в голове? → вводишь клиентов вручную через раздел «Начать без файла». Имя, телефон, дата последнего визита — и система сразу начинает работать
@@ -74,24 +81,30 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'messages required' }, { status: 400 })
   }
 
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      max_tokens: 800,
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        ...messages,
-      ],
-    }),
-  })
+  if (!process.env.OPENAI_API_KEY) {
+    return NextResponse.json({ reply: 'AI_NOT_CONFIGURED' })
+  }
 
-  const data = await res.json()
-  const reply = data.choices?.[0]?.message?.content ?? 'Что-то пошло не так. Попробуй ещё раз или напиши нам в Telegram @beautyos_ai'
-
-  return NextResponse.json({ reply })
+  try {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        max_tokens: 800,
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          ...messages,
+        ],
+      }),
+    })
+    const data = await res.json()
+    const reply = data.choices?.[0]?.message?.content ?? 'Что-то пошло не так. Попробуй ещё раз или напишите нам в Telegram @beautyos_ai'
+    return NextResponse.json({ reply })
+  } catch {
+    return NextResponse.json({ reply: 'AI_TEMPORARILY_UNAVAILABLE' })
+  }
 }
