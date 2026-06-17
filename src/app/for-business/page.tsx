@@ -160,9 +160,9 @@ export default function ForBusinessPage() {
             <img
               src="/landing-screens/beauty-atmosphere.jpg"
               alt=""
-              className="absolute inset-y-0 right-0 w-full lg:w-[58%] h-full object-cover object-center opacity-20 lg:opacity-45"
+              className="absolute inset-y-0 right-0 w-full lg:w-[58%] h-full object-cover object-center opacity-30 lg:opacity-60"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-cream via-cream/92 to-cream/40" />
+            <div className="absolute inset-0 bg-gradient-to-r from-cream via-cream/88 to-cream/20" />
             <div className="absolute inset-0 bg-gradient-to-b from-cream via-transparent to-cream" />
           </div>
           <div className="relative max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[1.02fr_0.98fr] gap-12 items-center">
@@ -208,6 +208,41 @@ export default function ForBusinessPage() {
                   alt="Дашборд BeautyOS с финансовой и клиентской картой бизнеса"
                   className="w-full rounded-[2rem] shadow-2xl shadow-graphite/20 border border-white/70"
                 />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="px-5 md:px-6 pb-20 bg-cream">
+          <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-8 items-stretch">
+            <div className="relative min-h-[360px] overflow-hidden rounded-[2rem] border border-parchment shadow-2xl shadow-graphite/10">
+              <img
+                src="/landing-screens/beauty-atmosphere.jpg"
+                alt="Мягкая эстетика BeautyOS для beauty-бизнеса"
+                className="absolute inset-0 w-full h-full object-cover object-center"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-graphite/35 via-transparent to-transparent" />
+              <div className="absolute left-6 bottom-6 right-6 max-w-md">
+                <p className="text-xs text-white/70 font-semibold uppercase tracking-wider mb-3">Soft luxury beauty layer</p>
+                <h2 className="text-3xl md:text-4xl font-bold text-white leading-tight">
+                  Технология, которая выглядит как часть красивого сервиса
+                </h2>
+              </div>
+            </div>
+            <div className="bg-card border border-parchment rounded-[2rem] p-8 md:p-10 flex flex-col justify-center">
+              <p className="text-xs text-terracotta font-semibold uppercase tracking-wider mb-3">Живость без шума</p>
+              <h2 className="text-3xl font-bold tracking-tight mb-5">BeautyOS не выглядит как холодная CRM</h2>
+              <p className="text-dusk leading-relaxed mb-6">
+                Лендинг теперь соединяет реальный продукт с мягкой beauty-эстетикой:
+                спокойный премиальный визуал, живые скриншоты и понятный бизнес-результат.
+              </p>
+              <div className="space-y-3">
+                {['тёплый ivory и blush вместо тяжёлого SaaS-стиля', 'реальные экраны продукта вместо фейковых мокапов', 'ощущение заботы и сервиса между визитами'].map(item => (
+                  <div key={item} className="flex items-center gap-3">
+                    <CheckCircle size={17} className="text-sage shrink-0" />
+                    <span className="text-sm text-dusk">{item}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
