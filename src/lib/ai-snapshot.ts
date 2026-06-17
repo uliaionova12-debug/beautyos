@@ -159,8 +159,17 @@ function computeScores(snap: AISnapshot): Record<ActionId, number> {
   return result
 }
 
-// Возвращает ID приоритетного действия.
-// Правило: CASH-слой всегда первый; внутри слоя — по finalScore.
+// Сортировка: CASH-слой первый; внутри cash — at_risk > lost когда есть клиенты
+// в зоне риска (они не ушли, конвертируются лучше, поэтому важнее потерянных);
+// далее по finalScore.
+function cashPriority(a: ActionId, b: ActionId, snap: AISnapshot): number {
+  if (snap.kpis.at_risk_clients > 0) {
+    if (a === 'cash_at_risk' && b === 'cash_lost') return -1
+    if (a === 'cash_lost' && b === 'cash_at_risk') return 1
+  }
+  return 0
+}
+
 export function getPrimaryActionId(snap: AISnapshot): ActionId {
   const scores = computeScores(snap)
   return [...ACTION_IDS]
@@ -169,11 +178,12 @@ export function getPrimaryActionId(snap: AISnapshot): ActionId {
       const bIsCash = ACTION_LAYER[b] === 'cash'
       if (aIsCash && !bIsCash) return -1
       if (!aIsCash && bIsCash) return 1
+      const cp = cashPriority(a, b, snap)
+      if (cp !== 0) return cp
       return scores[b] - scores[a]
     })[0]
 }
 
-// Возвращает отсортированный массив ID (primary первый).
 export function getSortedActionIds(snap: AISnapshot): ActionId[] {
   const scores = computeScores(snap)
   return [...ACTION_IDS].sort((a, b) => {
@@ -181,6 +191,8 @@ export function getSortedActionIds(snap: AISnapshot): ActionId[] {
     const bIsCash = ACTION_LAYER[b] === 'cash'
     if (aIsCash && !bIsCash) return -1
     if (!aIsCash && bIsCash) return 1
+    const cp = cashPriority(a, b, snap)
+    if (cp !== 0) return cp
     return scores[b] - scores[a]
   })
 }

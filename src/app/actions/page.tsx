@@ -42,18 +42,18 @@ function buildScoredActions(s: SummaryData, q: string): ScoredAction[] {
 
   const ACTION_COPY: Record<ActionId, Pick<ScoredAction, 'text' | 'sub' | 'cta' | 'clients' | 'selectionReason'>> = {
     cash_at_risk: {
-      text: `Написать ${s.at_risk_count} клиентам, которые могут уйти`,
-      sub: `Не приходили 90–180 дней · ещё не ушли · один контакт возвращает запись`,
-      cta: 'Открыть список клиентов',
+      text: `Горячая база: написать ${s.at_risk_count} клиентам до того, как уйдут`,
+      sub: `Не приходили 90–180 дней · ещё не ушли · конверсия в запись выше, чем у потерянных`,
+      cta: 'Открыть горячую базу',
       clients: s.at_risk_count,
-      selectionReason: `${s.at_risk_count} клиентов ещё не ушли — максимальный эффект при минимальном усилии`,
+      selectionReason: `${s.at_risk_count} клиентов на грани ухода — работать с ними легче и выгоднее, чем возвращать ушедших`,
     },
     cash_lost: {
-      text: `Вернуть ${s.lost_count} ушедших клиентов личным сообщением`,
-      sub: `Давно не были · ~30% возвращаются при прямом контакте · потенциал ${fmtMoney(pool.cash_lost_pool)}`,
-      cta: 'Открыть ушедших',
+      text: `Реактивация: вернуть часть из ${s.lost_count} потерянных клиентов`,
+      sub: `Не были более 180 дней · ~30% отзываются при личном контакте · потенциал ${fmtMoney(pool.cash_lost_pool)}`,
+      cta: 'Открыть потерянных',
       clients: s.lost_count,
-      selectionReason: `${s.lost_count} ушедших — самый дешёвый способ вернуть выручку`,
+      selectionReason: `${s.lost_count} потерянных — дополнительный источник выручки после работы с горячей базой`,
     },
     cash_slots: {
       text: `Заполнить ~${slots} пустых окна в расписании мастеров`,
