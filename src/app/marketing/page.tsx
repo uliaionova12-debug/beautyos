@@ -515,10 +515,11 @@ export default function MarketingPage() {
         setSelectedImage(data.imageDataUrl)
         setGeneratedPrompt(data.prompt || '')
       } else {
-        setGenerationError('Изображение не создалось. Попробуйте ещё раз — обычно со второй попытки получается.')
+        const detail = data.error ? ` (${data.error})` : ''
+        setGenerationError(`Изображение не создалось${detail}. Попробуйте ещё раз.`)
       }
     } catch {
-      setGenerationError('Не удалось связаться с сервером генерации. Проверьте подключение и попробуйте снова.')
+      setGenerationError('Не удалось связаться с сервером. Проверьте подключение и попробуйте снова.')
     } finally {
       setIsGenerating(false)
     }

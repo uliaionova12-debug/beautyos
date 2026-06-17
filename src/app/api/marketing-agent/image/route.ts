@@ -19,7 +19,11 @@ const GOAL_SCENES: Record<string, string> = {
 }
 
 export async function POST(req: NextRequest) {
-  const { goal = '', platform = '', postText = '' } = await req.json()
+  if (!process.env.OPENAI_API_KEY) {
+    return NextResponse.json({ error: 'OPENAI_API_KEY не настроен на сервере' }, { status: 500 })
+  }
+
+  const { goal = '', platform = '' } = await req.json()
 
   const scene = GOAL_SCENES[goal] || 'Premium beauty salon interior with soft natural light'
   const aspectNote = (platform === 'instagram') ? 'square composition' : 'clean balanced composition'
@@ -32,23 +36,27 @@ export async function POST(req: NextRequest) {
       prompt,
       n: 1,
       size: '1024x1024',
-      quality: 'hd',
+      quality: 'standard', // 'hd' takes 15-30 sec and risks timeout; standard is 8-12 sec
       style: 'natural',
     })
 
     const imageUrl = response.data?.[0]?.url
-    if (!imageUrl) return NextResponse.json({ error: 'No image generated' }, { status: 500 })
+    if (!imageUrl) {
+      return NextResponse.json({ error: 'OpenAI не вернул URL изображения' }, { status: 500 })
+    }
 
     const imgRes = await fetch(imageUrl)
+    if (!imgRes.ok) {
+      return NextResponse.json({ error: `Не удалось загрузить изображение: ${imgRes.status}` }, { status: 500 })
+    }
     const buffer = await imgRes.arrayBuffer()
     const base64 = Buffer.from(buffer).toString('base64')
 
-    return NextResponse.json({
-      imageDataUrl: `data:image/png;base64,${base64}`,
-      prompt,
-    })
-  } catch (err) {
-    console.error('DALL-E error:', err)
-    return NextResponse.json({ error: 'Image generation failed' }, { status: 500 })
+    return NextResponse.json({ imageDataUrl: `data:image/png;base64,${base64}`, prompt })
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('DALL-E error:', msg)
+    // Surface OpenAI error details so they're visible in the UI
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }
