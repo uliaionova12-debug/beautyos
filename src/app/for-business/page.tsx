@@ -155,40 +155,41 @@ export default function ForBusinessPage() {
       </header>
 
       <main>
-        <section className="relative pt-28 md:pt-32 pb-16 md:pb-24 px-5 md:px-6 overflow-hidden">
+        <section className="relative min-h-[calc(100svh-76px)] flex items-center pt-24 md:pt-28 pb-8 md:pb-10 px-5 md:px-6 overflow-hidden">
           <div className="absolute inset-0 pointer-events-none">
             <img
               src="/landing-screens/beauty-atmosphere.jpg"
               alt=""
-              className="absolute inset-y-0 right-0 w-full lg:w-[58%] h-full object-cover object-center opacity-30 lg:opacity-60"
+              className="absolute inset-y-0 right-0 w-full lg:w-[62%] h-full object-cover object-center opacity-25 lg:opacity-50"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-cream via-cream/88 to-cream/20" />
-            <div className="absolute inset-0 bg-gradient-to-b from-cream via-transparent to-cream" />
+            <div className="absolute inset-0 bg-gradient-to-r from-cream via-cream/90 to-cream/30" />
+            <div className="absolute inset-0 bg-gradient-to-b from-cream via-transparent to-cream/95" />
           </div>
-          <div className="relative max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[1.02fr_0.98fr] gap-12 items-center">
-            <div>
-              <div className="inline-flex items-center gap-2 bg-blush text-terracotta text-xs font-semibold uppercase tracking-wider px-4 py-2 rounded-full mb-6">
+          <div className="relative max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[0.78fr_1.22fr] gap-8 lg:gap-12 items-center">
+            <div className="max-w-xl">
+              <div className="inline-flex items-center gap-2 bg-blush/90 text-terracotta text-[11px] font-semibold uppercase tracking-[0.18em] px-4 py-2 rounded-full mb-5">
                 <Sparkles size={14} />
                 AI operating system для beauty-бизнеса
               </div>
-              <h1 className="text-[2.65rem] md:text-[4.25rem] font-bold leading-[1.04] tracking-tight mb-6">
-                AI-платформа, которая помогает beauty-бизнесу возвращать клиентов и увеличивать выручку
+              <h1 className="font-serif text-[2.7rem] md:text-[4.15rem] lg:text-[4.45rem] font-medium leading-[0.94] tracking-tight mb-6">
+                BeautyOS для роста
+                <span className="block text-rose italic">beauty-бизнеса</span>
               </h1>
-              <p className="text-lg md:text-xl text-dusk leading-relaxed mb-8 max-w-2xl">
-                BeautyOS анализирует записи, клиентов и доход, показывает точки роста и даёт готовые действия:
-                кого вернуть, что написать, где теряются деньги и как сопровождать клиентов между визитами.
+              <p className="text-base md:text-lg text-dusk leading-relaxed mb-7 max-w-lg">
+                AI-платформа анализирует записи, клиентов и доход, показывает точки роста
+                и даёт готовые действия: кого вернуть, что написать и где теряются деньги.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <Link
                   href={`/dashboard?salon_id=${DEMO_SALON_ID}`}
-                  className="inline-flex items-center justify-center gap-2 bg-sage text-white px-8 py-4 rounded-xl text-base font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-sage/20"
+                  className="inline-flex items-center justify-center gap-2 bg-sage text-white px-7 py-3.5 rounded-full text-sm font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-sage/20"
                 >
                   Посмотреть демо
                   <ArrowRight size={18} />
                 </Link>
                 <a
                   href="#forwhom"
-                  className="inline-flex items-center justify-center gap-2 border border-parchment bg-card text-graphite px-8 py-4 rounded-xl text-base font-semibold hover:border-sage/40 transition-colors"
+                  className="inline-flex items-center justify-center gap-2 border border-parchment bg-card/85 text-graphite px-7 py-3.5 rounded-full text-sm font-semibold hover:border-sage/40 transition-colors"
                 >
                   Для кого BeautyOS?
                 </a>
@@ -196,17 +197,20 @@ export default function ForBusinessPage() {
             </div>
 
             <div className="relative">
-              <div className="absolute -inset-6 bg-blush/80 rounded-[3rem] rotate-2" />
-              <div className="relative grid grid-cols-[0.78fr_1fr] gap-4 items-end">
+              <div className="absolute -inset-5 bg-blush/80 rounded-[2.5rem] rotate-1" />
+              <div className="absolute -right-6 top-6 bottom-10 w-[74%] rounded-[2.5rem] bg-card/70 border border-white/70 shadow-2xl shadow-graphite/10" />
+              <div className="relative flex items-center justify-center min-h-[420px] lg:min-h-[560px]">
+                <div className="relative z-10 w-[min(76vw,420px)] lg:w-[min(38vw,430px)] h-[min(58svh,560px)] overflow-hidden rounded-[1.9rem] shadow-2xl shadow-graphite/20 border border-white/70 bg-card">
+                  <img
+                    src="/landing-screens/dashboard.png"
+                    alt="Дашборд BeautyOS с финансовой и клиентской картой бизнеса"
+                    className="w-full h-auto"
+                  />
+                </div>
                 <img
                   src="/landing-screens/actions.png"
                   alt="BeautyOS показывает действия и точки роста"
-                  className="w-full rounded-[2rem] shadow-2xl shadow-graphite/15 border border-white/70 hidden sm:block"
-                />
-                <img
-                  src="/landing-screens/dashboard.png"
-                  alt="Дашборд BeautyOS с финансовой и клиентской картой бизнеса"
-                  className="w-full rounded-[2rem] shadow-2xl shadow-graphite/20 border border-white/70"
+                  className="absolute z-20 left-0 bottom-6 w-[30%] max-w-[210px] rounded-[1.35rem] shadow-2xl shadow-graphite/20 border border-white/70 hidden md:block"
                 />
               </div>
             </div>
