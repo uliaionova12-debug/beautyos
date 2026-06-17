@@ -32,24 +32,17 @@ export async function POST(req: NextRequest) {
 
   try {
     const response = await openai.images.generate({
-      model: 'dall-e-3',
+      model: 'gpt-image-1',
       prompt,
       n: 1,
       size: '1024x1024',
-      quality: 'standard', // 'hd' takes 15-30 sec and risks timeout; standard is 8-12 sec
+      quality: 'medium',
     })
 
-    const imageUrl = response.data?.[0]?.url
-    if (!imageUrl) {
-      return NextResponse.json({ error: 'OpenAI не вернул URL изображения' }, { status: 500 })
+    const base64 = response.data?.[0]?.b64_json
+    if (!base64) {
+      return NextResponse.json({ error: 'OpenAI не вернул изображение' }, { status: 500 })
     }
-
-    const imgRes = await fetch(imageUrl)
-    if (!imgRes.ok) {
-      return NextResponse.json({ error: `Не удалось загрузить изображение: ${imgRes.status}` }, { status: 500 })
-    }
-    const buffer = await imgRes.arrayBuffer()
-    const base64 = Buffer.from(buffer).toString('base64')
 
     return NextResponse.json({ imageDataUrl: `data:image/png;base64,${base64}`, prompt })
   } catch (err: unknown) {
