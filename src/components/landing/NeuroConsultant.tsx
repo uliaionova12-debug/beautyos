@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { X, Send, Sparkles, MessageCircle } from 'lucide-react'
+import { X, Send, Sparkles } from 'lucide-react'
+import { VoiceButton } from '@/components/ui/VoiceButton'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -36,10 +37,13 @@ export function NeuroConsultant() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, loading])
 
-  // Stop pulse after first open
   useEffect(() => {
     if (open) setPulse(false)
   }, [open])
+
+  function appendTranscript(text: string) {
+    setInput(prev => prev ? prev + ' ' + text : text)
+  }
 
   async function send(text: string) {
     if (!text.trim() || loading) return
@@ -162,9 +166,10 @@ export function NeuroConsultant() {
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && !e.shiftKey && send(input)}
-                placeholder="Напиши вопрос про BeautyOS..."
+                placeholder="Напишите вопрос или спросите голосом"
                 className="flex-1 bg-cream border border-parchment rounded-xl px-4 py-2.5 text-sm text-graphite placeholder:text-dusk/50 outline-none focus:border-sage transition-colors"
               />
+              <VoiceButton onTranscript={appendTranscript} variant="sage" />
               <button
                 onClick={() => send(input)}
                 disabled={!input.trim() || loading}

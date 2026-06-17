@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
 Твоя цель — создавать ощущение персональной заботы и внимания к человеку.
 
 ИСТОРИЯ КЛИЕНТА:
+- Имя: ${context.client_name} (используй строго это имя, не добавляй фамилию или отчество)
 - Последний визит: ${context.last_service} у ${context.last_master}, ${context.last_date}
 - История: ${historyStr || 'нет данных'}
 - Сезон: ${context.season}
@@ -42,13 +43,21 @@ ${context.scenario ? `- Контекст: ${context.scenario}` : ''}
 - НИКОГДА не упоминай цены, скидки, записи, рекламу
 - 2–4 предложения, не больше
 - Обращайся на «вы», тепло и заботливо
-- Только русский язык`
+- Только русский язык
+- СТРОГО: не дополняй имя клиента — используй только то, что указано выше, без изменений`
 
-  const response = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    max_tokens: 220,
-    messages: [{ role: 'system', content: system }, ...messages],
-  })
+  if (!process.env.OPENAI_API_KEY) {
+    return NextResponse.json({ message: 'AI_NOT_CONFIGURED' })
+  }
 
-  return NextResponse.json({ message: response.choices[0].message.content?.trim() ?? '' })
+  try {
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      max_tokens: 220,
+      messages: [{ role: 'system', content: system }, ...messages],
+    })
+    return NextResponse.json({ message: response.choices[0].message.content?.trim() ?? '' })
+  } catch {
+    return NextResponse.json({ message: 'AI_TEMPORARILY_UNAVAILABLE' })
+  }
 }

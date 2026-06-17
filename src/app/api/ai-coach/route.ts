@@ -35,11 +35,18 @@ export async function POST(req: NextRequest) {
 - Обращайся на «вы»
 - Только русский язык`
 
-  const response = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    max_tokens: 280,
-    messages: [{ role: 'system', content: system }, ...messages],
-  })
+  if (!process.env.OPENAI_API_KEY) {
+    return NextResponse.json({ message: 'AI_NOT_CONFIGURED' })
+  }
 
-  return NextResponse.json({ message: response.choices[0].message.content?.trim() ?? '' })
+  try {
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      max_tokens: 280,
+      messages: [{ role: 'system', content: system }, ...messages],
+    })
+    return NextResponse.json({ message: response.choices[0].message.content?.trim() ?? '' })
+  } catch {
+    return NextResponse.json({ message: 'AI_TEMPORARILY_UNAVAILABLE' })
+  }
 }

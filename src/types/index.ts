@@ -54,6 +54,65 @@ export interface DailyAction {
   client_ids: string[]
 }
 
+export interface Availability {
+  id: string
+  master_id: string
+  salon_id: string
+  day_of_week: number        // 0=Sun 1=Mon 2=Tue 3=Wed 4=Thu 5=Fri 6=Sat
+  start_time: string         // "HH:MM"
+  end_time: string           // "HH:MM"
+  slot_duration: number      // minutes
+  active: boolean
+  created_at?: string
+}
+
+export type BookingStatus = 'booked' | 'completed' | 'cancelled' | 'no_show'
+
+export interface Booking {
+  id: string
+  master_id: string
+  salon_id: string
+  client_id: string | null
+  client_name: string
+  client_phone: string | null
+  booking_date: string         // "YYYY-MM-DD"
+  booking_time: string         // "HH:MM:SS"
+  duration: number             // minutes
+  status: BookingStatus
+  service_name: string | null
+  service_price: number | null
+  next_visit_date: string | null
+  notes: string | null
+  created_at?: string
+  updated_at?: string
+}
+
+export interface Service {
+  id: string
+  master_id: string
+  salon_id: string
+  name: string
+  duration_min: number
+  price: number | null
+  active: boolean
+  sort_order: number
+  created_at?: string
+}
+
+export type SubscriptionStatus = 'trial' | 'active' | 'expired' | 'cancelled'
+
+export interface Subscription {
+  id: string
+  salon_id: string
+  plan_name: string
+  status: SubscriptionStatus
+  trial_started_at: string
+  trial_ends_at: string
+  active_until: string | null
+  created_at?: string
+  updated_at?: string
+}
+
 export interface Insight {
   id: string
   salon_id: string

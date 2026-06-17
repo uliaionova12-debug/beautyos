@@ -43,19 +43,22 @@ ${worstMasters.map(m => `- ${m.name}: возвратность ${formatPct(m.ret
   "recommendation": "одно главное действие, которое нужно сделать сегодня (2-3 предложения, конкретно)"
 }`
 
-  const response = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    max_tokens: 800,
-    response_format: { type: 'json_object' },
-    messages: [{ role: 'user', content: prompt }],
-  })
+  if (!process.env.OPENAI_API_KEY) {
+    return { insights: [], recommendation: '' }
+  }
 
-  const text = response.choices[0].message.content || '{}'
-  const parsed = JSON.parse(text)
-
-  return {
-    insights: parsed.insights || [],
-    recommendation: parsed.recommendation || '',
+  try {
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      max_tokens: 800,
+      response_format: { type: 'json_object' },
+      messages: [{ role: 'user', content: prompt }],
+    })
+    const text = response.choices[0].message.content || '{}'
+    const parsed = JSON.parse(text)
+    return { insights: parsed.insights || [], recommendation: parsed.recommendation || '' }
+  } catch {
+    return { insights: [], recommendation: '' }
   }
 }
 
@@ -65,13 +68,16 @@ export async function generateReturnMessage(
   lastService: string,
   salonName: string
 ): Promise<string> {
-  const response = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    max_tokens: 200,
-    messages: [
-      {
-        role: 'user',
-        content: `Напиши короткое персональное сообщение для возврата клиента в салон красоты.
+  if (!process.env.OPENAI_API_KEY) return ''
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      max_tokens: 200,
+      messages: [
+        {
+          role: 'user',
+          content: `Напиши короткое персональное сообщение для возврата клиента в салон красоты.
 
 Клиент: ${clientName}
 Последняя услуга: ${lastService || 'маникюр'}
@@ -84,9 +90,11 @@ export async function generateReturnMessage(
 - Без скидок и акций (не обесценивай)
 - На русском языке
 - Только текст сообщения, без кавычек и пояснений`,
-      },
-    ],
-  })
-
-  return response.choices[0].message.content?.trim() || ''
+        },
+      ],
+    })
+    return response.choices[0].message.content?.trim() || ''
+  } catch {
+    return ''
+  }
 }

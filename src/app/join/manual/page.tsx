@@ -125,7 +125,7 @@ export default function ManualStartPage() {
             {loadingDone ? 'Готово!' : 'Создаю первый анализ...'}
           </p>
           <p className="text-dusk text-sm mt-1">
-            {loadingDone ? 'Открываю дашборд...' : 'Анализирую возвратность клиентов'}
+            {loadingDone ? 'Формирую карту бизнеса...' : 'Анализирую возвратность клиентов'}
           </p>
         </div>
       </div>

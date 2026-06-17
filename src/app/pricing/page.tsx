@@ -1,8 +1,10 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { Check, X } from 'lucide-react'
+import { ArrowLeft, Check, X } from 'lucide-react'
 
 type PlanId = 'solo' | 'studio' | 'salon'
 
@@ -141,9 +143,15 @@ export default function PricingPage() {
 
         {/* Header */}
         <header className="flex items-center justify-between px-7 md:px-12 py-5 md:py-6 border-b border-parchment/60">
-          <Link href="/" className="text-base font-semibold tracking-tight text-graphite">
-            BeautyOS<sup className="text-rose text-[10px] font-bold ml-0.5 relative -top-1">+</sup>
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-dusk hover:text-sage transition-colors">
+              <ArrowLeft size={14} />
+              Назад
+            </Link>
+            <Link href="/" className="text-base font-semibold tracking-tight text-graphite">
+              BeautyOS<sup className="text-rose text-[10px] font-bold ml-0.5 relative -top-1">+</sup>
+            </Link>
+          </div>
           <div className="flex items-center gap-6">
             <span className="text-sm font-medium text-rose hidden sm:block">Тарифы</span>
             <Link href="/role" className="text-sm font-medium text-dusk hover:text-rose transition-colors">Войти</Link>

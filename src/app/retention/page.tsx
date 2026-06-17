@@ -85,11 +85,11 @@ export default function RetentionPage() {
       <div className="max-w-4xl mx-auto px-4 py-8">
 
         <Link
-          href={`/dashboard?salon_id=${salonId}`}
+          href={`/actions?salon_id=${salonId}`}
           className="flex items-center gap-1.5 text-sm text-dusk hover:text-sage transition-colors mb-6"
         >
           <ArrowLeft size={14} />
-          Дашборд
+          Действия
         </Link>
 
         <div className="flex items-center gap-3 mb-6">

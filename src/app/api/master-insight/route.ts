@@ -21,12 +21,18 @@ export async function POST(req: NextRequest) {
 
 Напиши персональную рекомендацию: 3-4 предложения, конкретно и по делу. Что сделать сегодня, чтобы вернуть клиентов из группы риска и увеличить повторные записи. Без воды.`
 
-  const response = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    max_tokens: 250,
-    messages: [{ role: 'user', content: prompt }],
-  })
+  if (!process.env.OPENAI_API_KEY) {
+    return NextResponse.json({ message: 'AI_NOT_CONFIGURED' })
+  }
 
-  const message = response.choices[0].message.content?.trim() || ''
-  return NextResponse.json({ message })
+  try {
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      max_tokens: 250,
+      messages: [{ role: 'user', content: prompt }],
+    })
+    return NextResponse.json({ message: response.choices[0].message.content?.trim() || '' })
+  } catch {
+    return NextResponse.json({ message: 'AI_TEMPORARILY_UNAVAILABLE' })
+  }
 }

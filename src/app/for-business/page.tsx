@@ -1,5 +1,7 @@
+export const dynamic = 'force-dynamic'
+
 import Link from 'next/link'
-import { ArrowRight, Users, Star, Target, Megaphone, Sparkles, CheckCircle, Phone, Shield, Quote, TrendingDown } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Users, Star, Target, Megaphone, Sparkles, CheckCircle, Phone, Shield, Quote, TrendingDown } from 'lucide-react'
 import { RoiCalculator } from '@/components/landing/RoiCalculator'
 import { FaqSection } from '@/components/landing/FaqSection'
 import { AppScreenshots } from '@/components/landing/AppScreenshots'
@@ -91,7 +93,11 @@ export default function LandingPage() {
       {/* ─── HEADER ─── */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-cream/90 backdrop-blur-md border-b border-parchment">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
+            <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-dusk hover:text-sage transition-colors">
+              <ArrowLeft size={14} />
+              Назад
+            </Link>
             <span className="text-base font-bold tracking-tight">BeautyOS</span>
             <span className="text-[10px] font-semibold text-sage bg-sage/10 px-2 py-0.5 rounded-full uppercase tracking-wider">AI</span>
           </div>

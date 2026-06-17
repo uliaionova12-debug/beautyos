@@ -41,8 +41,9 @@ function parseDikidiClients(text: string) {
     const phone = get(iPhone).replace(/[^\d+]/g, '') || null
     const lastVisitRaw = get(iLast)
     const visits = parseInt(get(iVisits)) || 0
-    const spent = parseFloat(get(iSpent).replace(',', '.')) || 0
-    const avgCheck = parseFloat(get(iAvg).replace(',', '.')) || 0
+    const parseNum = (s: string) => parseFloat(s.replace(/\s/g, '').replace(',', '.')) || 0
+    const spent = parseNum(get(iSpent))
+    const avgCheck = parseNum(get(iAvg))
     let lastVisitDate: string | null = null
     if (lastVisitRaw && /\d{2}\.\d{2}\.\d{4}/.test(lastVisitRaw)) {
       const [d, m, y] = lastVisitRaw.split('.')

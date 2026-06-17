@@ -7,9 +7,10 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   ArrowLeft, Scissors, TrendingUp, Trophy, Star,
-  CalendarDays, Users, Plus, Sparkles,
-  Phone, MessageCircle, Loader2, Copy, CheckCircle2, ChevronRight,
+  CalendarDays, Users, Sparkles, Share2,
+  Phone, MessageCircle, Loader2, Copy, CheckCircle2, ChevronRight, QrCode, Link2,
 } from 'lucide-react'
+import { QRCodeSVG } from 'qrcode.react'
 import { Master, Client } from '@/types'
 
 interface MasterLevel {
@@ -46,25 +47,107 @@ function formatPct(n: number): string {
   return Math.round(n * 100) + '%'
 }
 
-// ── Onboarding empty state for masters ──────────────────────────────────────
-function MasterOnboarding() {
-  const router = useRouter()
-  const [loadingDemo, setLoadingDemo] = useState(false)
+// ── Master Client Link Card (used in analytics view) ────────────────────────
+function MasterLinkCard({ link }: { link: string }) {
+  const [copied, setCopied] = useState(false)
+  const [showQr, setShowQr] = useState(false)
 
-  async function startDemo() {
-    setLoadingDemo(true)
+  function copyLink() {
+    navigator.clipboard.writeText(link)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <div className="bg-card border border-parchment rounded-2xl p-5 mb-4">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="p-1.5 bg-sage/10 rounded-lg">
+          <Share2 size={14} className="text-sage" />
+        </div>
+        <p className="text-sm font-semibold text-graphite">Ссылка для новых клиентов</p>
+      </div>
+      <p className="text-xs text-dusk leading-relaxed mb-3">
+        Клиент перейдёт по ссылке, введёт имя и телефон — и появится в вашей базе.
+      </p>
+
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 bg-parchment/60 rounded-xl px-3 py-2.5 border border-parchment">
+          <code className="text-xs text-graphite/70 flex-1 truncate">{link}</code>
+          <button onClick={copyLink} className="shrink-0 text-dusk/50 hover:text-graphite transition-colors">
+            {copied ? <CheckCircle2 size={14} className="text-sage" /> : <Copy size={14} />}
+          </button>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={copyLink}
+            className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold bg-sage text-white rounded-xl py-2.5 hover:bg-sage/90 transition-colors"
+          >
+            {copied ? <><CheckCircle2 size={12} />Скопировано</> : <><Copy size={12} />Скопировать</>}
+          </button>
+          <button
+            onClick={() => setShowQr(v => !v)}
+            className={`flex items-center justify-center gap-1.5 text-xs font-semibold border rounded-xl px-4 py-2.5 transition-colors ${
+              showQr ? 'bg-sage/10 border-sage/40 text-sage' : 'border-parchment text-graphite/70 hover:border-sage/40'
+            }`}
+          >
+            <QrCode size={12} />
+            QR-код
+          </button>
+        </div>
+        {showQr && (
+          <div className="flex flex-col items-center gap-3 bg-white border border-parchment rounded-2xl py-6 px-4">
+            <QRCodeSVG value={link} size={180} bgColor="#ffffff" fgColor="#2d2d2d" level="M" />
+            <p className="text-xs text-dusk text-center">Клиент сканирует и попадает на регистрацию</p>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ── Master Onboarding: create personal link ─────────────────────────────────
+function MasterOnboarding({ salonId = '' }: { salonId?: string }) {
+  const router = useRouter()
+  const [masterName, setMasterName]   = useState('')
+  const [loading, setLoading]         = useState(false)
+  const [error, setError]             = useState('')
+  const [linkResult, setLinkResult]   = useState<{ salon_id: string; master_id: string } | null>(null)
+  const [copied, setCopied]           = useState(false)
+  const [showQr, setShowQr]           = useState(false)
+
+  function linkUrl() {
+    if (!linkResult) return ''
+    const origin = typeof window !== 'undefined' ? window.location.origin : ''
+    return `${origin}/join?salon_id=${linkResult.salon_id}&master_id=${linkResult.master_id}`
+  }
+
+  async function createLink() {
+    if (!masterName.trim()) return
+    setLoading(true)
+    setError('')
     try {
-      const res = await fetch('/sample_salon.csv')
-      const blob = await res.blob()
-      const file = new File([blob], 'sample_salon.csv', { type: 'text/csv' })
-      const form = new FormData()
-      form.append('file', file)
-      form.append('salon_name', 'Демо-студия')
-      const data = await (await fetch('/api/upload', { method: 'POST', body: form })).json()
-      if (data.salon_id) router.push(`/master?salon_id=${data.salon_id}`)
+      const res = await fetch('/api/master-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: masterName.trim(), salon_id: salonId || undefined }),
+      })
+      const data = await res.json()
+      if (data.error) { setError(data.error); return }
+      setLinkResult(data)
+      if (data.salon_id && data.salon_id !== salonId) {
+        router.replace(`/master?salon_id=${data.salon_id}`, { scroll: false })
+      }
     } catch {
-      setLoadingDemo(false)
+      setError('Не удалось создать ссылку. Попробуйте ещё раз.')
+    } finally {
+      setLoading(false)
     }
+  }
+
+  function copyLink() {
+    navigator.clipboard.writeText(linkUrl())
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   return (
@@ -82,67 +165,141 @@ function MasterOnboarding() {
           </div>
         </div>
 
-        {/* Visual */}
-        <div className="flex-1 flex flex-col items-center justify-center text-center py-4">
+        <div className="flex-1 flex flex-col items-center justify-center py-4">
 
-          <div className="relative mb-8">
-            <div className="w-20 h-20 bg-rose/10 rounded-3xl flex items-center justify-center mx-auto">
-              <CalendarDays size={32} className="text-rose" />
-            </div>
-            <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-sage/15 rounded-xl flex items-center justify-center">
-              <Users size={13} className="text-sage" />
-            </div>
-          </div>
+          {!linkResult ? (
+            <>
+              {/* Icon */}
+              <div className="relative mb-8">
+                <div className="w-20 h-20 bg-sage/10 rounded-3xl flex items-center justify-center mx-auto">
+                  <Share2 size={32} className="text-sage" />
+                </div>
+                <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-rose/10 rounded-xl flex items-center justify-center">
+                  <Users size={13} className="text-rose" />
+                </div>
+              </div>
 
-          <h1 className="font-serif text-[1.8rem] text-graphite leading-tight mb-3 tracking-tight">
-            Кабинет готов
-          </h1>
-          <p className="text-sm text-dusk leading-relaxed mb-10 max-w-[280px]">
-            Добавьте первых клиентов, чтобы начать отслеживать возвратность и получать AI-рекомендации.
-          </p>
+              <h1 className="font-serif text-[1.8rem] text-graphite leading-tight mb-3 tracking-tight text-center">
+                Сделайте ссылку для клиентов
+              </h1>
+              <p className="text-sm text-dusk leading-relaxed mb-10 max-w-[280px] text-center">
+                Клиент перейдёт по ссылке, введёт имя и телефон — и появится в вашей базе.
+              </p>
 
-          {/* Actions */}
-          <div className="flex flex-col gap-3 w-full mb-10">
-            <Link
-              href="/join/manual"
-              className="flex items-center justify-center gap-2 bg-rose text-white py-4 rounded-2xl text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm shadow-rose/20"
-            >
-              <Plus size={16} />
-              Добавить клиентов
-            </Link>
+              {/* Name input */}
+              <div className="w-full mb-3">
+                <label className="text-xs font-semibold text-dusk uppercase tracking-wider block mb-1.5">
+                  Ваше имя
+                </label>
+                <input
+                  type="text"
+                  value={masterName}
+                  onChange={e => setMasterName(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && createLink()}
+                  placeholder="Юлия"
+                  className="w-full bg-card border border-parchment rounded-xl px-4 py-3.5 text-sm text-graphite placeholder-dusk/40 focus:outline-none focus:border-rose/40 transition-colors"
+                />
+              </div>
 
-            <button
-              onClick={startDemo}
-              disabled={loadingDemo}
-              className="flex items-center justify-center gap-2 bg-cream border border-parchment text-dusk hover:border-sage/40 hover:text-graphite py-4 rounded-2xl text-sm font-medium transition-all disabled:opacity-50"
-            >
-              <Sparkles size={15} />
-              {loadingDemo ? 'Загружаю демо...' : 'Посмотреть на демо-данных'}
-            </button>
-          </div>
+              {error && (
+                <p className="text-sm text-rose mb-3 text-center">{error}</p>
+              )}
 
-          {/* What will appear */}
-          <div className="w-full bg-card border border-parchment rounded-2xl p-5 text-left">
-            <p className="text-xs font-semibold text-dusk uppercase tracking-wider mb-4">
-              После добавления клиентов появится:
-            </p>
-            <ul className="space-y-3">
-              {[
-                { icon: '📊', text: 'Показатель возвратности клиентов' },
-                { icon: '⚠️', text: 'Клиенты в группе риска — кто давно не приходил' },
-                { icon: '✨', text: 'AI-Коуч с персональными рекомендациями' },
-                { icon: '📈', text: 'Динамика выручки и средний чек' },
-              ].map(item => (
-                <li key={item.text} className="flex items-start gap-3">
-                  <span className="text-base leading-none mt-0.5">{item.icon}</span>
-                  <span className="text-[13px] text-dusk leading-snug">{item.text}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+              <button
+                onClick={createLink}
+                disabled={loading || !masterName.trim()}
+                className="w-full flex items-center justify-center gap-2 bg-sage text-white py-4 rounded-2xl text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 shadow-sm shadow-sage/20 mb-6"
+              >
+                <Link2 size={16} />
+                {loading ? 'Создаю...' : 'Создать ссылку'}
+              </button>
+
+              {/* What will appear */}
+              <div className="w-full bg-card border border-parchment rounded-2xl p-5 text-left">
+                <p className="text-xs font-semibold text-dusk uppercase tracking-wider mb-4">
+                  После регистрации клиентов появится:
+                </p>
+                <ul className="space-y-3">
+                  {[
+                    { icon: '👤', text: 'Имя, телефон, дата регистрации' },
+                    { icon: '📊', text: 'Возвратность и история визитов' },
+                    { icon: '⚠️', text: 'Клиенты в группе риска' },
+                    { icon: '✨', text: 'AI-Коуч с персональными советами' },
+                  ].map(item => (
+                    <li key={item.text} className="flex items-start gap-3">
+                      <span className="text-base leading-none mt-0.5">{item.icon}</span>
+                      <span className="text-[13px] text-dusk leading-snug">{item.text}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Link created */}
+              <div className="w-8 h-8 bg-sage/20 rounded-full flex items-center justify-center mx-auto mb-5">
+                <CheckCircle2 size={18} className="text-sage" />
+              </div>
+              <h1 className="font-serif text-[1.8rem] text-graphite leading-tight mb-2 tracking-tight text-center">
+                Ссылка готова!
+              </h1>
+              <p className="text-sm text-dusk mb-8 text-center leading-relaxed">
+                Отправьте клиентам — они зарегистрируются, и вы их увидите здесь.
+              </p>
+
+              <div className="w-full space-y-3">
+                {/* Link display */}
+                <div className="flex items-center gap-2 bg-parchment/60 rounded-xl px-3 py-2.5 border border-parchment">
+                  <code className="text-xs text-graphite/70 flex-1 truncate">{linkUrl()}</code>
+                  <button onClick={copyLink} className="shrink-0 text-dusk/50 hover:text-graphite transition-colors">
+                    {copied ? <CheckCircle2 size={14} className="text-sage" /> : <Copy size={14} />}
+                  </button>
+                </div>
+
+                {/* Action buttons */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={copyLink}
+                    className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold bg-sage text-white rounded-xl py-3 hover:bg-sage/90 transition-colors"
+                  >
+                    {copied ? <><CheckCircle2 size={12} />Скопировано</> : <><Copy size={12} />Скопировать</>}
+                  </button>
+                  <button
+                    onClick={() => setShowQr(v => !v)}
+                    className={`flex items-center justify-center gap-1.5 text-xs font-semibold border rounded-xl px-4 py-3 transition-colors ${
+                      showQr
+                        ? 'bg-sage/10 border-sage/40 text-sage'
+                        : 'border-parchment text-graphite/70 hover:border-sage/40'
+                    }`}
+                  >
+                    <QrCode size={12} />
+                    QR-код
+                  </button>
+                </div>
+
+                {showQr && (
+                  <div className="flex flex-col items-center gap-3 bg-white border border-parchment rounded-2xl py-6 px-4">
+                    <QRCodeSVG
+                      value={linkUrl()}
+                      size={200}
+                      bgColor="#ffffff"
+                      fgColor="#2d2d2d"
+                      level="M"
+                    />
+                    <p className="text-xs text-dusk text-center leading-relaxed">
+                      Клиент сканирует и попадает на страницу регистрации
+                    </p>
+                  </div>
+                )}
+
+                <p className="text-xs text-dusk/40 text-center leading-relaxed pt-2">
+                  Клиенты появятся в списке, как только зарегистрируются по вашей ссылке
+                </p>
+              </div>
+            </>
+          )}
 
         </div>
-
       </div>
     </div>
   )
@@ -265,7 +422,7 @@ export default function MasterPage() {
 
   // No salon_id OR no data → onboarding for masters (not "данные не найдены")
   if (!salonId || masters.length === 0) {
-    return <MasterOnboarding />
+    return <MasterOnboarding salonId={salonId} />
   }
 
   // ── Master analytics (data exists) ──
@@ -276,11 +433,11 @@ export default function MasterPage() {
       <div className="max-w-2xl mx-auto px-4 py-8">
 
         <Link
-          href={`/role?salon_id=${salonId}`}
+          href={`/actions?salon_id=${salonId}`}
           className="flex items-center gap-1.5 text-sm text-dusk hover:text-rose transition-colors mb-6"
         >
           <ArrowLeft size={14} />
-          Сменить роль
+          Назад
         </Link>
 
         <div className="flex items-center gap-3 mb-6">
@@ -563,6 +720,33 @@ export default function MasterPage() {
                 )}
               </div>
             )}
+
+            {/* Client Link */}
+            {(() => {
+              const origin = typeof window !== 'undefined' ? window.location.origin : ''
+              const clientLink = `${origin}/join?salon_id=${salonId}&master_id=${selected.id}`
+              return <MasterLinkCard link={clientLink} />
+            })()}
+
+            {/* Smart Booking */}
+            <div className="bg-card border border-parchment rounded-2xl p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-1.5 bg-graphite/8 rounded-lg">
+                  <CalendarDays size={14} className="text-graphite/70" />
+                </div>
+                <p className="text-sm font-semibold text-graphite">Запись клиентов</p>
+              </div>
+              <p className="text-xs text-dusk leading-relaxed mb-4">
+                Настройте рабочие часы и поделитесь ссылкой — клиенты запишутся самостоятельно.
+              </p>
+              <Link
+                href={`/booking?master_id=${selected.id}&salon_id=${salonId}`}
+                className="flex items-center justify-between w-full bg-graphite/5 border border-graphite/15 rounded-xl px-4 py-3 hover:bg-graphite/10 transition-colors"
+              >
+                <span className="text-sm font-medium text-graphite">Управление записью</span>
+                <ChevronRight size={15} className="text-graphite/40" />
+              </Link>
+            </div>
 
             {/* AI Coach */}
             <div className="bg-card border border-parchment rounded-2xl p-5">

@@ -2,71 +2,109 @@ export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import { directFromSummary, validateDirectorOutput, type ReputationInput } from '@/lib/director-core'
+import { fmtMoney, type SummaryData } from '@/lib/ai-snapshot'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! })
 
 interface Message { role: 'user' | 'assistant'; content: string }
 
-function fmt(n: number): string {
-  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + ' млн ₽'
-  if (n >= 1_000) return Math.round(n / 1_000) + ' тыс ₽'
-  return n.toLocaleString('ru-RU') + ' ₽'
+const ACTION_NAMES: Record<string, string> = {
+  cash_at_risk:   'Написать клиентам в зоне риска',
+  cash_lost:      'Вернуть ушедших клиентов',
+  cash_slots:     'Заполнить пустые окна в расписании',
+  growth_check:   'Поднять средний чек через доп. услуги',
+  growth_freq:    'Увеличить частоту визитов',
+  growth_ltv:     'Повысить системную возвратность',
+  market_comp:    'Найти слабые стороны конкурентов',
+  market_content: 'Создать контент, который приводит на запись',
+  market_rep:     'Настроить мониторинг репутации',
 }
 
 export async function POST(req: NextRequest) {
-  const { messages, context } = await req.json()
+  const { messages, summary, reputation } = await req.json() as {
+    messages: Message[]
+    summary: SummaryData
+    reputation?: ReputationInput
+  }
 
-  const atRiskList = (context.at_risk_top || [])
-    .map((c: { name: string; phone: string | null; days_since: number; avg_interval: number; avg_check: number; visits: number }, i: number) =>
-      `  ${i + 1}. ${c.name}${c.phone ? ` (${c.phone})` : ''} — ${c.days_since} дн. без визита (интервал ${c.avg_interval} дн.), чек ${fmt(c.avg_check)}, визитов: ${c.visits}`)
-    .join('\n')
+  if (!summary?.total_clients) {
+    return NextResponse.json({ message: 'INSUFFICIENT DATA — передайте summary салона' })
+  }
 
-  const lostList = (context.lost_top || [])
-    .map((c: { name: string; phone: string | null; days_since: number; avg_check: number; revenue_opportunity: number }, i: number) =>
-      `  ${i + 1}. ${c.name}${c.phone ? ` (${c.phone})` : ''} — ${c.days_since} дн. без визита, чек ${fmt(c.avg_check)}, потенциал возврата ${fmt(c.revenue_opportunity)}`)
-    .join('\n')
+  // ─ Director Core: детерминированное решение (никакого LLM здесь) ──────────
+  const { snapshot, output } = directFromSummary(summary, reputation)
 
-  const mastersList = (context.masters || [])
-    .map((m: { name: string; retention_rate: number; avg_check: number; total_revenue: number; active_clients_count: number; at_risk_clients_count: number }) =>
-      `  • ${m.name}: возвратность ${Math.round((m.retention_rate || 0) * 100)}%, чек ${fmt(m.avg_check)}, активных ${m.active_clients_count}, в риске ${m.at_risk_clients_count}`)
-    .join('\n')
+  // Validate (log only — don't block production)
+  const errors = validateDirectorOutput(output, snapshot)
+  if (errors.length > 0) {
+    console.error('[DirectorCore] Validation errors:', errors)
+  }
 
-  const system = `Ты — AI Директор BeautyOS, персональный бизнес-советник салона красоты${context.salon_name ? ` «${context.salon_name}»` : ''}.
+  // ─ Build system prompt: LLM получает готовый output, только форматирует ───
+  const primaryScore = snapshot.derived.action_scores[output.primary_action_id]
+  const secondaryBlock = output.secondary_action_ids.map((id, i) => {
+    const sc = snapshot.derived.action_scores[id]
+    return `${i + 2}. ${ACTION_NAMES[id]} — SCORE ${sc.final_score} | ${fmtMoney(sc.raw_money)}`
+  }).join('\n')
 
-═══ РЕАЛЬНЫЕ ДАННЫЕ САЛОНА ═══
+  const system = `Ты — AI Director BeautyOS. Ты ТОЛЬКО форматируешь и объясняешь готовое решение. Ты НЕ вычисляешь приоритеты — они уже определены.
 
-Клиентская база:
-  Всего клиентов: ${context.total_clients ?? 0}
-  Активных: ${context.active_clients ?? 0}
-  В группе риска: ${context.at_risk_count ?? 0}
-  Потеряно: ${context.lost_count ?? 0}
-  Возвратность: ${context.retention_rate ?? 0}%
+═══ DIRECTOR OUTPUT (deterministic, не изменяй) ═══
+PRIMARY ACTION: ${ACTION_NAMES[output.primary_action_id]}
+  FINAL_SCORE: ${primaryScore.final_score}
+  raw_money:   ${fmtMoney(primaryScore.raw_money)}
+  layer:       ${primaryScore.layer.toUpperCase()}
 
-Финансы:
-  Общая выручка: ${fmt(context.total_revenue ?? 0)}
-  Средний чек: ${fmt(context.avg_check ?? 0)}
-  Потенциал от клиентов в риске: ${fmt(context.at_risk_revenue ?? 0)}
-  Финансовый ущерб от потерянных: ${fmt(context.lost_impact ?? 0)}
+SECONDARY ACTIONS:
+${secondaryBlock}
 
-${atRiskList ? `Клиенты в группе риска (топ по вероятности возврата):\n${atRiskList}` : ''}
+PRIMARY REASON (из данных): ${output.reasoning.primary_reason}
 
-${lostList ? `Потерянные клиенты (топ по потенциалу):\n${lostList}` : ''}
+DATA POINTS USED:
+${output.reasoning.data_points_used.map(d => `  • ${d}`).join('\n')}
 
-${mastersList ? `Мастера:\n${mastersList}` : ''}
+WHY NOT OTHERS:
+${output.reasoning.why_not_others.map(d => `  • ${d}`).join('\n')}
 
-═══ ПРАВИЛА ═══
-- Отвечай КОНКРЕТНО, называй имена клиентов и цифры из данных выше
-- Когда рекомендуешь связаться с клиентом — указывай имя и телефон (если есть)
-- 3–5 предложений, без воды и общих слов
-- Тон: доверенный директор, говорит как профессионал
-- Только русский язык, обращение на «вы»`
+═══ BUSINESS SNAPSHOT ═══
+cash.at_risk_clients:       ${snapshot.cash.at_risk_clients}
+cash.at_risk_revenue:       ${fmtMoney(snapshot.cash.at_risk_revenue)}
+cash.lost_clients:          ${snapshot.cash.lost_clients}
+cash.lost_revenue_estimate: ${fmtMoney(snapshot.cash.lost_revenue_estimate)}
+cash.empty_slots:           ${snapshot.cash.empty_slots}
+growth.active_clients:      ${snapshot.growth.active_clients}
+growth.avg_check:           ${fmtMoney(snapshot.growth.avg_check)}
+growth.return_rate:         ${snapshot.growth.return_rate}%
+derived.total_clients:      ${snapshot.derived.total_clients}
+derived.total_revenue:      ${fmtMoney(snapshot.derived.total_revenue)}
+reputation.has_sources:     ${snapshot.reputation.has_sources}
+reputation.sources_count:   ${snapshot.reputation.sources_count}
+
+═══ ТВОИ ПРАВИЛА ═══
+- Форматируй Director Output в читаемый бриф (4 блока: PRIMARY / SECONDARY / INSIGHT / TODAY PLAN)
+- НИКОГДА не меняй primary_action_id или порядок secondary
+- НИКОГДА не придумывай клиентов, цифры или действия — только из snapshot выше
+- НИКОГДА не используй маркетинговый язык: "усильте", "улучшите", "позиционирование"
+- TODAY PLAN: 3 операционных шага из PRIMARY ACTION (без теории)
+- BUSINESS STATE INSIGHT: одно наблюдение из данных. Формат: "Факт: [поле] = [значение] → [прямое следствие]"
+- При follow-up вопросах — отвечай только из данных snapshot выше
+- Язык: русский, обращение на «вы», тон директор→директор`
+
+  const chatMessages = messages.length === 0
+    ? [{ role: 'user' as const, content: 'Сформируй бриф.' }]
+    : messages
 
   const response = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
-    max_tokens: 450,
-    temperature: 0.4,
-    messages: [{ role: 'system', content: system }, ...messages],
+    max_tokens: 700,
+    temperature: 0.15,
+    messages: [{ role: 'system', content: system }, ...chatMessages],
   })
 
-  return NextResponse.json({ message: response.choices[0].message.content?.trim() ?? '' })
+  return NextResponse.json({
+    message: response.choices[0].message.content?.trim() ?? '',
+    director_output: output,           // клиент получает структурированный output
+    validation_errors: errors,
+  })
 }

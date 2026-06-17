@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
   Upload, CheckCircle, AlertCircle, Loader2, ArrowLeft,
@@ -24,6 +24,22 @@ export default function JoinSalonPage() {
   const [salonName, setSalonName] = useState('')
   const [error, setError] = useState('')
   const [progress, setProgress] = useState('')
+  const [stepIdx, setStepIdx] = useState(0)
+
+  const PROCESSING_STEPS = [
+    'Анализ клиентов...',
+    'Анализ записей...',
+    'Построение модели бизнеса...',
+    'Расчёт финансовых потоков...',
+  ]
+
+  useEffect(() => {
+    if (stage !== 'uploading' && stage !== 'analyzing') return
+    setStepIdx(0)
+    const id = setInterval(() => setStepIdx(i => (i + 1) % PROCESSING_STEPS.length), 1400)
+    return () => clearInterval(id)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage])
 
   async function handleFile(file: File) {
     if (!file.name.endsWith('.csv')) {
@@ -100,8 +116,8 @@ export default function JoinSalonPage() {
     function parseBookingCell(cellText: string, master: string, dateStr: string) {
       const lines = cellText.split('\n').map((l: string) => l.trim()).filter(Boolean)
       if (lines.length < 2) return null
-      const amountMatch = lines[0].match(/\((\d+)\s*RUB\)/)
-      const amount = amountMatch ? amountMatch[1] : '0'
+      const amountMatch = lines[0].match(/\(([\d\s]+)\s*RUB\)/)
+      const amount = amountMatch ? amountMatch[1].replace(/\s/g, '') : '0'
       let clientName = '', phone = ''
       const serviceParts: string[] = []
       for (const line of lines.slice(1)) {
@@ -181,7 +197,7 @@ export default function JoinSalonPage() {
         <div className="w-full max-w-lg">
 
           <div className="mb-8">
-            <Link href="/role" className="inline-flex items-center gap-1.5 text-sm text-dusk hover:text-sage transition-colors">
+            <Link href="/explain" className="inline-flex items-center gap-1.5 text-sm text-dusk hover:text-sage transition-colors">
               <ArrowLeft size={14} />
               Назад
             </Link>
@@ -189,7 +205,7 @@ export default function JoinSalonPage() {
 
           <div className="mb-10">
             <p className="text-base font-semibold text-graphite">BeautyOS</p>
-            <h1 className="text-xl font-semibold text-graphite mt-2">Как начнём?</h1>
+            <h1 className="text-xl font-semibold text-graphite mt-2">Загрузка данных</h1>
             <p className="text-sm text-dusk mt-1">Выберите способ, который подходит вам сейчас.</p>
           </div>
 
@@ -379,12 +395,17 @@ export default function JoinSalonPage() {
             })()}
 
             {(stage === 'uploading' || stage === 'analyzing') && (
-              <div className="flex flex-col items-center py-8 gap-4">
+              <div className="flex flex-col items-center py-8 gap-5">
                 <Loader2 size={32} className="text-sage animate-spin" />
-                <div className="text-center">
-                  <p className="text-graphite font-medium">{progress}</p>
-                  <p className="text-dusk text-sm mt-1">{fileName}</p>
+                <div className="w-full space-y-2">
+                  {PROCESSING_STEPS.map((step, i) => (
+                    <div key={step} className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all ${i === stepIdx ? 'bg-sage/10' : ''}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${i === stepIdx ? 'bg-sage animate-pulse' : i < stepIdx ? 'bg-sage/40' : 'bg-parchment'}`} />
+                      <p className={`text-sm transition-colors ${i === stepIdx ? 'text-graphite font-medium' : i < stepIdx ? 'text-dusk/60' : 'text-dusk/30'}`}>{step}</p>
+                    </div>
+                  ))}
                 </div>
+                {fileName && <p className="text-xs text-dusk/40">{fileName}</p>}
               </div>
             )}
 
@@ -393,7 +414,7 @@ export default function JoinSalonPage() {
                 <CheckCircle size={32} className="text-sage" />
                 <div className="text-center">
                   <p className="text-graphite font-medium">Анализ завершён</p>
-                  <p className="text-dusk text-sm mt-1">Открываю дашборд...</p>
+                  <p className="text-dusk text-sm mt-1">Формирую карту бизнеса...</p>
                 </div>
               </div>
             )}
@@ -478,12 +499,17 @@ export default function JoinSalonPage() {
             ))()}
 
             {(stage === 'uploading' || stage === 'analyzing') && (
-              <div className="flex flex-col items-center py-8 gap-4">
+              <div className="flex flex-col items-center py-8 gap-5">
                 <Loader2 size={32} className="text-sage animate-spin" />
-                <div className="text-center">
-                  <p className="text-graphite font-medium">{progress}</p>
-                  <p className="text-dusk text-sm mt-1">{fileName}</p>
+                <div className="w-full space-y-2">
+                  {PROCESSING_STEPS.map((step, i) => (
+                    <div key={step} className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all ${i === stepIdx ? 'bg-sage/10' : ''}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${i === stepIdx ? 'bg-sage animate-pulse' : i < stepIdx ? 'bg-sage/40' : 'bg-parchment'}`} />
+                      <p className={`text-sm transition-colors ${i === stepIdx ? 'text-graphite font-medium' : i < stepIdx ? 'text-dusk/60' : 'text-dusk/30'}`}>{step}</p>
+                    </div>
+                  ))}
                 </div>
+                {fileName && <p className="text-xs text-dusk/40">{fileName}</p>}
               </div>
             )}
 
@@ -492,7 +518,7 @@ export default function JoinSalonPage() {
                 <CheckCircle size={32} className="text-sage" />
                 <div className="text-center">
                   <p className="text-graphite font-medium">Анализ завершён</p>
-                  <p className="text-dusk text-sm mt-1">Открываю дашборд...</p>
+                  <p className="text-dusk text-sm mt-1">Формирую карту бизнеса...</p>
                 </div>
               </div>
             )}
@@ -570,12 +596,17 @@ export default function JoinSalonPage() {
           )}
 
           {(stage === 'uploading' || stage === 'analyzing') && (
-            <div className="flex flex-col items-center py-8 gap-4">
+            <div className="flex flex-col items-center py-8 gap-5">
               <Loader2 size={32} className="text-sage animate-spin" />
-              <div className="text-center">
-                <p className="text-graphite font-medium">{progress}</p>
-                <p className="text-dusk text-sm mt-1">{fileName}</p>
+              <div className="w-full space-y-2">
+                {PROCESSING_STEPS.map((step, i) => (
+                  <div key={step} className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all ${i === stepIdx ? 'bg-sage/10' : ''}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${i === stepIdx ? 'bg-sage animate-pulse' : i < stepIdx ? 'bg-sage/40' : 'bg-parchment'}`} />
+                    <p className={`text-sm transition-colors ${i === stepIdx ? 'text-graphite font-medium' : i < stepIdx ? 'text-dusk/60' : 'text-dusk/30'}`}>{step}</p>
+                  </div>
+                ))}
               </div>
+              {fileName && <p className="text-xs text-dusk/40">{fileName}</p>}
             </div>
           )}
 
@@ -584,7 +615,7 @@ export default function JoinSalonPage() {
               <CheckCircle size={32} className="text-sage" />
               <div className="text-center">
                 <p className="text-graphite font-medium">Анализ завершён</p>
-                <p className="text-dusk text-sm mt-1">Открываю дашборд...</p>
+                <p className="text-dusk text-sm mt-1">Формирую карту бизнеса...</p>
               </div>
             </div>
           )}

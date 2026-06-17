@@ -178,9 +178,9 @@ export default function CompetitorsPage() {
     <div className="min-h-screen bg-cream">
       <div className="max-w-2xl mx-auto px-4 py-8">
 
-        <Link href={`/dashboard?salon_id=${salonId}`}
+        <Link href={`/actions?salon_id=${salonId}`}
           className="flex items-center gap-1.5 text-sm text-dusk hover:text-rose transition-colors mb-6">
-          <ArrowLeft size={14} /> Дашборд
+          <ArrowLeft size={14} /> Действия
         </Link>
 
         {/* Header */}

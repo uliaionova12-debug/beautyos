@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import Link from 'next/link'
 import { Calendar, Heart, Star, Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -68,7 +70,7 @@ export default function LandingPage() {
               На экран
             </button>
           )}
-          <Link href="/role" className="text-sm font-medium text-dusk hover:text-rose transition-colors">
+          <Link href="/explain" className="text-sm font-medium text-dusk hover:text-rose transition-colors">
             Войти
           </Link>
         </div>
@@ -102,13 +104,13 @@ export default function LandingPage() {
 
         <div className="flex flex-col gap-3">
           <Link
-            href="/client"
+            href="/beauty-companion"
             className="inline-flex items-center gap-2.5 bg-rose text-white px-8 py-4 rounded-full text-sm font-semibold hover:opacity-90 transition-opacity w-fit shadow-sm shadow-rose/20"
           >
             🌸 Забочусь о себе
           </Link>
           <Link
-            href="/role"
+            href="/explain"
             className="inline-flex items-center gap-2 border border-rose/25 text-rose/80 hover:text-rose hover:border-rose/50 px-8 py-4 rounded-full text-sm font-medium transition-colors w-fit"
           >
             ✨ Территория профи

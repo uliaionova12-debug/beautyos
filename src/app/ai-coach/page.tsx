@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Send, Scissors, TrendingUp, Star, AlertCircle } from 'lucide-react'
+import { VoiceButton } from '@/components/ui/VoiceButton'
 import { Master } from '@/types'
 
 interface Message { role: 'user' | 'assistant'; content: string }
@@ -225,6 +226,11 @@ export default function AiCoachPage() {
             placeholder="Спросите о вашей практике..."
             disabled={loading || !selected}
             className="flex-1 bg-card border border-parchment rounded-xl px-4 py-3 text-sm text-graphite placeholder-dusk/40 focus:outline-none focus:border-sage/60 transition-colors disabled:opacity-50"
+          />
+          <VoiceButton
+            onTranscript={t => setInput(prev => prev ? prev + ' ' + t : t)}
+            disabled={loading || !selected}
+            variant="sage"
           />
           <button
             onClick={() => send(input)}
