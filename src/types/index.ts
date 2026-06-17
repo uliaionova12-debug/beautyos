@@ -44,6 +44,7 @@ export interface Master {
   active_clients_count: number
   at_risk_clients_count: number
   lost_clients_count: number
+  external_booking_url?: string | null
 }
 
 export interface DailyAction {

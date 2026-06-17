@@ -36,6 +36,9 @@ export default function DashboardPage() {
   const [inviteLoading, setInviteLoading] = useState(false)
   const [inviteCopied, setInviteCopied] = useState(false)
   const [showQr, setShowQr] = useState(false)
+  const [bookingUrlDraft, setBookingUrlDraft] = useState('')
+  const [bookingUrlSaving, setBookingUrlSaving] = useState(false)
+  const [bookingUrlSaved, setBookingUrlSaved] = useState(false)
 
   function generateInviteLink() {
     setInviteSlug(salonId)
@@ -61,7 +64,8 @@ export default function DashboardPage() {
       .then(([summaryData, salonData]) => {
         setSummary(summaryData)
         if (salonData?.salon_slug) setInviteSlug(salonData.salon_slug)
-        else setInviteSlug(salonId) // fallback: use salonId directly
+        else setInviteSlug(salonId)
+        if (salonData?.booking_url) setBookingUrlDraft(salonData.booking_url)
         setLoading(false)
       })
       .catch(() => setLoading(false))
@@ -78,6 +82,24 @@ export default function DashboardPage() {
         </div>
       </div>
     )
+  }
+
+  async function saveBookingUrl() {
+    if (!salonId) return
+    setBookingUrlSaving(true)
+    setBookingUrlSaved(false)
+    try {
+      const res = await fetch('/api/salon', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ salon_id: salonId, booking_url: bookingUrlDraft }),
+      })
+      const data = await res.json()
+      if (!data.error) setBookingUrlSaved(true)
+      setTimeout(() => setBookingUrlSaved(false), 3000)
+    } catch { /* ignore */ } finally {
+      setBookingUrlSaving(false)
+    }
   }
 
   const q = `?salon_id=${salonId}`
@@ -232,6 +254,43 @@ export default function DashboardPage() {
             Перейти к действиям
             <ArrowRight size={18} />
           </Link>
+        )}
+
+        {/* External booking URL */}
+        {!loading && salonId && (
+          <div className="bg-card border border-parchment rounded-2xl p-5 mb-3">
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles size={15} className="text-graphite/60" />
+              <p className="text-sm font-semibold text-graphite">Ссылка для записи клиентов</p>
+            </div>
+            <p className="text-xs text-dusk leading-relaxed mb-3">
+              Если вы уже используете DIKIDI, YClients или другую систему — вставьте ссылку. Кнопка «Записаться» в кабинете клиента будет вести туда.
+            </p>
+            <div className="flex gap-2">
+              <input
+                type="url"
+                value={bookingUrlDraft}
+                onChange={e => { setBookingUrlDraft(e.target.value); setBookingUrlSaved(false) }}
+                onKeyDown={e => e.key === 'Enter' && saveBookingUrl()}
+                placeholder="https://dikidi.net/..."
+                className="flex-1 bg-cream border border-parchment rounded-xl px-3 py-2.5 text-sm text-graphite placeholder-dusk/30 focus:outline-none focus:border-graphite/30 transition-colors min-w-0"
+              />
+              <button
+                onClick={saveBookingUrl}
+                disabled={bookingUrlSaving}
+                className="shrink-0 flex items-center gap-1.5 text-xs font-semibold px-3 py-2.5 rounded-xl bg-graphite text-white hover:bg-graphite/90 transition-colors disabled:opacity-50"
+              >
+                {bookingUrlSaved ? <CheckCircle2 size={12} /> : null}
+                {bookingUrlSaved ? 'Сохранено' : 'Сохранить'}
+              </button>
+            </div>
+            {bookingUrlDraft && (
+              <p className="text-[11px] text-sage mt-2 flex items-center gap-1.5">
+                <CheckCircle2 size={10} />
+                Клиенты будут переходить сюда для записи
+              </p>
+            )}
+          </div>
         )}
 
         {/* Invite link */}

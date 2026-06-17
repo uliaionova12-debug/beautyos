@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
   const [clientRes, salonRes, platformsRes] = await Promise.all([
     supabaseAdmin
       .from('clients')
-      .select('id, name, phone, status, avg_check, days_since_last_visit, avg_interval_days, total_visits, total_revenue, last_visit_date')
+      .select('id, name, phone, status, avg_check, days_since_last_visit, avg_interval_days, total_visits, total_revenue, last_visit_date, primary_master_name')
       .eq('id', clientId)
       .eq('salon_id', salonId)
       .single(),
@@ -41,6 +41,22 @@ export async function GET(req: NextRequest) {
   const salon  = salonRes.data
   const platforms = (platformsRes.data?.value as { platforms?: unknown[] } | null)?.platforms || []
 
+  // Priority booking URL: master's external URL → salon's booking_url → null
+  let bookingUrl: string = salon?.booking_url || ''
+
+  if (client.primary_master_name) {
+    const { data: masterRec } = await supabaseAdmin
+      .from('masters')
+      .select('external_booking_url')
+      .eq('salon_id', salonId)
+      .eq('name', client.primary_master_name)
+      .maybeSingle()
+
+    if (masterRec?.external_booking_url) {
+      bookingUrl = masterRec.external_booking_url
+    }
+  }
+
   const { data: visits } = await supabaseAdmin
     .from('visits')
     .select('service_name, amount, visit_date, master_name')
@@ -52,8 +68,8 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     client,
     salon: {
-      name:        salon?.name        || '',
-      booking_url: salon?.booking_url || '',
+      name:        salon?.name || '',
+      booking_url: bookingUrl,
     },
     visits:    visits || [],
     platforms,

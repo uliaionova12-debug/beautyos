@@ -321,6 +321,10 @@ export default function MasterPage() {
   const [smsModal, setSmsModal] = useState<{ client: Client; text: string } | null>(null)
   const [smsCopied, setSmsCopied] = useState(false)
   const [showAllAtRisk, setShowAllAtRisk] = useState(false)
+  const [extUrlDraft, setExtUrlDraft] = useState('')
+  const [urlSaving, setUrlSaving] = useState(false)
+  const [urlSaved, setUrlSaved] = useState(false)
+  const [urlError, setUrlError] = useState('')
 
   useEffect(() => {
     if (!salonId) { setLoading(false); return }
@@ -350,6 +354,9 @@ export default function MasterPage() {
     if (!selected || !salonId) { setAtRiskClients([]); return }
     setClientsLoading(true)
     setShowAllAtRisk(false)
+    setExtUrlDraft(selected.external_booking_url || '')
+    setUrlSaved(false)
+    setUrlError('')
     fetch(`/api/clients?salon_id=${salonId}&status=at_risk&master_name=${encodeURIComponent(selected.name)}&limit=50`)
       .then(r => r.json())
       .then(d => { setAtRiskClients(d.clients || []); setClientsLoading(false) })
@@ -392,6 +399,28 @@ export default function MasterPage() {
     navigator.clipboard.writeText(smsModal.text)
     setSmsCopied(true)
     setTimeout(() => setSmsCopied(false), 2000)
+  }
+
+  async function saveExtUrl() {
+    if (!selected) return
+    setUrlSaving(true)
+    setUrlError('')
+    setUrlSaved(false)
+    try {
+      const res = await fetch('/api/booking/master', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ master_id: selected.id, external_booking_url: extUrlDraft }),
+      })
+      const data = await res.json()
+      if (data.error) { setUrlError(data.error); return }
+      setUrlSaved(true)
+      setTimeout(() => setUrlSaved(false), 3000)
+    } catch {
+      setUrlError('Не удалось сохранить')
+    } finally {
+      setUrlSaving(false)
+    }
   }
 
   async function generateRecommendation(master: Master) {
@@ -728,24 +757,72 @@ export default function MasterPage() {
               return <MasterLinkCard link={clientLink} />
             })()}
 
-            {/* Smart Booking */}
-            <div className="bg-card border border-parchment rounded-2xl p-5">
+            {/* Запись клиентов */}
+            <div className="bg-card border border-parchment rounded-2xl p-5 mb-4">
               <div className="flex items-center gap-2 mb-3">
                 <div className="p-1.5 bg-graphite/8 rounded-lg">
                   <CalendarDays size={14} className="text-graphite/70" />
                 </div>
                 <p className="text-sm font-semibold text-graphite">Запись клиентов</p>
               </div>
-              <p className="text-xs text-dusk leading-relaxed mb-4">
-                Настройте рабочие часы и поделитесь ссылкой — клиенты запишутся самостоятельно.
-              </p>
-              <Link
-                href={`/booking?master_id=${selected.id}&salon_id=${salonId}`}
-                className="flex items-center justify-between w-full bg-graphite/5 border border-graphite/15 rounded-xl px-4 py-3 hover:bg-graphite/10 transition-colors"
-              >
-                <span className="text-sm font-medium text-graphite">Управление записью</span>
-                <ChevronRight size={15} className="text-graphite/40" />
-              </Link>
+
+              {/* External booking URL editor */}
+              <div className="mb-4">
+                <label className="text-xs font-semibold text-dusk uppercase tracking-wider block mb-1.5">
+                  Внешняя ссылка для записи
+                </label>
+                <p className="text-[11px] text-dusk/60 leading-relaxed mb-2">
+                  DIKIDI, YClients, WhatsApp, Telegram или другая система — запись останется там.
+                </p>
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    value={extUrlDraft}
+                    onChange={e => { setExtUrlDraft(e.target.value); setUrlSaved(false); setUrlError('') }}
+                    onKeyDown={e => e.key === 'Enter' && saveExtUrl()}
+                    placeholder="https://dikidi.net/..."
+                    className="flex-1 bg-cream border border-parchment rounded-xl px-3 py-2.5 text-sm text-graphite placeholder-dusk/30 focus:outline-none focus:border-graphite/30 transition-colors min-w-0"
+                  />
+                  <button
+                    onClick={saveExtUrl}
+                    disabled={urlSaving}
+                    className="shrink-0 flex items-center gap-1.5 text-xs font-semibold px-3 py-2.5 rounded-xl transition-colors disabled:opacity-50 bg-graphite text-white hover:bg-graphite/90"
+                  >
+                    {urlSaving ? <Loader2 size={12} className="animate-spin" /> : urlSaved ? <CheckCircle2 size={12} className="text-sage" /> : null}
+                    {urlSaved ? 'Сохранено' : 'Сохранить'}
+                  </button>
+                </div>
+                {urlError && <p className="text-xs text-rose mt-1.5">{urlError}</p>}
+                {extUrlDraft && (
+                  <div className="mt-2 flex items-center gap-1.5 text-xs text-dusk/60">
+                    <CheckCircle2 size={11} className="text-sage" />
+                    Клиенты будут переходить по этой ссылке для записи
+                  </div>
+                )}
+              </div>
+
+              {/* Internal booking fallback */}
+              {!extUrlDraft && (
+                <Link
+                  href={`/booking?master_id=${selected.id}&salon_id=${salonId}`}
+                  className="flex items-center justify-between w-full bg-graphite/5 border border-graphite/15 rounded-xl px-4 py-3 hover:bg-graphite/10 transition-colors"
+                >
+                  <div>
+                    <span className="text-sm font-medium text-graphite block">Внутренняя запись BeautyOS</span>
+                    <span className="text-[11px] text-dusk/50">Если внешней системы нет</span>
+                  </div>
+                  <ChevronRight size={15} className="text-graphite/40" />
+                </Link>
+              )}
+              {extUrlDraft && (
+                <Link
+                  href={`/booking?master_id=${selected.id}&salon_id=${salonId}`}
+                  className="flex items-center justify-between w-full border border-parchment rounded-xl px-4 py-2.5 hover:bg-parchment/30 transition-colors"
+                >
+                  <span className="text-xs text-dusk/60">Управление внутренней записью</span>
+                  <ChevronRight size={12} className="text-dusk/30" />
+                </Link>
+              )}
             </div>
 
             {/* AI Coach */}
