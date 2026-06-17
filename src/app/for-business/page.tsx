@@ -1,111 +1,152 @@
 export const dynamic = 'force-dynamic'
 
 import Link from 'next/link'
-import { ArrowLeft, ArrowRight, Users, Star, Target, Megaphone, Sparkles, CheckCircle, Phone, Shield, Quote, TrendingDown } from 'lucide-react'
+import {
+  ArrowLeft,
+  ArrowRight,
+  BarChart3,
+  Bot,
+  CheckCircle,
+  HeartHandshake,
+  MessageSquareText,
+  PenLine,
+  Shield,
+  Sparkles,
+  Star,
+  Users,
+} from 'lucide-react'
 import { RoiCalculator } from '@/components/landing/RoiCalculator'
 import { FaqSection } from '@/components/landing/FaqSection'
 import { AppScreenshots } from '@/components/landing/AppScreenshots'
 import { NeuroConsultant, ConsultantTeaser } from '@/components/landing/NeuroConsultant'
 import { ContactSection } from '@/components/landing/ContactSection'
+import { ForWhomSection } from '@/components/landing/ForWhomSection'
 
 /* eslint-disable @next/next/no-img-element */
 
 const DEMO_SALON_ID = '2e908b6f-5e39-44a3-bf9b-477db21dfaa9'
 
-const DIRECTORS = [
+const CAPABILITIES = [
   {
-    icon: Users, color: 'bg-sage/10 text-sage',
-    title: 'Директор по возврату',
-    desc: 'Находит клиентов, которых вы теряете прямо сейчас. Показывает потенциальную выручку и кому позвонить сегодня.',
-    href: '/retention',
+    icon: Users,
+    title: 'Возвращает клиентов',
+    text: 'Показывает, кто давно не приходил, кто в зоне риска и кому стоит написать сегодня.',
   },
   {
-    icon: Star, color: 'bg-amber-50 text-amber-600',
-    title: 'Директор по репутации',
-    desc: 'Следит за отзывами и предупреждает падение рейтинга до того, как вы потеряете клиентов.',
-    href: '/reputation',
+    icon: BarChart3,
+    title: 'Показывает потери и точки роста',
+    text: 'Считает финансовые потоки, пустые окна, потерянных клиентов и потенциал возврата.',
   },
   {
-    icon: Target, color: 'bg-blue-50 text-blue-600',
-    title: 'Директор по конкурентам',
-    desc: 'Показывает где конкуренты забирают ваших клиентов и что предложить, чтобы удержать их.',
-    href: '/competitors',
+    icon: CheckCircle,
+    title: 'Даёт конкретные действия',
+    text: 'Не просто аналитика — система показывает, что сделать сегодня, чтобы вернуть деньги.',
   },
   {
-    icon: Megaphone, color: 'bg-violet-50 text-violet-600',
-    title: 'Директор по маркетингу',
-    desc: 'Готовит акции, предложения и контент для привлечения клиентов — готовые к публикации.',
-    href: '/marketing',
-  },
-]
-
-const TESTIMONIALS = [
-  {
-    photo: 'https://randomuser.me/api/portraits/women/44.jpg',
-    name: 'Ольга Смирнова',
-    role: 'Владелец салона «Олива», Москва',
-    text: 'Загрузила базу в пятницу. В понедельник позвонила 8 клиентам по списку — вернулись 5. За неделю +64 000 ₽. Я просто не верила, что это так просто.',
-    result: '+64 000 ₽ за неделю',
+    icon: PenLine,
+    title: 'Пишет маркетинг',
+    text: 'AI-маркетолог создаёт контент не по шаблону, а из задач бизнеса и жизни салона.',
   },
   {
-    photo: 'https://randomuser.me/api/portraits/women/68.jpg',
-    name: 'Наталья Козлова',
-    role: 'Сеть студий «Лаванда», Санкт-Петербург',
-    text: 'У нас 3 точки и 9 мастеров. BeautyOS сразу показал, что у одного мастера возвратность 38% — мы бы никогда не увидели это в таблицах. Теперь знаем, с кем работать.',
-    result: 'Нашли узкое место за 2 минуты',
+    icon: HeartHandshake,
+    title: 'Заботится о клиентах между визитами',
+    text: 'Beauty Companion напоминает об уходе, помогает записаться и поддерживает связь с клиентом.',
   },
   {
-    photo: 'https://randomuser.me/api/portraits/women/83.jpg',
-    name: 'Марина Волкова',
-    role: 'Студия маникюра Nails Pro, Краснодар',
-    text: 'Думала, что теряю клиентов из-за цен. Оказалось — просто никто им не звонил между визитами. Смешно и грустно. Теперь звоним — и всё изменилось.',
-    result: 'Возвратность выросла с 52% до 71%',
+    icon: Star,
+    title: 'Помогает с отзывами',
+    text: 'Собирает площадки отзывов, помогает отвечать и не терять репутацию.',
   },
 ]
 
-const CASES = [
+const AI_TEAM = [
   {
-    salon: 'Студия «Эстет»',
-    city: 'Москва · 4 мастера · 327 клиентов',
-    detail: 'База загружена 5 июня. Через 8 дней:',
-    before: '48%',
-    after: '73%',
-    revenue: '+187 000 ₽',
-    period: 'дополнительной выручки',
-    img: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80&auto=format&fit=crop',
+    icon: Bot,
+    title: 'AI Director',
+    text: 'Видит финансовую картину, дефициты и приоритетные действия.',
+    href: `/dashboard?salon_id=${DEMO_SALON_ID}`,
   },
   {
-    salon: 'Beauty Room',
-    city: 'Санкт-Петербург · 2 мастера · 194 клиента',
-    detail: 'Начали работу 12 мая. За 3 недели:',
-    before: '41%',
-    after: '68%',
-    revenue: '+94 000 ₽',
-    period: 'дополнительной выручки',
-    img: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400&q=80&auto=format&fit=crop',
+    icon: PenLine,
+    title: 'AI Marketing Director',
+    text: 'Помогает решить бизнес-задачу через контент: заполнить окна, вернуть клиентов, поднять чек.',
+    href: `/marketing?salon_id=${DEMO_SALON_ID}`,
+  },
+  {
+    icon: HeartHandshake,
+    title: 'Beauty Companion',
+    text: 'Личный помощник клиента между визитами: уход, запись, история процедур, отзывы.',
+    href: '/beauty-companion',
+  },
+  {
+    icon: Star,
+    title: 'Reputation Director',
+    text: 'Следит за отзывами, площадками и ответами.',
+    href: `/reputation?salon_id=${DEMO_SALON_ID}`,
+  },
+  {
+    icon: MessageSquareText,
+    title: 'AI Consultant',
+    text: 'Объясняет, где что находится в приложении и какую кнопку нажать.',
+    href: '/explain',
+  },
+  {
+    icon: CheckCircle,
+    title: 'Execution Assistant',
+    text: 'Превращает аналитику в конкретные шаги и готовые сообщения.',
+    href: `/actions?salon_id=${DEMO_SALON_ID}`,
   },
 ]
 
-export default function LandingPage() {
+const HOW_IT_WORKS = [
+  {
+    title: 'Загружаете данные',
+    text: 'DIKIDI, CSV, Excel или ручной ввод.',
+  },
+  {
+    title: 'Система строит карту бизнеса',
+    text: 'Видно клиентов, деньги, дефициты и точки роста.',
+  },
+  {
+    title: 'AI выбирает приоритеты',
+    text: 'Что делать сегодня: кого вернуть, где закрыть окна, как увеличить чек.',
+  },
+  {
+    title: 'Получаете готовые действия',
+    text: 'Сообщения клиентам, сценарии для мастеров, контент и план.',
+  },
+  {
+    title: 'Клиенты возвращаются в систему',
+    text: 'Через персональные ссылки, Beauty Companion, запись и отзывы.',
+  },
+]
+
+const CLIENT_FEATURES = [
+  'видеть историю посещений',
+  'получить рекомендации по уходу',
+  'записаться снова',
+  'оставить отзыв',
+  'получать мягкие напоминания между визитами',
+]
+
+export default function ForBusinessPage() {
   return (
     <div className="min-h-screen bg-cream text-graphite">
-
-      {/* ─── HEADER ─── */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-cream/90 backdrop-blur-md border-b border-parchment">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-5 md:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-dusk hover:text-sage transition-colors">
               <ArrowLeft size={14} />
               Назад
             </Link>
             <span className="text-base font-bold tracking-tight">BeautyOS</span>
-            <span className="text-[10px] font-semibold text-sage bg-sage/10 px-2 py-0.5 rounded-full uppercase tracking-wider">AI</span>
+            <span className="text-[10px] font-semibold text-sage bg-sage/10 px-2 py-0.5 rounded-full uppercase tracking-wider">AI OS</span>
           </div>
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#cases" className="text-sm text-dusk hover:text-graphite transition-colors">Кейсы</a>
-            <a href="#directors" className="text-sm text-dusk hover:text-graphite transition-colors">AI директора</a>
+            <a href="#capabilities" className="text-sm text-dusk hover:text-graphite transition-colors">Что умеет</a>
+            <a href="#team" className="text-sm text-dusk hover:text-graphite transition-colors">AI-команда</a>
+            <a href="#screens" className="text-sm text-dusk hover:text-graphite transition-colors">Экраны</a>
             <a href="#calculator" className="text-sm text-dusk hover:text-graphite transition-colors">Калькулятор</a>
-            <Link href="/pricing" className="text-sm text-dusk hover:text-graphite transition-colors">Тарифы</Link>
           </nav>
           <Link href="/explain" className="bg-sage text-white text-sm font-semibold px-5 py-2.5 rounded-full hover:opacity-90 transition-opacity">
             Войти
@@ -113,414 +154,278 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* ─── HERO ─── */}
-      <section className="min-h-screen flex flex-col md:flex-row pt-16">
-        {/* Text */}
-        <div className="flex-1 flex items-center px-8 md:px-16 py-16 md:py-0 bg-cream order-2 md:order-1">
-          <div className="max-w-lg">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="w-2 h-2 rounded-full bg-sage animate-pulse" />
-              <span className="text-xs text-sage font-semibold uppercase tracking-wider">Возврат клиентов для салонов красоты</span>
+      <main>
+        <section className="pt-28 md:pt-32 pb-16 md:pb-24 px-5 md:px-6 overflow-hidden">
+          <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[1.02fr_0.98fr] gap-12 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 bg-blush text-terracotta text-xs font-semibold uppercase tracking-wider px-4 py-2 rounded-full mb-6">
+                <Sparkles size={14} />
+                AI operating system для beauty-бизнеса
+              </div>
+              <h1 className="text-[2.65rem] md:text-[4.25rem] font-bold leading-[1.04] tracking-tight mb-6">
+                AI-платформа, которая помогает beauty-бизнесу возвращать клиентов и увеличивать выручку
+              </h1>
+              <p className="text-lg md:text-xl text-dusk leading-relaxed mb-8 max-w-2xl">
+                BeautyOS анализирует записи, клиентов и доход, показывает точки роста и даёт готовые действия:
+                кого вернуть, что написать, где теряются деньги и как сопровождать клиентов между визитами.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link
+                  href={`/dashboard?salon_id=${DEMO_SALON_ID}`}
+                  className="inline-flex items-center justify-center gap-2 bg-sage text-white px-8 py-4 rounded-xl text-base font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-sage/20"
+                >
+                  Посмотреть демо
+                  <ArrowRight size={18} />
+                </Link>
+                <a
+                  href="#forwhom"
+                  className="inline-flex items-center justify-center gap-2 border border-parchment bg-card text-graphite px-8 py-4 rounded-xl text-base font-semibold hover:border-sage/40 transition-colors"
+                >
+                  Для кого BeautyOS?
+                </a>
+              </div>
             </div>
-            <h1 className="text-[2.8rem] md:text-[3.8rem] font-bold leading-[1.05] tracking-tight mb-6">
-              Покажем,<br />сколько денег<br />
-              <span className="text-sage">теряет ваш салон.</span>
-            </h1>
-            <p className="text-lg text-dusk leading-relaxed mb-8 max-w-md">
-              BeautyOS находит клиентов, которые перестали приходить, и каждое утро говорит:
-              кому позвонить, что сказать и сколько денег вернётся в кассу сегодня.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 mb-10">
-              <Link href="/join/salon"
-                className="inline-flex items-center justify-center gap-2 bg-sage text-white px-8 py-4 rounded-xl text-base font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-sage/20">
-                Загрузить базу бесплатно
+
+            <div className="relative">
+              <div className="absolute -inset-6 bg-blush rounded-[3rem] rotate-2" />
+              <div className="relative grid grid-cols-[0.78fr_1fr] gap-4 items-end">
+                <img
+                  src="/landing-screens/actions.png"
+                  alt="BeautyOS показывает действия и точки роста"
+                  className="w-full rounded-[2rem] shadow-2xl shadow-graphite/15 border border-white/70 hidden sm:block"
+                />
+                <img
+                  src="/landing-screens/dashboard.png"
+                  alt="Дашборд BeautyOS с финансовой и клиентской картой бизнеса"
+                  className="w-full rounded-[2rem] shadow-2xl shadow-graphite/20 border border-white/70"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="capabilities" className="py-20 px-5 md:px-6 bg-card border-y border-parchment">
+          <div className="max-w-6xl mx-auto">
+            <div className="max-w-2xl mb-12">
+              <p className="text-xs text-sage font-semibold uppercase tracking-wider mb-3">Система вместо разрозненных инструментов</p>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Что умеет BeautyOS</h2>
+              <p className="text-dusk leading-relaxed">
+                BeautyOS соединяет аналитику, действия, маркетинг и клиентское сопровождение в один рабочий слой для владельца и команды.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {CAPABILITIES.map(({ icon: Icon, title, text }) => (
+                <div key={title} className="bg-cream border border-parchment rounded-2xl p-6">
+                  <div className="w-11 h-11 rounded-xl bg-sage/10 text-sage flex items-center justify-center mb-5">
+                    <Icon size={21} />
+                  </div>
+                  <h3 className="font-semibold text-graphite mb-2">{title}</h3>
+                  <p className="text-sm text-dusk leading-relaxed">{text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="py-20 px-5 md:px-6 bg-blush">
+          <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[0.85fr_1.15fr] gap-10 items-center">
+            <div>
+              <p className="text-xs text-terracotta font-semibold uppercase tracking-wider mb-3">Карта бизнеса</p>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-5">Сначала видно, где теряются клиенты и деньги</h2>
+              <p className="text-dusk leading-relaxed mb-6">
+                После загрузки данных BeautyOS собирает финансовую и клиентскую картину: средний чек,
+                активных клиентов, потери, зоны риска и потенциал возврата.
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  ['клиенты', 'активные, в риске, потерянные'],
+                  ['деньги', 'потоки, ущерб, потенциал'],
+                  ['окна', 'свободные слоты и расписание'],
+                  ['рост', 'приоритеты на сегодня'],
+                ].map(([title, text]) => (
+                  <div key={title} className="bg-card border border-parchment rounded-2xl p-4">
+                    <p className="text-sm font-semibold text-graphite mb-1">{title}</p>
+                    <p className="text-xs text-dusk leading-relaxed">{text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="bg-card border border-parchment rounded-[2rem] p-4 md:p-6 shadow-xl shadow-graphite/10">
+              <img
+                src="/landing-screens/dashboard.png"
+                alt="Финансовая и клиентская карта BeautyOS"
+                className="w-full max-w-sm mx-auto rounded-[1.75rem] shadow-xl shadow-graphite/10"
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className="py-20 px-5 md:px-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center max-w-2xl mx-auto mb-14">
+              <p className="text-xs text-sage font-semibold uppercase tracking-wider mb-3">От данных к действию</p>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Как работает BeautyOS</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              {HOW_IT_WORKS.map((step, index) => (
+                <div key={step.title} className="bg-card border border-parchment rounded-2xl p-5">
+                  <p className="text-4xl font-bold text-parchment mb-4">{index + 1}</p>
+                  <h3 className="font-semibold text-graphite mb-2">{step.title}</h3>
+                  <p className="text-sm text-dusk leading-relaxed">{step.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="team" className="py-20 px-5 md:px-6 bg-card border-y border-parchment">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center max-w-2xl mx-auto mb-14">
+              <p className="text-xs text-sage font-semibold uppercase tracking-wider mb-3">AI-команда внутри бизнеса</p>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">В вашем салоне появляется команда AI-помощников</h2>
+              <p className="text-dusk leading-relaxed">
+                Каждый помощник отвечает за свою часть работы: деньги, клиентов, контент, репутацию, сопровождение и выполнение.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {AI_TEAM.map(({ icon: Icon, title, text, href }) => (
+                <Link key={title} href={href} className="group bg-cream border border-parchment rounded-2xl p-6 hover:shadow-md transition-shadow">
+                  <div className="w-11 h-11 rounded-xl bg-blush text-terracotta flex items-center justify-center mb-5">
+                    <Icon size={21} />
+                  </div>
+                  <h3 className="font-semibold text-graphite mb-2">{title}</h3>
+                  <p className="text-sm text-dusk leading-relaxed mb-5">{text}</p>
+                  <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-sage group-hover:gap-2 transition-all">
+                    Посмотреть <ArrowRight size={14} />
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="py-20 px-5 md:px-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center max-w-2xl mx-auto mb-12">
+              <p className="text-xs text-terracotta font-semibold uppercase tracking-wider mb-3">Не ещё одна база клиентов</p>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight">BeautyOS — это не CRM</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="bg-card border border-parchment rounded-3xl p-8">
+                <h3 className="text-xl font-semibold mb-6">CRM</h3>
+                {['хранит клиентов', 'показывает записи', 'ведёт календарь', 'фиксирует историю'].map(item => (
+                  <div key={item} className="flex items-center gap-3 py-3 border-b border-parchment last:border-0">
+                    <div className="w-2 h-2 rounded-full bg-dusk/30" />
+                    <span className="text-dusk">{item}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="bg-sage text-white rounded-3xl p-8 shadow-xl shadow-sage/20">
+                <h3 className="text-xl font-semibold mb-6">BeautyOS</h3>
+                {[
+                  'анализирует, где теряются деньги',
+                  'подсказывает, что делать',
+                  'помогает вернуть клиентов',
+                  'пишет тексты и контент',
+                  'сопровождает клиентов между визитами',
+                  'работает как AI-команда внутри бизнеса',
+                ].map(item => (
+                  <div key={item} className="flex items-center gap-3 py-3 border-b border-white/15 last:border-0">
+                    <CheckCircle size={16} className="shrink-0" />
+                    <span className="text-white/90">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <ForWhomSection />
+
+        <section className="py-20 px-5 md:px-6 bg-blush border-y border-parchment">
+          <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-12 items-center">
+            <div>
+              <p className="text-xs text-terracotta font-semibold uppercase tracking-wider mb-3">Beauty Companion</p>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-5">Клиенты тоже получают свой личный кабинет</h2>
+              <p className="text-dusk leading-relaxed mb-6">
+                Салон отправляет персональную ссылку, и клиент попадает в Beauty Companion.
+                Там сохраняется связь между визитами, где часто и теряется повторная запись.
+              </p>
+              <div className="space-y-3">
+                {CLIENT_FEATURES.map(feature => (
+                  <div key={feature} className="flex items-center gap-3">
+                    <CheckCircle size={17} className="text-sage shrink-0" />
+                    <span className="text-dusk">{feature}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4 items-center">
+              <img
+                src="/landing-screens/client-companion.png"
+                alt="Клиентский экран Beauty Companion"
+                className="w-full rounded-[1.75rem] shadow-2xl shadow-graphite/15 border border-white/70"
+              />
+              <img
+                src="/landing-screens/companion-profile.png"
+                alt="Профиль Beauty Companion с рекомендациями по уходу"
+                className="w-full rounded-[1.75rem] shadow-2xl shadow-graphite/15 border border-white/70 mt-10"
+              />
+            </div>
+          </div>
+        </section>
+
+        <AppScreenshots />
+
+        <section id="calculator" className="py-20 px-5 md:px-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-4">
+              <p className="text-sm text-dusk">Посчитайте, сколько денег теряется прямо сейчас — и сколько можно вернуть</p>
+            </div>
+            <RoiCalculator />
+          </div>
+        </section>
+
+        <ContactSection />
+
+        <section className="py-20 px-5 md:px-6 bg-cream">
+          <div className="max-w-6xl mx-auto">
+            <FaqSection />
+            <ConsultantTeaser />
+          </div>
+        </section>
+
+        <section className="py-24 px-5 md:px-6 bg-graphite text-white">
+          <div className="max-w-3xl mx-auto text-center">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <Shield size={16} className="opacity-60" />
+              <span className="text-xs font-semibold opacity-60 uppercase tracking-wider">Начните с карты бизнеса</span>
+            </div>
+            <h2 className="text-3xl md:text-5xl font-bold mb-6 leading-tight">
+              Загрузите данные и посмотрите, где сейчас теряются клиенты, деньги и возможности роста
+            </h2>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href={`/dashboard?salon_id=${DEMO_SALON_ID}`}
+                className="inline-flex items-center justify-center gap-2 bg-white text-sage px-8 py-4 rounded-xl text-base font-semibold hover:opacity-95 transition-opacity"
+              >
+                Посмотреть демо BeautyOS
                 <ArrowRight size={18} />
               </Link>
-              <Link href={`/dashboard?salon_id=${DEMO_SALON_ID}`}
-                className="inline-flex items-center justify-center gap-2 border-2 border-sage text-sage px-8 py-4 rounded-xl text-base font-semibold hover:bg-sage hover:text-white transition-colors">
-                <Sparkles size={16} />
-                Открыть демо-дашборд
-              </Link>
-            </div>
-            <div className="flex items-center gap-6">
-              <div className="flex -space-x-3">
-                {['44', '68', '83', '32'].map(n => (
-                  <img key={n} src={`https://randomuser.me/api/portraits/women/${n}.jpg`} alt=""
-                    className="w-9 h-9 rounded-full border-2 border-cream object-cover" />
-                ))}
-              </div>
-              <p className="text-sm text-dusk"><span className="font-semibold text-graphite">50+ салонов</span> уже вернули клиентов с BeautyOS</p>
+              <a
+                href="#contact"
+                className="inline-flex items-center justify-center px-8 py-4 rounded-xl text-base font-medium border border-white/30 text-white hover:bg-white/10 transition-colors"
+              >
+                Связаться
+              </a>
             </div>
           </div>
-        </div>
+        </section>
+      </main>
 
-        {/* Photo */}
-        <div className="md:w-[48%] h-64 md:h-auto relative order-1 md:order-2 overflow-hidden">
-          <img
-            src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1000&q=85&auto=format&fit=crop"
-            alt="Мастер в салоне красоты"
-            className="absolute inset-0 w-full h-full object-cover object-center"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-cream via-transparent to-transparent md:block hidden" />
-          {/* Floating metric */}
-          <div className="absolute bottom-8 left-8 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl px-5 py-4 hidden md:block">
-            <p className="text-xs text-dusk mb-1">Возвратность этой недели</p>
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-graphite">71%</span>
-              <span className="text-sm font-semibold text-emerald-600">↑ +6%</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── STATS ─── */}
-      <section className="py-14 px-6 bg-graphite text-white">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
-          {[
-            { value: '38%', label: 'клиентов уходят из салона каждый год — молча, без объяснений' },
-            { value: '×4', label: 'дороже привлечь нового клиента, чем вернуть старого' },
-            { value: '225 000 ₽', label: 'в месяц теряет типичный салон на клиентах, которые просто перестали приходить' },
-          ].map(s => (
-            <div key={s.value}>
-              <p className="text-5xl font-bold mb-2">{s.value}</p>
-              <p className="text-white/60 text-sm leading-snug">{s.label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ─── СКОЛЬКО ТЕРЯЕТ САЛОН ─── */}
-      <section className="py-20 px-6 bg-blush">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 bg-terracotta/10 text-terracotta text-xs font-semibold uppercase tracking-wider px-4 py-2 rounded-full mb-4">
-              <TrendingDown size={13} />
-              Считаем потери
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-graphite mb-4">
-              Сколько денег теряет<br />ваш салон прямо сейчас
-            </h2>
-            <p className="text-dusk">Реальный расчёт для типичного салона с базой 300 клиентов</p>
-          </div>
-
-          <div className="bg-card border border-parchment rounded-3xl overflow-hidden shadow-lg">
-            <div className="grid grid-cols-1 md:grid-cols-2">
-              {/* Left — numbers */}
-              <div className="p-8 md:p-12 border-b md:border-b-0 md:border-r border-parchment">
-                <p className="text-xs text-dusk font-semibold uppercase tracking-wider mb-6">Ваша база сейчас</p>
-                <div className="space-y-5">
-                  {[
-                    { label: 'Клиентов в базе', value: '300', sub: 'чел.' },
-                    { label: 'Давно не приходили', value: '90', sub: 'чел. (30%)', highlight: true },
-                    { label: 'Средний чек', value: '2 500 ₽', sub: 'за визит' },
-                    { label: 'Частота визитов', value: '1 раз', sub: 'в 6–8 недель' },
-                  ].map(row => (
-                    <div key={row.label} className={`flex items-center justify-between py-3 border-b border-parchment last:border-0 ${row.highlight ? 'text-terracotta' : ''}`}>
-                      <span className="text-sm text-dusk">{row.label}</span>
-                      <div className="text-right">
-                        <span className={`font-bold ${row.highlight ? 'text-terracotta text-lg' : 'text-graphite'}`}>{row.value}</span>
-                        <span className="text-xs text-dusk ml-1">{row.sub}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Right — loss */}
-              <div className="p-8 md:p-12 flex flex-col justify-center">
-                <p className="text-xs text-dusk font-semibold uppercase tracking-wider mb-6">Потерянная выручка</p>
-                <div className="bg-terracotta/5 border border-terracotta/20 rounded-2xl p-6 mb-6">
-                  <p className="text-sm text-dusk mb-2">90 клиентов × 2 500 ₽ =</p>
-                  <p className="text-4xl font-bold text-terracotta">225 000 ₽</p>
-                  <p className="text-sm text-dusk mt-1">в месяц уходит мимо кассы</p>
-                </div>
-                <div className="bg-sage/5 border border-sage/20 rounded-2xl p-6">
-                  <p className="text-xs font-semibold text-sage uppercase tracking-wider mb-2">BeautyOS находит этих клиентов автоматически</p>
-                  <p className="text-sm text-dusk leading-relaxed">
-                    Показывает кому позвонить сегодня и готовит скрипт — чтобы клиент вернулся, а деньги пришли в кассу.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── HOW IT WORKS ─── */}
-      <section className="py-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
-            <p className="text-xs text-sage font-semibold uppercase tracking-wider mb-3">Быстро и просто</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Как вернуть деньги за один день</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                num: '01', bg: 'bg-blush', emoji: '📂',
-                title: 'Загрузите клиентскую базу',
-                desc: 'CSV из DIKIDI, YClients или Excel. 2 минуты, никаких технических знаний.',
-                detail: 'Поддерживаем форматы всех популярных CRM в России',
-              },
-              {
-                num: '02', bg: 'bg-violet-50', emoji: '✦',
-                title: 'Получите список клиентов на возврат',
-                desc: 'С прогнозом выручки по каждому клиенту и готовым скриптом разговора.',
-                detail: 'Система сама определяет кто уже уходит и сколько это стоит',
-              },
-              {
-                num: '03', bg: 'bg-sage/10', emoji: '📞',
-                title: 'Свяжитесь — и деньги вернутся',
-                desc: 'Готовые сообщения и сценарии уже подготовлены системой.',
-                detail: 'Персональный скрипт для каждого клиента с историей его визитов',
-              },
-            ].map(step => (
-              <div key={step.num} className="bg-card border border-parchment rounded-2xl overflow-hidden">
-                <div className={`${step.bg} h-40 flex items-center justify-center`}>
-                  <span className="text-6xl">{step.emoji}</span>
-                </div>
-                <div className="p-6">
-                  <p className="text-4xl font-bold text-parchment mb-3">{step.num}</p>
-                  <h3 className="text-base font-semibold text-graphite mb-2">{step.title}</h3>
-                  <p className="text-sm text-dusk leading-relaxed mb-3">{step.desc}</p>
-                  <p className="text-xs text-dusk/60 leading-relaxed">{step.detail}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── DASHBOARD PREVIEW ─── */}
-      <section className="py-16 px-6 bg-sage/5">
-        <div className="max-w-6xl mx-auto">
-          <div className="bg-card border border-parchment rounded-3xl overflow-hidden">
-            <div className="grid grid-cols-1 md:grid-cols-2">
-              {/* Photo */}
-              <div className="relative h-64 md:h-auto min-h-[320px] overflow-hidden">
-                <img
-                  src="https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&q=80&auto=format&fit=crop"
-                  alt="Владелец салона за работой с данными"
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent to-card/80 hidden md:block" />
-              </div>
-              {/* Text */}
-              <div className="p-8 md:p-12 flex flex-col justify-center">
-                <p className="text-xs text-sage font-semibold uppercase tracking-wider mb-3">Каждое утро</p>
-                <h2 className="text-2xl md:text-3xl font-bold mb-4">Что видит владелец<br />каждое утро</h2>
-                <p className="text-dusk leading-relaxed mb-4">
-                  Никаких таблиц. Только конкретные действия, которые приносят деньги сегодня.
-                </p>
-                {/* Today's summary */}
-                <div className="bg-sage/5 border border-sage/20 rounded-xl px-5 py-4 mb-5">
-                  <p className="text-xs text-sage font-semibold uppercase tracking-wider mb-2">Сегодня можно вернуть</p>
-                  <div className="flex gap-6">
-                    <div>
-                      <p className="text-2xl font-bold text-graphite">18</p>
-                      <p className="text-xs text-dusk">клиентов</p>
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold text-emerald-600">287 000 ₽</p>
-                      <p className="text-xs text-dusk">потенциальной выручки</p>
-                    </div>
-                  </div>
-                </div>
-                {[
-                  'Конкретные имена и номера телефонов',
-                  'Персональный скрипт для каждого клиента',
-                  'Прогноз выручки с точностью до рубля',
-                  'История визитов и предпочтений',
-                ].map(f => (
-                  <div key={f} className="flex items-center gap-3 mb-3">
-                    <CheckCircle size={16} className="text-sage shrink-0" />
-                    <span className="text-sm text-dusk">{f}</span>
-                  </div>
-                ))}
-                {/* Mini mockup */}
-                <div className="mt-4 bg-cream rounded-2xl p-5 border border-parchment">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-2 h-2 rounded-full bg-sage animate-pulse" />
-                    <p className="text-[10px] text-sage font-semibold uppercase tracking-wider">Главное действие</p>
-                  </div>
-                  <p className="text-sm font-semibold text-graphite mb-1">Позвонить 7 клиентам мастера Анны</p>
-                  <div className="flex items-center gap-3">
-                    <span className="text-emerald-600 font-bold">63 000 ₽</span>
-                    <span className="text-dusk text-xs">· вероятность возврата 84%</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sage text-xs font-semibold mt-3">
-                    <Phone size={11} />Открыть мастера<ArrowRight size={11} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── APP SCREENSHOTS ─── */}
-      <AppScreenshots />
-
-      {/* ─── CASES ─── */}
-      <section id="cases" className="py-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
-            <p className="text-xs text-sage font-semibold uppercase tracking-wider mb-3">Реальные результаты</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Что получают салоны</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
-            {CASES.map(c => (
-              <div key={c.salon} className="bg-card border border-parchment rounded-2xl overflow-hidden">
-                <div className="h-48 overflow-hidden relative">
-                  <img src={c.img} alt={c.salon} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-graphite/60 to-transparent" />
-                  <div className="absolute bottom-4 left-5 text-white">
-                    <p className="font-semibold">{c.salon}</p>
-                    <p className="text-xs opacity-70">{c.city}</p>
-                  </div>
-                </div>
-                <div className="p-6">
-                  <p className="text-xs text-dusk mb-4">{c.detail}</p>
-                  <div className="grid grid-cols-3 gap-4 mb-3">
-                    <div>
-                      <p className="text-xs text-dusk mb-1">Было</p>
-                      <p className="text-xl font-bold text-terracotta">{c.before}</p>
-                      <p className="text-xs text-dusk">возвратность</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-dusk mb-1">Стало</p>
-                      <p className="text-xl font-bold text-sage">{c.after}</p>
-                      <p className="text-xs text-dusk">возвратность</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-dusk mb-1">Выручка</p>
-                      <p className="text-xl font-bold text-emerald-600">{c.revenue}</p>
-                      <p className="text-xs text-dusk">{c.period}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* ─── TESTIMONIALS ─── */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map(t => (
-              <div key={t.name} className="bg-card border border-parchment rounded-2xl p-7">
-                <Quote size={24} className="text-sage/30 mb-4" />
-                <p className="text-sm text-dusk leading-relaxed mb-6">«{t.text}»</p>
-                <div className="border-t border-parchment pt-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <img src={t.photo} alt={t.name}
-                      className="w-11 h-11 rounded-full object-cover border-2 border-parchment" />
-                    <div>
-                      <p className="text-sm font-semibold text-graphite">{t.name}</p>
-                      <p className="text-xs text-dusk">{t.role}</p>
-                    </div>
-                  </div>
-                  <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2">
-                    <p className="text-xs font-semibold text-emerald-700">{t.result}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── AI DIRECTORS ─── */}
-      <section id="directors" className="py-20 px-6 bg-card border-y border-parchment">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
-            <p className="text-xs text-sage font-semibold uppercase tracking-wider mb-3">Работают 24/7</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Четыре директора,<br />которые возвращают деньги</h2>
-            <p className="text-dusk max-w-lg mx-auto">Каждый отвечает за своё направление и каждое утро кладёт на стол конкретный план действий.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
-            {DIRECTORS.map(d => (
-              <div key={d.title} className="bg-cream border border-parchment rounded-2xl p-7 hover:shadow-md transition-shadow flex flex-col">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 ${d.color}`}>
-                  <d.icon size={22} />
-                </div>
-                <h3 className="text-base font-semibold text-graphite mb-2">{d.title}</h3>
-                <p className="text-sm text-dusk leading-relaxed mb-5 flex-1">{d.desc}</p>
-                <Link
-                  href={`${d.href}?salon_id=${DEMO_SALON_ID}`}
-                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-sage hover:opacity-70 transition-opacity"
-                >
-                  Посмотреть в деле <ArrowRight size={14} />
-                </Link>
-              </div>
-            ))}
-          </div>
-          <div className="text-center">
-            <Link href="/explain"
-              className="inline-flex items-center gap-2 bg-sage text-white px-8 py-4 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity">
-              <Sparkles size={16} />Попробовать бесплатно
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── ROI CALCULATOR ─── */}
-      <section id="calculator" className="py-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-4">
-            <p className="text-sm text-dusk">Посчитайте, сколько денег теряется прямо сейчас — и сколько можно вернуть</p>
-          </div>
-          <RoiCalculator />
-        </div>
-      </section>
-
-      {/* ─── КОНТАКТ ─── */}
-      <ContactSection />
-
-      {/* ─── FAQ ─── */}
-      <section className="py-20 px-6 bg-cream">
-        <div className="max-w-6xl mx-auto">
-          <FaqSection />
-          <ConsultantTeaser />
-        </div>
-      </section>
-
-      {/* ─── FINAL CTA ─── */}
-      <section className="relative py-32 px-6 overflow-hidden">
-        <img
-          src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=1600&q=80&auto=format&fit=crop"
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-graphite/80" />
-        <div className="relative max-w-3xl mx-auto text-center text-white">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Shield size={16} className="opacity-60" />
-            <span className="text-xs font-semibold opacity-60 uppercase tracking-wider">14 дней бесплатно</span>
-          </div>
-          <h2 className="text-3xl md:text-5xl font-bold mb-6 leading-tight">
-            Загрузите базу и увидите<br />деньги через 2 минуты
-          </h2>
-          <p className="text-white/70 mb-10 text-lg max-w-xl mx-auto">
-            Никаких переговоров. Просто CSV — и вы уже знаете,
-            сколько денег можно вернуть этой неделей.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/join/salon"
-              className="inline-flex items-center justify-center gap-2 bg-white text-sage px-8 py-4 rounded-xl text-base font-semibold hover:opacity-95 transition-opacity">
-              Начать бесплатно
-              <ArrowRight size={18} />
-            </Link>
-            <Link href="/pricing"
-              className="inline-flex items-center justify-center px-8 py-4 rounded-xl text-base font-medium border border-white/30 text-white hover:bg-white/10 transition-colors">
-              Посмотреть тарифы
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── НЕЙРОКОНСУЛЬТАНТ (плавающая кнопка + чат) ─── */}
       <NeuroConsultant />
 
-      {/* ─── FOOTER ─── */}
-      <footer className="py-10 px-6 border-t border-parchment bg-cream">
+      <footer className="py-10 px-5 md:px-6 border-t border-parchment bg-cream">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-6">
             <span className="text-sm font-bold text-graphite">BeautyOS</span>
@@ -528,12 +433,13 @@ export default function LandingPage() {
               <Link href="/pricing" className="text-xs text-dusk hover:text-graphite transition-colors">Тарифы</Link>
               <Link href="/explain" className="text-xs text-dusk hover:text-graphite transition-colors">Войти</Link>
               <Link href="/join/salon" className="text-xs text-dusk hover:text-graphite transition-colors">Регистрация</Link>
-              <a href="https://t.me/beautyos_ai" target="_blank" rel="noopener noreferrer"
-                className="text-xs text-dusk hover:text-graphite transition-colors">Telegram</a>
+              <a href="https://t.me/beautyos_ai" target="_blank" rel="noopener noreferrer" className="text-xs text-dusk hover:text-graphite transition-colors">
+                Telegram
+              </a>
             </div>
           </div>
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 pt-5 border-t border-parchment">
-            <p className="text-xs text-dusk/50">© 2025 BeautyOS. Возврат клиентов для салонов красоты.</p>
+            <p className="text-xs text-dusk/50">© 2025 BeautyOS. AI-платформа для beauty-бизнеса.</p>
             <div className="flex gap-5">
               <Link href="/privacy" className="text-xs text-dusk/50 hover:text-dusk transition-colors">Политика обработки данных</Link>
               <a href="mailto:hello@beautyos.ai" className="text-xs text-dusk/50 hover:text-dusk transition-colors">hello@beautyos.ai</a>
@@ -541,7 +447,6 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
-
     </div>
   )
 }
