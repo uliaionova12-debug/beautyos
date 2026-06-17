@@ -228,14 +228,14 @@ export default function ForBusinessPage() {
               <div className="absolute inset-0 bg-gradient-to-r from-cream/5 via-transparent to-cream/10" />
             </div>
             <div className="bg-card border border-parchment rounded-[2rem] p-8 md:p-10 flex flex-col justify-center">
-              <p className="text-xs text-terracotta font-semibold uppercase tracking-wider mb-3">Живость без шума</p>
-              <h2 className="text-3xl font-bold tracking-tight mb-5">BeautyOS не выглядит как холодная CRM</h2>
+              <p className="text-xs text-terracotta font-semibold uppercase tracking-wider mb-3">Между визитами</p>
+              <h2 className="text-3xl font-bold tracking-tight mb-5">Клиент чувствует заботу даже после выхода из салона</h2>
               <p className="text-dusk leading-relaxed mb-6">
-                Лендинг теперь соединяет реальный продукт с мягкой beauty-эстетикой:
-                спокойный премиальный визуал, живые скриншоты и понятный бизнес-результат.
+                BeautyOS помогает сохранить связь: напомнить об уходе, предложить следующий визит,
+                подготовить сообщение и вернуть клиента в запись без давления.
               </p>
               <div className="space-y-3">
-                {['тёплый ivory и blush вместо тяжёлого SaaS-стиля', 'реальные экраны продукта вместо фейковых мокапов', 'ощущение заботы и сервиса между визитами'].map(item => (
+                {['персональные рекомендации после процедуры', 'готовые сообщения для возврата клиентов', 'мягкое сопровождение до следующей записи'].map(item => (
                   <div key={item} className="flex items-center gap-3">
                     <CheckCircle size={17} className="text-sage shrink-0" />
                     <span className="text-sm text-dusk">{item}</span>
