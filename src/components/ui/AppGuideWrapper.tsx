@@ -17,6 +17,9 @@ const ALLOWED_PREFIXES = [
   '/ai-director',
   '/ai-coach',
   '/booking',
+  '/join',
+  '/explain',
+  '/subscription',
 ]
 
 function shouldShow(pathname: string): boolean {

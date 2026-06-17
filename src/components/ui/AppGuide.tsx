@@ -104,9 +104,9 @@ export function AppGuide({ currentPage = '' }: AppGuideProps) {
 
   return (
     <>
-      {/* ── Backdrop ─────────────────────────────────────────────────────── */}
+      {/* ── Backdrop (mobile only) ───────────────────────────────────────── */}
       <div
-        className="fixed inset-0 z-[9997] bg-black/40"
+        className="fixed inset-0 z-[9997] bg-black/40 md:hidden"
         style={{
           opacity: open ? 1 : 0,
           pointerEvents: open ? 'auto' : 'none',
@@ -115,19 +115,30 @@ export function AppGuide({ currentPage = '' }: AppGuideProps) {
         onClick={() => setOpen(false)}
       />
 
-      {/* ── Bottom sheet chat ─────────────────────────────────────────────── */}
+      {/* ── Mobile: bottom sheet / Desktop: corner popup ─────────────────── */}
       <div
-        className="fixed inset-x-0 bottom-0 z-[9998] bg-card rounded-t-3xl shadow-2xl shadow-graphite/20 flex flex-col overflow-hidden"
+        className={[
+          'fixed z-[9998] bg-card shadow-2xl shadow-graphite/20 flex flex-col overflow-hidden',
+          // Mobile: full-width bottom sheet
+          'inset-x-0 bottom-0 rounded-t-3xl md:inset-x-auto',
+          // Desktop: corner popup
+          'md:bottom-24 md:right-5 md:w-[380px] md:rounded-3xl md:border md:border-parchment',
+        ].join(' ')}
         style={{
+          // Mobile height
           height: '72vh',
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-          transform: open ? 'translateY(0)' : 'translateY(100%)',
-          transition: 'transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)',
+          // Mobile: slide up / Desktop: fade+scale
+          transform: open
+            ? 'translateY(0) scale(1)'
+            : 'translateY(100%) scale(0.97)',
+          opacity: open ? 1 : 0,
+          transition: 'transform 0.3s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.2s ease',
           pointerEvents: open ? 'auto' : 'none',
         }}
       >
-        {/* Handle */}
-        <div className="flex justify-center pt-3 pb-1 shrink-0">
+        {/* Handle (mobile only) */}
+        <div className="flex justify-center pt-3 pb-1 shrink-0 md:hidden">
           <div className="w-10 h-1 bg-parchment rounded-full" />
         </div>
 
@@ -238,9 +249,10 @@ export function AppGuide({ currentPage = '' }: AppGuideProps) {
           className="fixed right-5 z-[9999]"
           style={{ bottom: 'calc(1.25rem + env(safe-area-inset-bottom, 0px))' }}
         >
+          {/* Mobile: round icon button */}
           <button
             onClick={() => setOpen(true)}
-            className="relative w-14 h-14 bg-sage text-white rounded-full shadow-lg shadow-sage/30 flex items-center justify-center hover:bg-sage/90 active:scale-95 transition-all"
+            className="relative md:hidden w-14 h-14 bg-sage text-white rounded-full shadow-lg shadow-sage/30 flex items-center justify-center hover:bg-sage/90 active:scale-95 transition-all"
           >
             {pulse && (
               <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3">
@@ -249,6 +261,20 @@ export function AppGuide({ currentPage = '' }: AppGuideProps) {
               </span>
             )}
             <Sparkles size={22} />
+          </button>
+
+          {/* Desktop: pill button with label */}
+          <button
+            onClick={() => setOpen(true)}
+            className="relative hidden md:flex items-center gap-2.5 bg-sage text-white px-5 py-3.5 rounded-full shadow-xl shadow-sage/30 hover:opacity-90 transition-opacity font-semibold text-sm"
+          >
+            {pulse && (
+              <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-rose">
+                <span className="absolute inset-0 rounded-full bg-rose animate-ping opacity-75" />
+              </span>
+            )}
+            <Sparkles size={16} className="shrink-0" />
+            Нейроконсультант
           </button>
         </div>
       )}
