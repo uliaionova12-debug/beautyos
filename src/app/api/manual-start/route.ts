@@ -16,10 +16,11 @@ interface ManualClient {
 
 export async function POST(req: NextRequest) {
   try {
-    const { salon_id: existingSalonId, salon_name, clients } = await req.json() as {
+    const { salon_id: existingSalonId, salon_name, booking_url, clients } = await req.json() as {
       salon_id?: string
       salon_name?: string
       salon_type?: string
+      booking_url?: string
       clients: ManualClient[]
     }
 
@@ -41,9 +42,11 @@ export async function POST(req: NextRequest) {
       salonId = existingSalonId
     } else {
       // Create new salon
+      const salonInsert: Record<string, string> = { name: salon_name?.trim() || 'Мой кабинет', crm_type: 'manual' }
+      if (booking_url?.trim()) salonInsert.booking_url = booking_url.trim()
       const { data: newSalon, error: salonErr } = await supabaseAdmin
         .from('salons')
-        .insert({ name: salon_name?.trim() || 'Мой кабинет', crm_type: 'manual' })
+        .insert(salonInsert)
         .select('id')
         .single()
       if (salonErr || !newSalon) {

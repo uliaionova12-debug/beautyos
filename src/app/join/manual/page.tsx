@@ -107,6 +107,7 @@ export default function ManualStartPage() {
   const [step, setStep] = useState(existingSalonId ? 2 : 1)
   const [salonType, setSalonType] = useState<SalonType | null>(null)
   const [salonName, setSalonName] = useState('')
+  const [bookingUrl, setBookingUrl] = useState('')
   const [clients, setClients] = useState<ManualClient[]>([])
   const [form, setForm] = useState({ ...EMPTY_FORM })
   const [showAddForm, setShowAddForm] = useState(false)
@@ -159,6 +160,7 @@ export default function ManualStartPage() {
           salon_id: existingSalonId || undefined,
           salon_name: salonName.trim() || DEFAULT_NAMES[salonType || 'solo'],
           salon_type: salonType,
+          booking_url: bookingUrl.trim() || undefined,
           clients: clients.map(({ id: _id, ...c }) => c),
         }),
       })
@@ -228,14 +230,27 @@ export default function ManualStartPage() {
             </div>
 
             {salonType && (
-              <div className="mb-8">
-                <label className="block text-xs font-semibold text-dusk mb-2 tracking-wide">
-                  Название {salonType === 'solo' ? 'кабинета' : salonType === 'team' ? 'студии' : 'салона'}
-                  <span className="text-dusk/40 font-normal ml-1">(необязательно)</span>
-                </label>
-                <input type="text" value={salonName} onChange={e => setSalonName(e.target.value)}
-                  placeholder={DEFAULT_NAMES[salonType]}
-                  className="w-full bg-cream border border-parchment rounded-xl px-4 py-3 text-sm text-graphite placeholder-dusk/40 focus:outline-none focus:border-rose/50 transition-colors" />
+              <div className="space-y-4 mb-8">
+                <div>
+                  <label className="block text-xs font-semibold text-dusk mb-2 tracking-wide">
+                    Название {salonType === 'solo' ? 'кабинета' : salonType === 'team' ? 'студии' : 'салона'}
+                    <span className="text-dusk/40 font-normal ml-1">(необязательно)</span>
+                  </label>
+                  <input type="text" value={salonName} onChange={e => setSalonName(e.target.value)}
+                    placeholder={DEFAULT_NAMES[salonType]}
+                    className="w-full bg-cream border border-parchment rounded-xl px-4 py-3 text-sm text-graphite placeholder-dusk/40 focus:outline-none focus:border-rose/50 transition-colors" />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-dusk mb-1 tracking-wide">
+                    Ссылка для онлайн-записи
+                    <span className="text-dusk/40 font-normal ml-1">(необязательно)</span>
+                  </label>
+                  <p className="text-[11px] text-dusk/50 mb-2">DIKIDI, YCLIENTS, сайт, таплинк — любая ссылка, куда записываются клиенты</p>
+                  <input type="url" value={bookingUrl} onChange={e => setBookingUrl(e.target.value)}
+                    placeholder="https://dikidi.ru/..."
+                    className="w-full bg-cream border border-parchment rounded-xl px-4 py-3 text-sm text-graphite placeholder-dusk/40 focus:outline-none focus:border-rose/50 transition-colors" />
+                </div>
               </div>
             )}
 
