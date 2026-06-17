@@ -32,6 +32,63 @@ const DEFAULT_NAMES: Record<SalonType, string> = {
   salon: 'Мой салон',
 }
 
+type FormState = typeof EMPTY_FORM
+
+function ClientForm({
+  form, setForm, onSubmit, submitLabel,
+}: {
+  form: FormState
+  setForm: React.Dispatch<React.SetStateAction<FormState>>
+  onSubmit: () => void
+  submitLabel: string
+}) {
+  return (
+    <div className="space-y-3.5">
+      <div>
+        <label className="block text-xs font-semibold text-dusk mb-1.5 tracking-wide">Имя клиента *</label>
+        <input type="text" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+          placeholder="Анна Иванова"
+          className="w-full bg-cream border border-parchment rounded-xl px-4 py-3 text-sm text-graphite placeholder-dusk/40 focus:outline-none focus:border-rose/50 transition-colors" />
+      </div>
+
+      <div>
+        <label className="block text-xs font-semibold text-dusk mb-1.5 tracking-wide">Телефон</label>
+        <input type="tel" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+          placeholder="+7 900 000 00 00"
+          className="w-full bg-cream border border-parchment rounded-xl px-4 py-3 text-sm text-graphite placeholder-dusk/40 focus:outline-none focus:border-rose/50 transition-colors" />
+      </div>
+
+      <div>
+        <label className="block text-xs font-semibold text-dusk mb-1.5 tracking-wide">Последний визит *</label>
+        <input type="date" value={form.last_visit_date} onChange={e => setForm(f => ({ ...f, last_visit_date: e.target.value }))}
+          max={new Date().toISOString().split('T')[0]}
+          className="w-full bg-cream border border-parchment rounded-xl px-4 py-3 text-sm text-graphite focus:outline-none focus:border-rose/50 transition-colors" />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs font-semibold text-dusk mb-1.5 tracking-wide">Услуга</label>
+          <input type="text" value={form.service_name} onChange={e => setForm(f => ({ ...f, service_name: e.target.value }))}
+            placeholder="Маникюр"
+            className="w-full bg-cream border border-parchment rounded-xl px-4 py-3 text-sm text-graphite placeholder-dusk/40 focus:outline-none focus:border-rose/50 transition-colors" />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-dusk mb-1.5 tracking-wide">Стоимость, ₽</label>
+          <input type="number" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))}
+            placeholder="2500"
+            className="w-full bg-cream border border-parchment rounded-xl px-4 py-3 text-sm text-graphite placeholder-dusk/40 focus:outline-none focus:border-rose/50 transition-colors" />
+        </div>
+      </div>
+
+      <button onClick={onSubmit} disabled={!form.name.trim() || !form.last_visit_date}
+        className="w-full flex items-center justify-center gap-2 bg-rose text-white py-3.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-30">
+        {submitLabel}
+        <ArrowRight size={15} />
+      </button>
+    </div>
+  )
+}
+
 function StepDots({ current }: { current: number }) {
   return (
     <div className="flex items-center gap-2 mb-10">
@@ -135,55 +192,6 @@ export default function ManualStartPage() {
     )
   }
 
-  // ── Client form block ──
-  function ClientForm({ onSubmit, submitLabel }: { onSubmit: () => void; submitLabel: string }) {
-    return (
-      <div className="space-y-3.5">
-        <div>
-          <label className="block text-xs font-semibold text-dusk mb-1.5 tracking-wide">Имя клиента *</label>
-          <input type="text" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-            placeholder="Анна Иванова" autoFocus
-            className="w-full bg-cream border border-parchment rounded-xl px-4 py-3 text-sm text-graphite placeholder-dusk/40 focus:outline-none focus:border-rose/50 transition-colors" />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-dusk mb-1.5 tracking-wide">Телефон</label>
-          <input type="tel" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
-            placeholder="+7 900 000 00 00"
-            className="w-full bg-cream border border-parchment rounded-xl px-4 py-3 text-sm text-graphite placeholder-dusk/40 focus:outline-none focus:border-rose/50 transition-colors" />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-dusk mb-1.5 tracking-wide">Последний визит *</label>
-          <input type="date" value={form.last_visit_date} onChange={e => setForm(f => ({ ...f, last_visit_date: e.target.value }))}
-            max={new Date().toISOString().split('T')[0]}
-            className="w-full bg-cream border border-parchment rounded-xl px-4 py-3 text-sm text-graphite focus:outline-none focus:border-rose/50 transition-colors" />
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-xs font-semibold text-dusk mb-1.5 tracking-wide">Услуга</label>
-            <input type="text" value={form.service_name} onChange={e => setForm(f => ({ ...f, service_name: e.target.value }))}
-              placeholder="Маникюр"
-              className="w-full bg-cream border border-parchment rounded-xl px-4 py-3 text-sm text-graphite placeholder-dusk/40 focus:outline-none focus:border-rose/50 transition-colors" />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-dusk mb-1.5 tracking-wide">Стоимость, ₽</label>
-            <input type="number" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))}
-              placeholder="2500"
-              className="w-full bg-cream border border-parchment rounded-xl px-4 py-3 text-sm text-graphite placeholder-dusk/40 focus:outline-none focus:border-rose/50 transition-colors" />
-          </div>
-        </div>
-
-        <button onClick={onSubmit} disabled={!form.name.trim() || !form.last_visit_date}
-          className="w-full flex items-center justify-center gap-2 bg-rose text-white py-3.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-30">
-          {submitLabel}
-          <ArrowRight size={15} />
-        </button>
-      </div>
-    )
-  }
-
   return (
     <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 py-12">
       <div className="w-full max-w-md">
@@ -245,7 +253,7 @@ export default function ManualStartPage() {
             <h1 className="text-xl font-semibold text-graphite mb-1">Добавьте первого клиента</h1>
             <p className="text-sm text-dusk mb-8">Нам нужны имя и дата последнего визита — всё остальное опционально.</p>
             <div className="bg-card border border-parchment rounded-2xl p-6">
-              <ClientForm onSubmit={addFirstClient} submitLabel="Добавить и продолжить" />
+              <ClientForm form={form} setForm={setForm} onSubmit={addFirstClient} submitLabel="Добавить и продолжить" />
             </div>
           </div>
         )}
@@ -286,7 +294,7 @@ export default function ManualStartPage() {
                     <p className="text-sm font-semibold text-graphite">Ещё один клиент</p>
                     <button onClick={() => { setShowAddForm(false); setForm({ ...EMPTY_FORM }) }} className="text-dusk/40 hover:text-dusk transition-colors"><X size={16} /></button>
                   </div>
-                  <ClientForm onSubmit={addMoreClient} submitLabel="Добавить" />
+                  <ClientForm form={form} setForm={setForm} onSubmit={addMoreClient} submitLabel="Добавить" />
                 </div>
               )
               : (
