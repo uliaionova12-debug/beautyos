@@ -155,8 +155,17 @@ export default function ForBusinessPage() {
       </header>
 
       <main>
-        <section className="pt-28 md:pt-32 pb-16 md:pb-24 px-5 md:px-6 overflow-hidden">
-          <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[1.02fr_0.98fr] gap-12 items-center">
+        <section className="relative pt-28 md:pt-32 pb-16 md:pb-24 px-5 md:px-6 overflow-hidden">
+          <div className="absolute inset-0 pointer-events-none">
+            <img
+              src="/landing-screens/beauty-atmosphere.jpg"
+              alt=""
+              className="absolute inset-y-0 right-0 w-full lg:w-[58%] h-full object-cover object-center opacity-20 lg:opacity-45"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-cream via-cream/92 to-cream/40" />
+            <div className="absolute inset-0 bg-gradient-to-b from-cream via-transparent to-cream" />
+          </div>
+          <div className="relative max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[1.02fr_0.98fr] gap-12 items-center">
             <div>
               <div className="inline-flex items-center gap-2 bg-blush text-terracotta text-xs font-semibold uppercase tracking-wider px-4 py-2 rounded-full mb-6">
                 <Sparkles size={14} />
@@ -187,7 +196,7 @@ export default function ForBusinessPage() {
             </div>
 
             <div className="relative">
-              <div className="absolute -inset-6 bg-blush rounded-[3rem] rotate-2" />
+              <div className="absolute -inset-6 bg-blush/80 rounded-[3rem] rotate-2" />
               <div className="relative grid grid-cols-[0.78fr_1fr] gap-4 items-end">
                 <img
                   src="/landing-screens/actions.png"
