@@ -3,7 +3,7 @@
 export const dynamic = 'force-dynamic'
 
 import { useEffect, useState } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { CheckCircle2, Sparkles, ArrowRight, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 
@@ -66,7 +66,6 @@ function PlanDetails() {
 
 export default function SubscriptionPage() {
   const searchParams = useSearchParams()
-  const router = useRouter()
   const salonId = searchParams.get('salon_id') || ''
   const [stats, setStats] = useState<TrialStats | null>(null)
   const [trialSince, setTrialSince] = useState<string | null>(null)
@@ -139,18 +138,20 @@ export default function SubscriptionPage() {
           <p className="text-xs text-dusk mt-1">Полный доступ · Без ограничений</p>
         </div>
 
-        {/* CTA */}
-        <button
-          onClick={() => {
-            // Phase 2: YooKassa integration
-            // For now, show a temporary message
-            alert('Оплата через YooKassa будет подключена в ближайшее время. Пожалуйста, свяжитесь с поддержкой для активации подписки.')
-          }}
+        {/* CTA — WhatsApp activation */}
+        <a
+          href="https://wa.me/79991234567?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21+%D0%A5%D0%BE%D1%87%D1%83+%D0%BF%D0%BE%D0%B4%D0%BA%D0%BB%D1%8E%D1%87%D0%B8%D1%82%D1%8C+BeautyOS"
+          target="_blank"
+          rel="noopener noreferrer"
           className="w-full bg-graphite text-white py-4 rounded-2xl font-semibold text-base flex items-center justify-center gap-2 hover:bg-graphite/90 active:scale-[0.98] transition-all mb-3"
         >
-          Продолжить работу
+          Написать для подключения
           <ArrowRight size={18} />
-        </button>
+        </a>
+
+        <p className="text-xs text-dusk text-center mb-5 leading-relaxed">
+          Ответим в WhatsApp и активируем доступ в течение часа
+        </p>
 
         <PlanDetails />
 

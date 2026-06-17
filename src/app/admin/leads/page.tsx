@@ -26,7 +26,7 @@ export default async function AdminLeadsPage({
   searchParams: Promise<{ key?: string }>
 }) {
   const { key } = await searchParams
-  if (key !== process.env.ADMIN_KEY) return notFound()
+  if (!key || !process.env.ADMIN_KEY || key !== process.env.ADMIN_KEY) return notFound()
 
   const { data: leads, error } = await supabaseAdmin
     .from('leads')

@@ -3,7 +3,7 @@
 export const dynamic = 'force-dynamic'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowLeft, ArrowRight, Plus, X, Loader2, CheckCircle, User } from 'lucide-react'
 import Link from 'next/link'
 
@@ -45,7 +45,9 @@ function StepDots({ current }: { current: number }) {
 
 export default function ManualStartPage() {
   const router = useRouter()
-  const [step, setStep] = useState(1)
+  const searchParams = useSearchParams()
+  const existingSalonId = searchParams.get('salon_id') || ''
+  const [step, setStep] = useState(existingSalonId ? 2 : 1)
   const [salonType, setSalonType] = useState<SalonType | null>(null)
   const [salonName, setSalonName] = useState('')
   const [clients, setClients] = useState<ManualClient[]>([])
@@ -97,6 +99,7 @@ export default function ManualStartPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          salon_id: existingSalonId || undefined,
           salon_name: salonName.trim() || DEFAULT_NAMES[salonType || 'solo'],
           salon_type: salonType,
           clients: clients.map(({ id: _id, ...c }) => c),

@@ -16,7 +16,8 @@ interface ManualClient {
 
 export async function POST(req: NextRequest) {
   try {
-    const { salon_name, clients } = await req.json() as {
+    const { salon_id: existingSalonId, salon_name, clients } = await req.json() as {
+      salon_id?: string
       salon_name?: string
       salon_type?: string
       clients: ManualClient[]
@@ -28,17 +29,28 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Добавьте хотя бы одного клиента с именем и датой визита' }, { status: 400 })
     }
 
-    // Create salon
-    const { data: newSalon, error: salonErr } = await supabaseAdmin
-      .from('salons')
-      .insert({ name: salon_name?.trim() || 'Мой кабинет', crm_type: 'manual' })
-      .select('id')
-      .single()
+    let salonId: string
 
-    if (salonErr || !newSalon) {
-      return NextResponse.json({ error: 'Не удалось создать профиль' }, { status: 500 })
+    if (existingSalonId) {
+      // Use existing salon
+      const { data: existing } = await supabaseAdmin
+        .from('salons').select('id').eq('id', existingSalonId).single()
+      if (!existing) {
+        return NextResponse.json({ error: 'Салон не найден' }, { status: 404 })
+      }
+      salonId = existingSalonId
+    } else {
+      // Create new salon
+      const { data: newSalon, error: salonErr } = await supabaseAdmin
+        .from('salons')
+        .insert({ name: salon_name?.trim() || 'Мой кабинет', crm_type: 'manual' })
+        .select('id')
+        .single()
+      if (salonErr || !newSalon) {
+        return NextResponse.json({ error: 'Не удалось создать профиль' }, { status: 500 })
+      }
+      salonId = newSalon.id
     }
-    const salonId: string = newSalon.id
 
     // Convert to CSVRow format for retention engine
     const rows: CSVRow[] = validClients.map(c => ({

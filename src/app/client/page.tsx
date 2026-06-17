@@ -3,7 +3,7 @@
 export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   ArrowLeft, Star, CheckCircle2, ExternalLink, Heart,
@@ -108,14 +108,31 @@ function daysUntilNext(avgInterval: number | null, daysSinceLast: number | null)
   return Math.max(0, avgInterval - daysSinceLast)
 }
 
+const SESSION_KEY = 'beautyos_client_session'
+
 export default function ClientPage() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const clientId = searchParams.get('id') || ''
   const salonId  = searchParams.get('salon_id') || ''
 
   const [profile, setProfile] = useState<ProfileData | null>(null)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
+
+  // Restore session from localStorage if URL has no params
+  useEffect(() => {
+    if (clientId && salonId) return
+    try {
+      const saved = localStorage.getItem(SESSION_KEY)
+      if (saved) {
+        const { clientId: cid, salonId: sid } = JSON.parse(saved)
+        if (cid && sid) {
+          router.replace(`/client?id=${cid}&salon_id=${sid}`)
+        }
+      }
+    } catch { /* ignore */ }
+  }, [clientId, salonId, router])
 
   const [aiOutput, setAiOutput] = useState<{
     care_message: string
@@ -138,7 +155,11 @@ export default function ClientPage() {
     if (!clientId || !salonId) { setLoading(false); setNotFound(true); return }
     fetch(`/api/client-profile?client_id=${clientId}&salon_id=${salonId}`)
       .then(r => r.ok ? r.json() : Promise.reject(r.status))
-      .then(d => { setProfile(d); setLoading(false) })
+      .then(d => {
+        setProfile(d)
+        setLoading(false)
+        try { localStorage.setItem(SESSION_KEY, JSON.stringify({ clientId, salonId })) } catch { /* ignore */ }
+      })
       .catch(() => { setNotFound(true); setLoading(false) })
   }, [clientId, salonId])
 
@@ -251,11 +272,11 @@ export default function ClientPage() {
       <div className="max-w-md mx-auto px-4 py-8">
 
         <Link
-          href="/"
+          href={`/beauty-companion?id=${clientId}&salon_id=${salonId}`}
           className="flex items-center gap-1.5 text-sm text-dusk hover:text-rose transition-colors mb-6"
         >
           <ArrowLeft size={14} />
-          На главную
+          Beauty Companion
         </Link>
 
         {/* Greeting */}
@@ -322,15 +343,18 @@ export default function ClientPage() {
               <span className="text-xs text-dusk">Записаться</span>
             </div>
           )}
-          <button className="bg-card border border-parchment rounded-xl py-4 flex flex-col items-center gap-2 hover:border-rose/30 transition-colors">
+          <a
+            href="#last-visit"
+            className="bg-card border border-parchment rounded-xl py-4 flex flex-col items-center gap-2 hover:border-rose/30 transition-colors"
+          >
             <Star size={18} className="text-dusk" />
             <span className="text-xs text-dusk">Мой мастер</span>
-          </button>
+          </a>
         </div>
 
         {/* Review flow */}
         {step === 'idle' && lastVisit && (
-          <div className="bg-card border border-parchment rounded-2xl p-5 mb-4">
+          <div id="last-visit" className="bg-card border border-parchment rounded-2xl p-5 mb-4">
             <p className="text-xs text-dusk font-semibold uppercase tracking-wider mb-3">Последний визит</p>
             <div className="flex items-start justify-between mb-4">
               <div>

@@ -213,7 +213,7 @@ export default function JoinSalonPage() {
 
             {/* Manual — highlighted, new */}
             <button
-              onClick={() => router.push('/join/manual')}
+              onClick={() => router.push('/join/manual' + (existingSalonId ? `?salon_id=${existingSalonId}` : ''))}
               className="w-full text-left bg-card border-2 border-rose/30 rounded-2xl p-5 hover:border-rose/60 hover:shadow-sm transition-all group"
             >
               <div className="flex items-start gap-4">
